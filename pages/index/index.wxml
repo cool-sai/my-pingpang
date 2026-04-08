@@ -1,0 +1,4 @@
+<!--index.wxml-->
+<scroll-view class="scrollarea" scroll-y type="list">
+  <video src="https://video-js.51miz.com/preview/video/00/00/12/67/V-126710-7B9D2490.mp4" loop="true"></video>
+</scroll-view>
