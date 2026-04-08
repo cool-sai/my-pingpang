@@ -1,0 +1,33 @@
+<view class="container">
+  <!-- 状态筛选 -->
+  <view class="filter-tabs">
+    <view class="tab {{status === 'all' ? 'active' : ''}}" data-status="all" bindtap="switchStatus">全部</view>
+    <view class="tab {{status === 'upcoming' ? 'active' : ''}}" data-status="upcoming" bindtap="switchStatus">报名中</view>
+    <view class="tab {{status === 'ongoing' ? 'active' : ''}}" data-status="ongoing" bindtap="switchStatus">进行中</view>
+    <view class="tab {{status === 'finished' ? 'active' : ''}}" data-status="finished" bindtap="switchStatus">已结束</view>
+  </view>
+
+  <!-- 赛事列表 -->
+  <view class="event-list">
+    <view class="event-item" wx:for="{{events}}" wx:key="_id" data-id="{{item._id}}" bindtap="goToEventDetail">
+      <view class="event-cover">
+        <text class="event-icon">🏓</text>
+      </view>
+      <view class="event-content">
+        <text class="event-name">{{item.name}}</text>
+        <view class="event-meta">
+          <text class="event-time">📅 {{item.startTime}}</text>
+          <text class="event-location">📍 {{item.location || '待定'}}</text>
+        </view>
+        <view class="event-footer">
+          <text class="event-status status-pill {{item.status === 'upcoming' ? 'status-pill--info' : item.status === 'ongoing' ? 'status-pill--success' : 'status-pill--muted'}}">{{item.statusText}}</text>
+          <text class="event-signup">已有{{item.signupCount || 0}}人报名</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="empty-tip" wx:if="{{events.length === 0 && !isLoading}}">
+      暂无赛事
+    </view>
+  </view>
+</view>

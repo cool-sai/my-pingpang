@@ -1,0 +1,42 @@
+<view class="container">
+  <!-- 筛选 -->
+  <view class="filter-tabs">
+    <view class="tab {{sortBy === 'score' ? 'active' : ''}}" data-sort="score" bindtap="switchSort">积分排序</view>
+    <view class="tab {{sortBy === 'members' ? 'active' : ''}}" data-sort="members" bindtap="switchSort">人数排序</view>
+  </view>
+
+  <!-- 俱乐部列表 -->
+  <view class="club-list">
+    <view class="club-item" wx:for="{{clubs}}" wx:key="_id" data-id="{{item._id}}" bindtap="goToClubDetail">
+      <view class="club-header">
+        <view class="club-avatar">{{item.name.charAt(0)}}</view>
+        <view class="club-info">
+          <text class="club-name">{{item.name}}</text>
+          <text class="club-desc">{{item.description || '暂无描述'}}</text>
+        </view>
+      </view>
+      <view class="club-stats">
+        <view class="stat">
+          <text class="stat-value">{{item.memberCount || 0}}</text>
+          <text class="stat-label">成员</text>
+        </view>
+        <view class="stat">
+          <text class="stat-value">{{item.totalScore || 0}}</text>
+          <text class="stat-label">总积分</text>
+        </view>
+        <view class="stat">
+          <text class="stat-value">{{item.matchCount || 0}}</text>
+          <text class="stat-label">比赛</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="empty-tip" wx:if="{{clubs.length === 0 && !isLoading}}">
+      <text>暂无俱乐部</text>
+      <text class="empty-subtip">创建第一个俱乐部吧</text>
+    </view>
+  </view>
+
+  <!-- 创建俱乐部按钮 -->
+  <view class="fab" bindtap="goToCreateClub">+</view>
+</view>

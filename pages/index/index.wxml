@@ -1,4 +1,80 @@
-<!--index.wxml-->
-<scroll-view class="scrollarea" scroll-y type="list">
-  <video src="https://video-js.51miz.com/preview/video/00/00/12/67/V-126710-7B9D2490.mp4" loop="true"></video>
-</scroll-view>
+<view class="container">
+  <!-- 顶部区域 -->
+  <view class="header">
+    <view class="user-section">
+      <image class="avatar" src="{{userInfo.avatar || '/images/default_avatar.png'}}" />
+      <text class="nickname">{{userInfo.nickname || '未登录'}}</text>
+    </view>
+    <view class="score-section">
+      <text class="score-label">积分</text>
+      <text class="score-value">{{userInfo.score || 0}}</text>
+    </view>
+  </view>
+
+  <!-- 快捷入口 -->
+  <view class="quick-actions">
+    <view class="action-btn primary" bindtap="goToMatch">
+      <text class="action-icon">🎮</text>
+      <text class="action-text">发起比赛</text>
+    </view>
+    <view class="action-btn secondary" bindtap="goToRank">
+      <text class="action-icon">🏆</text>
+      <text class="action-text">查看排名</text>
+    </view>
+  </view>
+
+  <!-- 热门赛事 -->
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">热门赛事</text>
+      <text class="section-more" bindtap="goToEvent">更多 ></text>
+    </view>
+    <view class="event-list">
+      <view class="event-item" wx:for="{{currentEvents}}" wx:key="_id">
+        <view class="event-info">
+          <text class="event-name">{{item.name}}</text>
+          <text class="event-time">{{item.startTime}}</text>
+        </view>
+        <view class="event-status status-pill {{item.status === 'ongoing' ? 'status-pill--success' : 'status-pill--info'}}">{{item.statusText}}</view>
+      </view>
+      <view class="empty-tip" wx:if="{{currentEvents.length === 0}}">暂无进行中的赛事</view>
+    </view>
+  </view>
+
+  <!-- 积分榜TOP5 -->
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">积分榜 TOP5</text>
+      <text class="section-more" bindtap="goToRank">更多 ></text>
+    </view>
+    <view class="rank-list">
+      <view class="rank-item" wx:for="{{topPlayers}}" wx:key="_id">
+        <view class="rank-num {{item.rank <= 3 ? 'top' : ''}}">{{item.rank}}</view>
+        <image class="rank-avatar" src="{{item.avatar || '/images/default_avatar.png'}}" />
+        <view class="rank-info">
+          <text class="rank-name">{{item.nickname}}</text>
+          <text class="rank-score">{{item.score}}分</text>
+        </view>
+      </view>
+      <view class="empty-tip" wx:if="{{topPlayers.length === 0}}">暂无排名数据</view>
+    </view>
+  </view>
+
+  <!-- 热门俱乐部 -->
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">热门俱乐部</text>
+      <text class="section-more" bindtap="goToClub">更多 ></text>
+    </view>
+    <view class="club-list">
+      <view class="club-item" wx:for="{{hotClubs}}" wx:key="_id">
+        <view class="club-info">
+          <text class="club-name">{{item.name}}</text>
+          <text class="club-members">{{item.memberCount || 0}}人</text>
+        </view>
+        <text class="club-score">积分: {{item.totalScore}}</text>
+      </view>
+      <view class="empty-tip" wx:if="{{hotClubs.length === 0}}">暂无俱乐部</view>
+    </view>
+  </view>
+</view>

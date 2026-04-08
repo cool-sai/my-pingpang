@@ -1,0 +1,129 @@
+.container {
+  padding-bottom: 48rpx;
+}
+
+.section-title {
+  display: block;
+  margin-bottom: 20rpx;
+}
+
+.search-box {
+  display: flex;
+  gap: 16rpx;
+}
+
+.search-input {
+  flex: 1;
+  height: 80rpx;
+  padding: 0 24rpx;
+  background: #f5f8f6;
+  border: 1rpx solid #e7eeea;
+  border-radius: 18rpx;
+  font-size: 28rpx;
+}
+
+.search-btn {
+  width: 160rpx;
+  height: 80rpx;
+  line-height: 80rpx;
+  margin: 0;
+  background: linear-gradient(135deg, #16924f 0%, #32c26b 100%);
+  color: #fff;
+  font-size: 28rpx;
+  border-radius: 18rpx;
+  box-shadow: 0 12rpx 24rpx rgba(22, 146, 79, 0.18);
+}
+
+.opponent-selected {
+  margin-top: 20rpx;
+  padding: 18rpx 20rpx;
+  background: #edf9f1;
+  border: 1rpx solid #dbeee3;
+  border-radius: 18rpx;
+  color: #198f50;
+  font-size: 28rpx;
+}
+
+.score-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24rpx;
+}
+
+.score-input {
+  flex: 1;
+  text-align: center;
+  padding: 28rpx 20rpx;
+  background: #f7faf8;
+  border: 1rpx solid #ecf2ee;
+  border-radius: 22rpx;
+}
+
+.score-label {
+  font-size: 26rpx;
+  color: #647384;
+  display: block;
+  margin-bottom: 16rpx;
+}
+
+.score-control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24rpx;
+}
+
+.score-btn {
+  width: 68rpx;
+  height: 68rpx;
+  line-height: 68rpx;
+  text-align: center;
+  background: #ffffff;
+  border: 1rpx solid #dfe7e2;
+  border-radius: 50%;
+  font-size: 36rpx;
+  color: #23303d;
+  box-shadow: 0 8rpx 18rpx rgba(25, 45, 37, 0.05);
+}
+
+.score-value {
+  font-size: 48rpx;
+  font-weight: 700;
+  color: #198f50;
+  min-width: 80rpx;
+  text-align: center;
+}
+
+.vs {
+  font-size: 42rpx;
+  font-weight: 700;
+  color: #9aa7b4;
+}
+
+.input-item {
+  height: 80rpx;
+  padding: 0 24rpx;
+  background: #f5f8f6;
+  border: 1rpx solid #e7eeea;
+  border-radius: 18rpx;
+  font-size: 28rpx;
+}
+
+.submit-btn {
+  margin: 40rpx 0 0;
+  height: 96rpx;
+  line-height: 96rpx;
+  background: linear-gradient(135deg, #16924f 0%, #32c26b 100%);
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: 700;
+  border-radius: 48rpx;
+  box-shadow: 0 16rpx 28rpx rgba(22, 146, 79, 0.2);
+}
+
+.submit-btn.disabled {
+  background: #c6cdd3;
+  color: #fff;
+  box-shadow: none;
+}

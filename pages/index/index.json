@@ -1,5 +1,4 @@
 {
-  "usingComponents": {
-  },
-  "navigationBarTitleText": "微信小程序"
+  "navigationBarTitleText": "乒乓球约战",
+  "enablePullDownRefresh": true
 }

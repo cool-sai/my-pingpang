@@ -1,0 +1,41 @@
+<view class="container">
+  <!-- 我的排名 -->
+  <view class="my-rank" wx:if="{{myRank}}">
+    <text class="my-rank-label">我的排名</text>
+    <view class="my-rank-info">
+      <text class="my-rank-num">第{{myRank.rank}}名</text>
+      <text class="my-rank-score">{{myRank.score}}分</text>
+    </view>
+  </view>
+
+  <!-- 筛选 -->
+  <view class="filter-tabs">
+    <view class="tab {{filter === 'all' ? 'active' : ''}}" data-filter="all" bindtap="switchFilter">总榜</view>
+    <view class="tab {{filter === 'club' ? 'active' : ''}}" data-filter="club" bindtap="switchFilter">俱乐部榜</view>
+  </view>
+
+  <!-- 排名列表 -->
+  <view class="rank-list">
+    <view class="rank-item {{item.rank <= 3 ? 'top' : ''}}" wx:for="{{rankings}}" wx:key="_id" data-openid="{{item.openid}}" bindtap="goToUserDetail">
+      <view class="rank-num {{item.rank <= 3 ? 'medal' : ''}}">
+        <text wx:if="{{item.rank > 3}}">{{item.rank}}</text>
+        <text wx:if="{{item.rank === 1}}">🥇</text>
+        <text wx:if="{{item.rank === 2}}">🥈</text>
+        <text wx:if="{{item.rank === 3}}">🥉</text>
+      </view>
+      <image class="rank-avatar" src="{{item.avatar || '/images/default_avatar.png'}}" />
+      <view class="rank-info">
+        <text class="rank-name">{{item.nickname}}</text>
+        <text class="rank-detail">胜{{item.winMatches}} 负{{item.loseMatches}}</text>
+      </view>
+      <view class="rank-score-section">
+        <text class="rank-score">{{item.score}}</text>
+        <text class="rank-score-label">分</text>
+      </view>
+    </view>
+
+    <view class="empty-tip" wx:if="{{rankings.length === 0 && !isLoading}}">
+      暂无排名数据
+    </view>
+  </view>
+</view>

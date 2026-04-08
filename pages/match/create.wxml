@@ -1,0 +1,47 @@
+<view class="container">
+  <!-- 对手搜索 -->
+  <view class="section">
+    <text class="section-title">选择对手</text>
+    <view class="search-box">
+      <input class="search-input" placeholder="输入对手昵称搜索" bindconfirm="searchOpponent" />
+      <button class="search-btn" bindtap="searchOpponent" loading="{{isSearching}}">搜索</button>
+    </view>
+    <view class="opponent-selected" wx:if="{{opponentName}}">
+      <text>已选择: {{opponentName}}</text>
+    </view>
+  </view>
+
+  <!-- 比分录入 -->
+  <view class="section">
+    <text class="section-title">比分</text>
+    <view class="score-section">
+      <view class="score-input">
+        <text class="score-label">我方得分</text>
+        <view class="score-control">
+          <text class="score-btn" bindtap="decrementScore" data-player="player1Score">-</text>
+          <text class="score-value">{{player1Score}}</text>
+          <text class="score-btn" bindtap="incrementScore" data-player="player1Score">+</text>
+        </view>
+      </view>
+      <text class="vs">:</text>
+      <view class="score-input">
+        <text class="score-label">对方得分</text>
+        <view class="score-control">
+          <text class="score-btn" bindtap="decrementScore" data-player="player2Score">-</text>
+          <text class="score-value">{{player2Score}}</text>
+          <text class="score-btn" bindtap="incrementScore" data-player="player2Score">+</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 比赛信息 -->
+  <view class="section">
+    <text class="section-title">比赛信息</text>
+    <input class="input-item" placeholder="比赛地点（选填）" bindinput="setLocation" value="{{location}}" />
+  </view>
+
+  <!-- 提交按钮 -->
+  <button class="submit-btn" bindtap="submitMatch" wx:if="{{opponentOpenid}}">提交比赛记录</button>
+  <button class="submit-btn disabled" wx:else>请先选择对手</button>
+</view>

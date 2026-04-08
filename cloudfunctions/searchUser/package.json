@@ -1,0 +1,9 @@
+{
+  "name": "searchUser",
+  "version": "1.0.0",
+  "description": "搜索用户",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

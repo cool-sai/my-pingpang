@@ -1,62 +1,218 @@
-/**index.wxss**/
-page {
-  height: 100vh;
+.header {
   display: flex;
-  flex-direction: column;
-}
-.scrollarea {
-  flex: 1;
-  overflow-y: hidden;
-}
-
-.userinfo {
-  display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  color: #aaa;
-  width: 80%;
+  padding: 34rpx 30rpx;
+  margin-bottom: 24rpx;
+  background: linear-gradient(135deg, #16924f 0%, #38c978 100%);
+  border-radius: 30rpx;
+  box-shadow: 0 20rpx 40rpx rgba(22, 146, 79, 0.22);
 }
 
-.userinfo-avatar {
-  overflow: hidden;
-  width: 128rpx;
-  height: 128rpx;
-  margin: 20rpx;
-  border-radius: 50%;
-}
-
-.usermotto {
-  margin-top: 200px;
-}
-
-.avatar-wrapper {
-  padding: 0;
-  width: 56px !important;
-  border-radius: 8px;
-  margin-top: 40px;
-  margin-bottom: 40px;
+.user-section {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
 }
 
 .avatar {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 50%;
+  margin-right: 20rpx;
+  border: 4rpx solid rgba(255, 255, 255, 0.24);
+}
+
+.nickname {
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: 700;
+}
+
+.score-section {
+  padding: 14rpx 22rpx;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 22rpx;
+}
+
+.score-label {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 24rpx;
   display: block;
-  width: 56px;
-  height: 56px;
 }
 
-.nickname-wrapper {
+.score-value {
+  color: #fff;
+  font-size: 42rpx;
+  font-weight: 700;
+}
+
+.quick-actions {
   display: flex;
-  width: 100%;
-  padding: 16px;
-  box-sizing: border-box;
-  border-top: .5px solid rgba(0, 0, 0, 0.1);
-  border-bottom: .5px solid rgba(0, 0, 0, 0.1);
-  color: black;
+  gap: 20rpx;
+  margin-bottom: 24rpx;
 }
 
-.nickname-label {
-  width: 105px;
-}
-
-.nickname-input {
+.action-btn {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 172rpx;
+  padding: 30rpx 20rpx;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1rpx solid rgba(31, 111, 66, 0.08);
+  border-radius: 24rpx;
+  box-shadow: 0 12rpx 30rpx rgba(25, 45, 37, 0.06);
+}
+
+.action-btn.primary {
+  background: linear-gradient(135deg, #16924f 0%, #33c16c 100%);
+  border: none;
+  box-shadow: 0 16rpx 32rpx rgba(22, 146, 79, 0.22);
+}
+
+.action-btn.secondary {
+  background: rgba(255, 255, 255, 0.94);
+}
+
+.action-icon {
+  font-size: 48rpx;
+  margin-bottom: 14rpx;
+}
+
+.action-text {
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
+.action-btn.primary .action-text {
+  color: #fff;
+}
+
+.action-btn.secondary .action-text {
+  color: #25313f;
+}
+
+.event-list,
+.rank-list,
+.club-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.event-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx;
+  background: #f7faf8;
+  border: 1rpx solid #eef3ef;
+  border-radius: 18rpx;
+  gap: 16rpx;
+}
+
+.event-info,
+.club-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.event-name {
+  font-size: 28rpx;
+  color: #25313f;
+  display: block;
+  font-weight: 600;
+}
+
+.event-time {
+  font-size: 24rpx;
+  color: #728294;
+}
+
+.event-status,
+.club-score {
+  flex-shrink: 0;
+}
+
+.rank-item {
+  display: flex;
+  align-items: center;
+  padding: 16rpx;
+  background: #f7faf8;
+  border: 1rpx solid #eef3ef;
+  border-radius: 18rpx;
+}
+
+.rank-num {
+  width: 48rpx;
+  height: 48rpx;
+  line-height: 48rpx;
+  text-align: center;
+  font-size: 24rpx;
+  color: #6d7b8a;
+  margin-right: 16rpx;
+}
+
+.rank-num.top {
+  background: linear-gradient(135deg, #ffcb45 0%, #ff9b2f 100%);
+  color: #fff;
+  border-radius: 50%;
+  font-weight: 700;
+}
+
+.rank-avatar {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 50%;
+  margin-right: 16rpx;
+}
+
+.rank-info {
+  flex: 1;
+}
+
+.rank-name {
+  font-size: 28rpx;
+  color: #25313f;
+  display: block;
+  font-weight: 600;
+}
+
+.rank-score {
+  font-size: 24rpx;
+  color: #728294;
+}
+
+.club-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx;
+  background: #f7faf8;
+  border: 1rpx solid #eef3ef;
+  border-radius: 18rpx;
+  gap: 20rpx;
+}
+
+.club-name {
+  font-size: 28rpx;
+  color: #25313f;
+  display: block;
+  font-weight: 600;
+}
+
+.club-members {
+  font-size: 24rpx;
+  color: #728294;
+}
+
+.club-score {
+  font-size: 24rpx;
+  color: #198f50;
+  font-weight: 600;
 }

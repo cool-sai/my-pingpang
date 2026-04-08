@@ -1,49 +1,75 @@
-// index.js
-const defaultAvatarUrl = 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0'
+// pages/index/index.js
+const app = getApp()
 
 Page({
   data: {
-    motto: 'Hello World',
-    userInfo: {
-      avatarUrl: defaultAvatarUrl,
-      nickName: '',
-    },
-    hasUserInfo: false,
-    canIUseGetUserProfile: wx.canIUse('getUserProfile'),
-    canIUseNicknameComp: wx.canIUse('input.type.nickname'),
+    userInfo: null,
+    topPlayers: [],
+    hotClubs: [],
+    currentEvents: []
   },
-  bindViewTap() {
-    wx.navigateTo({
-      url: '../logs/logs'
-    })
+
+  onLoad() {
+    this.checkLogin()
   },
-  onChooseAvatar(e) {
-    const { avatarUrl } = e.detail
-    const { nickName } = this.data.userInfo
-    this.setData({
-      "userInfo.avatarUrl": avatarUrl,
-      hasUserInfo: nickName && avatarUrl && avatarUrl !== defaultAvatarUrl,
-    })
+
+  onShow() {
+    if (app.globalData.isLogin) {
+      this.setData({
+        userInfo: app.globalData.userInfo
+      })
+      this.loadData()
+    }
   },
-  onInputChange(e) {
-    const nickName = e.detail.value
-    const { avatarUrl } = this.data.userInfo
-    this.setData({
-      "userInfo.nickName": nickName,
-      hasUserInfo: nickName && avatarUrl && avatarUrl !== defaultAvatarUrl,
-    })
+
+  onPullDownRefresh() {
+    this.loadData()
+    wx.stopPullDownRefresh()
   },
-  getUserProfile(e) {
-    // 推荐使用wx.getUserProfile获取用户信息，开发者每次通过该接口获取用户个人信息均需用户确认，开发者妥善保管用户快速填写的头像昵称，避免重复弹窗
-    wx.getUserProfile({
-      desc: '展示用户信息', // 声明获取用户个人信息后的用途，后续会展示在弹窗中，请谨慎填写
-      success: (res) => {
-        console.log(res)
+
+  checkLogin() {
+    if (!app.globalData.isLogin) {
+      wx.showModal({
+        title: '提示',
+        content: '请先登录后使用',
+        confirmText: '去登录',
+        success: (res) => {
+          if (res.confirm) {
+            wx.switchTab({ url: '/pages/user/user' })
+          }
+        }
+      })
+    }
+  },
+
+  async loadData() {
+    try {
+      const res = await wx.cloud.callFunction({ name: 'getHomeData' })
+      if (res.result.success) {
         this.setData({
-          userInfo: res.userInfo,
-          hasUserInfo: true
+          topPlayers: res.result.data.topPlayers || [],
+          hotClubs: res.result.data.hotClubs || [],
+          currentEvents: res.result.data.currentEvents || []
         })
       }
-    })
+    } catch (err) {
+      console.error('加载首页数据失败', err)
+    }
   },
+
+  goToMatch() {
+    wx.navigateTo({ url: '/pages/match/match' })
+  },
+
+  goToRank() {
+    wx.switchTab({ url: '/pages/rank/rank' })
+  },
+
+  goToEvent() {
+    wx.switchTab({ url: '/pages/event/event' })
+  },
+
+  goToClub() {
+    wx.switchTab({ url: '/pages/club/club' })
+  }
 })
