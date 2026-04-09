@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "CommonJS",
+    "strict": false,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "outDir": ".cloudfunctions-dist",
+    "rootDir": ".",
+    "types": [
+      "node"
+    ],
+    "lib": [
+      "ES2020"
+    ]
+  },
+  "include": [
+    "cloudfunctions/**/*.ts"
+  ],
+  "exclude": [
+    "**/node_modules"
+  ]
+}

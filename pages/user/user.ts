@@ -1,48 +1,63 @@
-// pages/user/user.js
-const app = getApp()
+const userApp = getApp<IAppOption>()
+
+interface IUserStats {
+  totalMatches: number
+  winRate: number
+  score: number
+}
+
+interface IMenuItem {
+  id: string
+  icon: string
+  title: string
+  url: string
+}
 
 Page({
   data: {
-    userInfo: null,
+    userInfo: null as IUserInfo | null,
     stats: {
       totalMatches: 0,
       winRate: 0,
       score: 0
-    },
+    } as IUserStats,
     menuItems: [
       { id: 'matches', icon: '🎾', title: '我的比赛', url: '/pages/match/match' },
       { id: 'clubs', icon: '🏠', title: '我的俱乐部', url: '/pages/club/my' },
       { id: 'favorites', icon: '⭐', title: '我的收藏', url: '/pages/user/favorites' },
       { id: 'settings', icon: '⚙️', title: '设置', url: '/pages/user/settings' }
-    ]
+    ] as IMenuItem[]
   },
 
   onLoad() {
-    if (app.globalData.isLogin) {
-      this.setData({ userInfo: app.globalData.userInfo })
+    if (userApp.globalData.isLogin) {
+      this.setData({ userInfo: userApp.globalData.userInfo })
       this.loadUserStats()
     }
   },
 
   onShow() {
-    if (app.globalData.isLogin) {
+    if (userApp.globalData.isLogin) {
       this.setData({
-        userInfo: app.globalData.userInfo
+        userInfo: userApp.globalData.userInfo
       })
       this.loadUserStats()
     }
   },
 
   loadUserStats() {
-    const userInfo = app.globalData.userInfo
+    const userInfo = userApp.globalData.userInfo
     if (userInfo) {
-      const winRate = userInfo.totalMatches > 0
-        ? Math.round(userInfo.winMatches / userInfo.totalMatches * 100)
+      const totalMatches = userInfo.totalMatches || 0
+      const winMatches = userInfo.winMatches || 0
+      const winRate = totalMatches > 0
+        ? Math.round((winMatches / totalMatches) * 100)
         : 0
+
       this.setData({
         stats: {
-          totalMatches: userInfo.totalMatches || 0,
-          winRate: winRate,
+          totalMatches,
+          winRate,
           score: userInfo.score || 0
         }
       })
@@ -50,11 +65,10 @@ Page({
   },
 
   onLogin() {
-    app.login({
+    userApp.login({
       success: (userInfo) => {
         this.setData({
-          userInfo: userInfo,
-          isLogin: true
+          userInfo
         })
         this.loadUserStats()
         wx.showToast({ title: '登录成功', icon: 'success' })
@@ -66,9 +80,9 @@ Page({
     })
   },
 
-  goToMenu(e) {
+  goToMenu(e: WechatMiniprogram.BaseEvent) {
     const url = e.currentTarget.dataset.url
-    if (!app.globalData.isLogin) {
+    if (!userApp.globalData.isLogin) {
       wx.showModal({
         title: '提示',
         content: '请先登录',

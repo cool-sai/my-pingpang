@@ -3,7 +3,7 @@
   <view class="section">
     <text class="section-title">选择对手</text>
     <view class="search-box">
-      <input class="search-input" placeholder="输入对手昵称搜索" bindconfirm="searchOpponent" />
+      <input class="search-input" placeholder="输入对手昵称搜索" value="{{searchKeyword}}" bindinput="setSearchKeyword" bindconfirm="searchOpponent" />
       <button class="search-btn" bindtap="searchOpponent" loading="{{isSearching}}">搜索</button>
     </view>
     <view class="opponent-selected" wx:if="{{opponentName}}">

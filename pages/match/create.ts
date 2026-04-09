@@ -1,8 +1,28 @@
-// pages/match/create.js
-const app = getApp()
+const createMatchApp = getApp<IAppOption>()
+
+type ScoreField = 'player1Score' | 'player2Score'
+type IValueEvent = WechatMiniprogram.BaseEvent & {
+  detail: {
+    value?: string
+  }
+}
+
+interface ISearchUserResult {
+  openid: string
+  nickname: string
+}
+
+interface ICreateMatchResult {
+  winner?: string
+  scoreChange?: {
+    player1?: number
+    player2?: number
+  }
+}
 
 Page({
   data: {
+    searchKeyword: '',
     opponentName: '',
     opponentOpenid: '',
     player1Score: 0,
@@ -13,26 +33,34 @@ Page({
   },
 
   onLoad() {
-    const userInfo = app.globalData.userInfo
-    if (!userInfo) {
+    if (!createMatchApp.globalData.userInfo) {
       wx.showToast({ title: '请先登录', icon: 'none' })
-      setTimeout(() => wx.switchTab({ url: '/pages/user/user' }), 1000)
+      setTimeout(() => {
+        wx.switchTab({ url: '/pages/user/user' })
+      }, 1000)
     }
   },
 
-  // 搜索对手
-  async searchOpponent(e) {
-    const nickname = e.detail.value.trim()
+  setSearchKeyword(e: IValueEvent) {
+    this.setData({
+      searchKeyword: (e.detail.value || '').trim()
+    })
+  },
+
+  async searchOpponent(e?: IValueEvent) {
+    const nickname = ((e?.detail?.value || this.data.searchKeyword) ?? '').trim()
     if (!nickname) return
 
     this.setData({ isSearching: true })
     try {
-      const res = await wx.cloud.callFunction({
+      const res = await createMatchApp.callFunction<ISearchUserResult[]>({
         name: 'searchUser',
         data: { nickname }
       })
+
       if (res.result.success && res.result.data.length > 0) {
         this.setData({
+          searchKeyword: nickname,
           opponentOpenid: res.result.data[0].openid,
           opponentName: res.result.data[0].nickname
         })
@@ -47,34 +75,37 @@ Page({
     }
   },
 
-  // 设置比分
-  setScore(e) {
-    const { player, value } = e.currentTarget.dataset
-    const score = parseInt(value) || 0
-    if (score < 0 || score > 99) return
+  setScore(e: WechatMiniprogram.BaseEvent) {
+    const player = e.currentTarget.dataset.player as ScoreField
+    const rawValue = e.currentTarget.dataset.value
+    const score = Number.parseInt(String(rawValue || '0'), 10) || 0
+
+    if (!player || score < 0 || score > 99) return
     this.setData({ [player]: score })
   },
 
-  incrementScore(player) {
+  incrementScore(e: WechatMiniprogram.BaseEvent) {
+    const player = e.currentTarget.dataset.player as ScoreField
     const current = this.data[player]
-    if (current < 99) {
+
+    if (player && current < 99) {
       this.setData({ [player]: current + 1 })
     }
   },
 
-  decrementScore(player) {
+  decrementScore(e: WechatMiniprogram.BaseEvent) {
+    const player = e.currentTarget.dataset.player as ScoreField
     const current = this.data[player]
-    if (current > 0) {
+
+    if (player && current > 0) {
       this.setData({ [player]: current - 1 })
     }
   },
 
-  // 设置地点
-  setLocation(e) {
+  setLocation(e: IValueEvent) {
     this.setData({ location: e.detail.value })
   },
 
-  // 提交比赛
   async submitMatch() {
     const { opponentOpenid, player1Score, player2Score, location } = this.data
 
@@ -86,7 +117,7 @@ Page({
     wx.showLoading({ title: '提交中...' })
 
     try {
-      const res = await wx.cloud.callFunction({
+      const res = await createMatchApp.callFunction<ICreateMatchResult>({
         name: 'createMatch',
         data: {
           opponentOpenid,
@@ -100,8 +131,7 @@ Page({
       wx.hideLoading()
 
       if (res.result.success) {
-        const { winner, scoreChange } = res.result.data
-        const myChange = scoreChange.player1
+        const myChange = res.result.data.scoreChange?.player1 || 0
         wx.showModal({
           title: '比赛记录成功',
           content: `${myChange >= 0 ? '+' : ''}${myChange}积分`,
@@ -111,7 +141,7 @@ Page({
           }
         })
       } else {
-        wx.showToast({ title: res.result.error, icon: 'none' })
+        wx.showToast({ title: res.result.error || '提交失败', icon: 'none' })
       }
     } catch (err) {
       wx.hideLoading()

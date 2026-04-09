@@ -1,12 +1,17 @@
-// pages/index/index.js
-const app = getApp()
+const indexApp = getApp<IAppOption>()
+
+interface IHomeData {
+  topPlayers: IUserInfo[]
+  hotClubs: Array<Record<string, any>>
+  currentEvents: Array<Record<string, any>>
+}
 
 Page({
   data: {
-    userInfo: null,
-    topPlayers: [],
-    hotClubs: [],
-    currentEvents: []
+    userInfo: null as IUserInfo | null,
+    topPlayers: [] as IUserInfo[],
+    hotClubs: [] as Array<Record<string, any>>,
+    currentEvents: [] as Array<Record<string, any>>
   },
 
   onLoad() {
@@ -14,21 +19,22 @@ Page({
   },
 
   onShow() {
-    if (app.globalData.isLogin) {
+    if (indexApp.globalData.isLogin) {
       this.setData({
-        userInfo: app.globalData.userInfo
+        userInfo: indexApp.globalData.userInfo
       })
-      this.loadData()
+      void this.loadData()
     }
   },
 
   onPullDownRefresh() {
-    this.loadData()
-    wx.stopPullDownRefresh()
+    void this.loadData().finally(() => {
+      wx.stopPullDownRefresh()
+    })
   },
 
   checkLogin() {
-    if (!app.globalData.isLogin) {
+    if (!indexApp.globalData.isLogin) {
       wx.showModal({
         title: '提示',
         content: '请先登录后使用',
@@ -44,7 +50,10 @@ Page({
 
   async loadData() {
     try {
-      const res = await wx.cloud.callFunction({ name: 'getHomeData' })
+      const res = await indexApp.callFunction<IHomeData>({
+        name: 'getHomeData'
+      })
+
       if (res.result.success) {
         this.setData({
           topPlayers: res.result.data.topPlayers || [],

@@ -1,0 +1,14 @@
+{
+  "name": "miniprogram-3",
+  "private": true,
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "typecheck:cloudfunctions": "tsc -p tsconfig.cloudfunctions.json --noEmit",
+    "build:cloudfunctions": "tsc -p tsconfig.cloudfunctions.json && node scripts/build-cloudfunctions.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.2",
+    "miniprogram-api-typings": "^5.1.2",
+    "typescript": "^6.0.2"
+  }
+}

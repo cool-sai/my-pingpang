@@ -1,28 +1,31 @@
-// pages/club/club.js
+const clubApp = getApp<IAppOption>()
+
+type ClubSort = 'score' | 'members'
+
 Page({
   data: {
-    clubs: [],
+    clubs: [] as Array<Record<string, any>>,
     isLoading: false,
-    sortBy: 'score' // score, members
+    sortBy: 'score' as ClubSort
   },
 
   onLoad() {
-    this.loadClubs()
+    void this.loadClubs()
   },
 
   onShow() {
-    this.loadClubs()
+    void this.loadClubs()
   },
 
   async loadClubs() {
     this.setData({ isLoading: true })
     try {
-      const res = await wx.cloud.callFunction({
+      const res = await clubApp.callFunction<Array<Record<string, any>>>({
         name: 'getClubs',
         data: { sortBy: this.data.sortBy }
       })
       if (res.result.success) {
-        this.setData({ clubs: res.result.data })
+        this.setData({ clubs: res.result.data || [] })
       }
     } catch (err) {
       console.error('加载俱乐部失败', err)
@@ -32,18 +35,19 @@ Page({
   },
 
   onPullDownRefresh() {
-    this.loadClubs()
-    wx.stopPullDownRefresh()
-  },
-
-  switchSort(e) {
-    const sortBy = e.currentTarget.dataset.sort
-    this.setData({ sortBy }, () => {
-      this.loadClubs()
+    void this.loadClubs().finally(() => {
+      wx.stopPullDownRefresh()
     })
   },
 
-  goToClubDetail(e) {
+  switchSort(e: WechatMiniprogram.BaseEvent) {
+    const sortBy = (e.currentTarget.dataset.sort || 'score') as ClubSort
+    this.setData({ sortBy }, () => {
+      void this.loadClubs()
+    })
+  },
+
+  goToClubDetail(e: WechatMiniprogram.BaseEvent) {
     const clubId = e.currentTarget.dataset.id
     wx.navigateTo({ url: `/pages/club/detail?id=${clubId}` })
   },

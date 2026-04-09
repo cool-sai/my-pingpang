@@ -1,32 +1,33 @@
-// pages/match/match.js
-const app = getApp()
+const matchApp = getApp<IAppOption>()
+
+type MatchStatus = 'all' | 'pending' | 'completed'
 
 Page({
   data: {
-    matches: [],
+    matches: [] as Array<Record<string, any>>,
     isLoading: false,
-    status: 'all' // all, pending, completed
+    status: 'all' as MatchStatus
   },
 
   onLoad() {
-    this.loadMatches()
+    void this.loadMatches()
   },
 
   onShow() {
-    if (app.globalData.isLogin) {
-      this.loadMatches()
+    if (matchApp.globalData.isLogin) {
+      void this.loadMatches()
     }
   },
 
   async loadMatches() {
     this.setData({ isLoading: true })
     try {
-      const res = await wx.cloud.callFunction({
+      const res = await matchApp.callFunction<Array<Record<string, any>>>({
         name: 'getMatches',
         data: { status: this.data.status }
       })
       if (res.result.success) {
-        this.setData({ matches: res.result.data })
+        this.setData({ matches: res.result.data || [] })
       }
     } catch (err) {
       console.error('加载比赛记录失败', err)
@@ -36,14 +37,15 @@ Page({
   },
 
   onPullDownRefresh() {
-    this.loadMatches()
-    wx.stopPullDownRefresh()
+    void this.loadMatches().finally(() => {
+      wx.stopPullDownRefresh()
+    })
   },
 
-  switchStatus(e) {
-    const status = e.currentTarget.dataset.status
+  switchStatus(e: WechatMiniprogram.BaseEvent) {
+    const status = (e.currentTarget.dataset.status || 'all') as MatchStatus
     this.setData({ status }, () => {
-      this.loadMatches()
+      void this.loadMatches()
     })
   },
 
@@ -51,7 +53,7 @@ Page({
     wx.navigateTo({ url: '/pages/match/create' })
   },
 
-  goToMatchDetail(e) {
+  goToMatchDetail(e: WechatMiniprogram.BaseEvent) {
     const matchId = e.currentTarget.dataset.id
     wx.navigateTo({ url: `/pages/match/detail?id=${matchId}` })
   }

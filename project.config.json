@@ -12,6 +12,9 @@
     "postcss": true,
     "minified": true,
     "enhance": true,
+    "useCompilerPlugins": [
+      "typescript"
+    ],
     "showShadowRootInWxmlPanel": true,
     "packNpmRelationList": [],
     "babelSetting": {
