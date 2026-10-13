@@ -2,7 +2,7 @@
   <!-- 顶部区域 -->
   <view class="header">
     <view class="user-section">
-      <image class="avatar" src="{{userInfo.avatar || '/images/default_avatar.png'}}" />
+      <image class="avatar" src="{{userInfo.avatar || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCI+PGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iNTAiIGZpbGw9IiNlMGUwZTAiLz48Y2lyY2xlIGN4PSI1MCIgY3k9IjM4IiByPSIxOCIgZmlsbD0iI2JkYmRiZCIvPjxlbGxpcHNlIGN4PSI1MCIgY3k9Ijg1IiByeD0iMjgiIHJ5PSIyMiIgZmlsbD0iI2JkYmRiZCIvPjwvc3ZnPg=='}}" />
       <text class="nickname">{{userInfo.nickname || '未登录'}}</text>
     </view>
     <view class="score-section">
@@ -50,7 +50,7 @@
     <view class="rank-list">
       <view class="rank-item" wx:for="{{topPlayers}}" wx:key="_id">
         <view class="rank-num {{item.rank <= 3 ? 'top' : ''}}">{{item.rank}}</view>
-        <image class="rank-avatar" src="{{item.avatar || '/images/default_avatar.png'}}" />
+        <image class="rank-avatar" src="{{item.avatar || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCI+PGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iNTAiIGZpbGw9IiNlMGUwZTAiLz48Y2lyY2xlIGN4PSI1MCIgY3k9IjM4IiByPSIxOCIgZmlsbD0iI2JkYmRiZCIvPjxlbGxpcHNlIGN4PSI1MCIgY3k9Ijg1IiByeD0iMjgiIHJ5PSIyMiIgZmlsbD0iI2JkYmRiZCIvPjwvc3ZnPg=='}}" />
         <view class="rank-info">
           <text class="rank-name">{{item.nickname}}</text>
           <text class="rank-score">{{item.score}}分</text>

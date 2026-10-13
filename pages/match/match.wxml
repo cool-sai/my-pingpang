@@ -15,13 +15,13 @@
       </view>
       <view class="match-players">
         <view class="player">
-          <image class="player-avatar" src="{{item.player1.avatar || '/images/default_avatar.png'}}" />
+          <image class="player-avatar" src="{{item.player1.avatar || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCI+PGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iNTAiIGZpbGw9IiNlMGUwZTAiLz48Y2lyY2xlIGN4PSI1MCIgY3k9IjM4IiByPSIxOCIgZmlsbD0iI2JkYmRiZCIvPjxlbGxpcHNlIGN4PSI1MCIgY3k9Ijg1IiByeD0iMjgiIHJ5PSIyMiIgZmlsbD0iI2JkYmRiZCIvPjwvc3ZnPg=='}}" />
           <text class="player-name">{{item.player1.nickname}}</text>
           <text class="player-score {{item.winner === 'player1' ? 'winner' : ''}}">{{item.player1Score}}</text>
         </view>
         <text class="vs">VS</text>
         <view class="player">
-          <image class="player-avatar" src="{{item.player2.avatar || '/images/default_avatar.png'}}" />
+          <image class="player-avatar" src="{{item.player2.avatar || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCI+PGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iNTAiIGZpbGw9IiNlMGUwZTAiLz48Y2lyY2xlIGN4PSI1MCIgY3k9IjM4IiByPSIxOCIgZmlsbD0iI2JkYmRiZCIvPjxlbGxpcHNlIGN4PSI1MCIgY3k9Ijg1IiByeD0iMjgiIHJ5PSIyMiIgZmlsbD0iI2JkYmRiZCIvPjwvc3ZnPg=='}}" />
           <text class="player-name">{{item.player2.nickname}}</text>
           <text class="player-score {{item.winner === 'player2' ? 'winner' : ''}}">{{item.player2Score}}</text>
         </view>
