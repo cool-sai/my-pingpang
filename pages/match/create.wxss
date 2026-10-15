@@ -1,129 +1,166 @@
-.container {
-  padding-bottom: 48rpx;
-}
-
 .section-title {
   display: block;
   margin-bottom: 20rpx;
+  line-height: 1.25;
 }
 
 .search-box {
   display: flex;
+  align-items: center;
   gap: 16rpx;
+}
+
+.search-input,
+.input-item {
+  display: block;
+  width: 100%;
+  height: 84rpx;
+  padding: 0 24rpx;
+  background: #f5f8f6;
+  border: 1rpx solid #e6eeea;
+  border-radius: 18rpx;
+  color: #1c2430;
+  font-size: 28rpx;
+  line-height: 84rpx;
 }
 
 .search-input {
   flex: 1;
-  height: 80rpx;
-  padding: 0 24rpx;
-  background: #f5f8f6;
-  border: 1rpx solid #e7eeea;
-  border-radius: 18rpx;
-  font-size: 28rpx;
+  min-width: 0;
 }
 
 .search-btn {
-  width: 160rpx;
-  height: 80rpx;
-  line-height: 80rpx;
-  margin: 0;
-  background: linear-gradient(135deg, #16924f 0%, #32c26b 100%);
-  color: #fff;
+  flex-shrink: 0;
+  width: 148rpx;
+  height: 84rpx;
+  background: linear-gradient(135deg, #148f4c 0%, #2fbe68 100%);
+  color: #ffffff;
   font-size: 28rpx;
+  font-weight: 600;
   border-radius: 18rpx;
-  box-shadow: 0 12rpx 24rpx rgba(22, 146, 79, 0.18);
 }
 
 .opponent-selected {
-  margin-top: 20rpx;
-  padding: 18rpx 20rpx;
+  display: flex;
+  align-items: center;
+  min-height: 76rpx;
+  margin-top: 16rpx;
+  padding: 16rpx 20rpx;
   background: #edf9f1;
-  border: 1rpx solid #dbeee3;
   border-radius: 18rpx;
-  color: #198f50;
+  color: #148f4c;
   font-size: 28rpx;
+  line-height: 1.3;
 }
 
 .score-section {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24rpx;
+  align-items: stretch;
+  gap: 16rpx;
 }
 
 .score-input {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   flex: 1;
-  text-align: center;
-  padding: 28rpx 20rpx;
+  min-width: 0;
+  padding: 24rpx 12rpx 28rpx;
   background: #f7faf8;
-  border: 1rpx solid #ecf2ee;
   border-radius: 22rpx;
 }
 
 .score-label {
-  font-size: 26rpx;
-  color: #647384;
   display: block;
-  margin-bottom: 16rpx;
+  margin-bottom: 20rpx;
+  color: #647384;
+  font-size: 24rpx;
+  line-height: 1.2;
+  text-align: center;
 }
 
 .score-control {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 24rpx;
+  gap: 16rpx;
 }
 
 .score-btn {
-  width: 68rpx;
-  height: 68rpx;
-  line-height: 68rpx;
-  text-align: center;
+  position: relative;
+  flex-shrink: 0;
+  width: 64rpx;
+  height: 64rpx;
   background: #ffffff;
   border: 1rpx solid #dfe7e2;
   border-radius: 50%;
-  font-size: 36rpx;
-  color: #23303d;
-  box-shadow: 0 8rpx 18rpx rgba(25, 45, 37, 0.05);
+}
+
+.score-btn::before,
+.score-btn--plus::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  background: #23303d;
+  border-radius: 2rpx;
+}
+
+.score-btn::before {
+  width: 24rpx;
+  height: 4rpx;
+  margin-left: -12rpx;
+  margin-top: -2rpx;
+}
+
+.score-btn--plus::after {
+  width: 4rpx;
+  height: 24rpx;
+  margin-left: -2rpx;
+  margin-top: -12rpx;
 }
 
 .score-value {
+  min-width: 64rpx;
+  color: #148f4c;
   font-size: 48rpx;
   font-weight: 700;
-  color: #198f50;
-  min-width: 80rpx;
+  line-height: 1;
   text-align: center;
 }
 
-.vs {
-  font-size: 42rpx;
-  font-weight: 700;
-  color: #9aa7b4;
+.vs-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  width: 32rpx;
+  padding-bottom: 28rpx;
 }
 
-.input-item {
-  height: 80rpx;
-  padding: 0 24rpx;
-  background: #f5f8f6;
-  border: 1rpx solid #e7eeea;
-  border-radius: 18rpx;
-  font-size: 28rpx;
+.vs-mark {
+  height: 64rpx;
+  color: #9aa7b4;
+  font-size: 40rpx;
+  font-weight: 700;
+  line-height: 64rpx;
+  text-align: center;
 }
 
 .submit-btn {
-  margin: 40rpx 0 0;
-  height: 96rpx;
-  line-height: 96rpx;
-  background: linear-gradient(135deg, #16924f 0%, #32c26b 100%);
-  color: #fff;
+  width: 100%;
+  height: 92rpx;
+  background: linear-gradient(135deg, #148f4c 0%, #2fbe68 100%);
+  color: #ffffff;
   font-size: 32rpx;
   font-weight: 700;
-  border-radius: 48rpx;
-  box-shadow: 0 16rpx 28rpx rgba(22, 146, 79, 0.2);
+  border-radius: 46rpx;
+  box-shadow: 0 12rpx 24rpx rgba(20, 143, 76, 0.2);
 }
 
 .submit-btn.disabled {
-  background: #c6cdd3;
-  color: #fff;
+  background: #d5dbe1;
+  color: #ffffff;
   box-shadow: none;
 }

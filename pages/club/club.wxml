@@ -1,4 +1,4 @@
-<view class="container">
+<view class="container has-fab">
   <!-- 筛选 -->
   <view class="filter-tabs">
     <view class="tab {{sortBy === 'score' ? 'active' : ''}}" data-sort="score" bindtap="switchSort">积分排序</view>
@@ -38,5 +38,5 @@
   </view>
 
   <!-- 创建俱乐部按钮 -->
-  <view class="fab" bindtap="goToCreateClub">+</view>
+  <view class="fab" bindtap="goToCreateClub"></view>
 </view>

@@ -22,7 +22,15 @@
       "disablePlugins": [],
       "outputPath": ""
     },
-    "condition": true
+    "condition": true,
+    "compileWorklet": false,
+    "uglifyFileName": false,
+    "uploadWithSourceMap": true,
+    "packNpmManually": false,
+    "minifyWXSS": true,
+    "minifyWXML": true,
+    "localPlugins": false,
+    "disableUseStrict": false
   },
   "condition": {},
   "editorSetting": {
@@ -30,5 +38,6 @@
     "tabSize": 2
   },
   "appid": "wxb718246ff09860a5",
-  "cloudfunctionTemplateRoot": "cloudfunctionTemplate/"
+  "cloudfunctionTemplateRoot": "cloudfunctionTemplate/",
+  "simulatorPluginLibVersion": {}
 }

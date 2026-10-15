@@ -12,14 +12,14 @@
     "navigationBarTextStyle": "black",
     "navigationBarTitleText": "乒乓球约战",
     "navigationBarBackgroundColor": "#ffffff",
-    "backgroundColor": "#f5f5f5"
+    "backgroundColor": "#f2f5f3"
   },
   "style": "v2",
   "sitemapLocation": "sitemap.json",
   "lazyCodeLoading": "requiredComponents",
   "tabBar": {
     "color": "#999999",
-    "selectedColor": "#1AAD19",
+    "selectedColor": "#148f4c",
     "borderStyle": "black",
     "backgroundColor": "#ffffff",
     "list": [

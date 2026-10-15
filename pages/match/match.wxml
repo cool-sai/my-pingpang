@@ -1,4 +1,4 @@
-<view class="container">
+<view class="container has-fab">
   <!-- 状态筛选 -->
   <view class="filter-tabs">
     <view class="tab {{status === 'all' ? 'active' : ''}}" data-status="all" bindtap="switchStatus">全部</view>
@@ -19,7 +19,9 @@
           <text class="player-name">{{item.player1.nickname}}</text>
           <text class="player-score {{item.winner === 'player1' ? 'winner' : ''}}">{{item.player1Score}}</text>
         </view>
-        <text class="vs">VS</text>
+        <view class="vs-wrap">
+          <text class="vs">VS</text>
+        </view>
         <view class="player">
           <image class="player-avatar" src="{{item.player2.avatar || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCI+PGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iNTAiIGZpbGw9IiNlMGUwZTAiLz48Y2lyY2xlIGN4PSI1MCIgY3k9IjM4IiByPSIxOCIgZmlsbD0iI2JkYmRiZCIvPjxlbGxpcHNlIGN4PSI1MCIgY3k9Ijg1IiByeD0iMjgiIHJ5PSIyMiIgZmlsbD0iI2JkYmRiZCIvPjwvc3ZnPg=='}}" />
           <text class="player-name">{{item.player2.nickname}}</text>
@@ -38,5 +40,5 @@
   </view>
 
   <!-- 发起比赛按钮 -->
-  <view class="fab" bindtap="goToCreateMatch">+</view>
+  <view class="fab" bindtap="goToCreateMatch"></view>
 </view>
