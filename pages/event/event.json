@@ -1,5 +1,7 @@
 {
-  "navigationBarTitleText": "赛事",
+  "navigationBarTitleText": "比赛",
   "enablePullDownRefresh": true,
-  "usingComponents": {}
+  "usingComponents": {
+    "event-card": "/components/event-card/index"
+  }
 }

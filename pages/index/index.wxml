@@ -22,22 +22,12 @@
 
   <view class="list-head">
     <text class="list-title">比赛</text>
-    <text class="list-more" bindtap="goToEvent">更多</text>
+    <view class="list-actions">
+      <text class="list-action" bindtap="goToCreate">创建</text>
+      <text class="list-action" bindtap="goToEvent">更多</text>
+    </view>
   </view>
 
-  <view
-    class="event-item"
-    wx:for="{{events}}"
-    wx:key="_id"
-    data-id="{{item._id}}"
-    bindtap="goToEventDetail"
-  >
-    <view class="event-main">
-      <text class="event-name">{{item.name}}</text>
-      <text class="event-meta">{{item.startTime || '时间待定'}}  {{item.location || '地点待定'}}</text>
-      <text class="event-meta">{{item.signupCount || 0}} 人报名</text>
-    </view>
-    <text class="event-status">{{item.statusText}}</text>
-  </view>
+  <event-card wx:for="{{events}}" wx:key="_id" event="{{item}}" bind:select="goToEventDetail" />
   <view class="empty-tip" wx:if="{{events.length === 0}}">附近还没有比赛</view>
 </view>

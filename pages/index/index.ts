@@ -11,6 +11,9 @@ interface IEventCard {
   status?: string
   statusText?: string
   signupCount?: number
+  maxPlayers?: number
+  format?: string
+  creatorName?: string
 }
 
 Page({
@@ -55,13 +58,25 @@ Page({
     wx.navigateTo({ url: `/pages/news/detail?id=${newsId}` })
   },
 
-  goToEventDetail(e: WechatMiniprogram.BaseEvent) {
-    const eventId = e.currentTarget.dataset.id
+  goToEventDetail(e: WechatMiniprogram.CustomEvent<{ id?: string }>) {
+    const eventId = e.detail.id
     if (!eventId) return
     wx.navigateTo({ url: `/pages/event/detail?id=${eventId}` })
   },
 
   goToEvent() {
     wx.switchTab({ url: '/pages/event/event' })
+  },
+
+  goToCreate() {
+    indexApp.requireLogin('登录后才能创建比赛', {
+      success: () => {
+        wx.navigateTo({ url: '/pages/event/edit' })
+      },
+      fail: (error) => {
+        if (error === '取消登录') return
+        wx.showToast({ title: '登录失败', icon: 'none' })
+      }
+    })
   }
 })

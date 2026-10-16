@@ -7,7 +7,7 @@ type EventStatus = 'all' | 'upcoming' | 'ongoing' | 'finished'
 Page({
   data: {
     events: [] as Array<Record<string, any>>,
-    isLoading: false,
+    isLoading: true,
     status: 'all' as EventStatus
   },
 
@@ -52,8 +52,21 @@ Page({
     })
   },
 
-  goToEventDetail(e: WechatMiniprogram.BaseEvent) {
-    const eventId = e.currentTarget.dataset.id
+  goToEventDetail(e: WechatMiniprogram.CustomEvent<{ id?: string }>) {
+    const eventId = e.detail.id
+    if (!eventId) return
     wx.navigateTo({ url: `/pages/event/detail?id=${eventId}` })
+  },
+
+  goToCreate() {
+    eventApp.requireLogin('登录后才能创建比赛', {
+      success: () => {
+        wx.navigateTo({ url: '/pages/event/edit' })
+      },
+      fail: (error) => {
+        if (error === '取消登录') return
+        wx.showToast({ title: '登录失败', icon: 'none' })
+      }
+    })
   }
 })

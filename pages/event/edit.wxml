@@ -1,0 +1,48 @@
+<block wx:if="{{ready}}">
+  <view class="container has-submit">
+    <view class="field">
+      <text class="field-label">名称</text>
+      <input class="field-input" maxlength="30" placeholder="例如周末积分赛" placeholder-class="field-placeholder" value="{{name}}" data-field="name" bindinput="setField" />
+    </view>
+    <view class="field">
+      <text class="field-label">日期</text>
+      <picker class="field-picker" mode="date" value="{{date}}" start="2024-01-01" end="2035-12-31" bindchange="setDate">
+        <view class="field-value field-value--pick {{date ? '' : 'is-placeholder'}}">{{date || '选择日期'}}</view>
+      </picker>
+    </view>
+    <view class="field">
+      <text class="field-label">时间</text>
+      <picker class="field-picker" mode="time" value="{{time}}" bindchange="setTime">
+        <view class="field-value field-value--pick {{time ? '' : 'is-placeholder'}}">{{time || '选择时间'}}</view>
+      </picker>
+    </view>
+    <view class="field">
+      <text class="field-label">地点</text>
+      <input class="field-input" maxlength="40" placeholder="球馆或场地" placeholder-class="field-placeholder" value="{{location}}" data-field="location" bindinput="setField" />
+    </view>
+    <view class="field">
+      <text class="field-label">赛制</text>
+      <picker class="field-picker" mode="selector" range="{{formats}}" value="{{formatIndex}}" bindchange="setFormat">
+        <view class="field-value field-value--pick">{{formats[formatIndex]}}</view>
+      </picker>
+    </view>
+    <view class="field">
+      <text class="field-label">状态</text>
+      <picker class="field-picker" mode="selector" range="{{statusLabels}}" value="{{statusIndex}}" bindchange="setStatus">
+        <view class="field-value field-value--pick">{{statusLabels[statusIndex]}}</view>
+      </picker>
+    </view>
+    <view class="field">
+      <text class="field-label">人数</text>
+      <input class="field-input" type="number" maxlength="3" placeholder="上限，留空则不限" placeholder-class="field-placeholder" value="{{maxPlayers}}" data-field="maxPlayers" bindinput="setField" />
+    </view>
+    <view class="field field--block">
+      <text class="field-label">说明</text>
+      <textarea class="field-area" maxlength="300" placeholder="费用、水平要求、到场说明" placeholder-class="field-placeholder" value="{{description}}" data-field="description" bindinput="setField" />
+    </view>
+  </view>
+
+  <view class="submit-bar">
+    <button class="submit-btn" hover-class="none" loading="{{submitting}}" disabled="{{submitting}}" bindtap="submit">{{eventId ? '保存' : '发布比赛'}}</button>
+  </view>
+</block>

@@ -1,5 +1,7 @@
 {
   "navigationBarTitleText": "乒乓球约战",
   "enablePullDownRefresh": true,
-  "usingComponents": {}
+  "usingComponents": {
+    "event-card": "/components/event-card/index"
+  }
 }

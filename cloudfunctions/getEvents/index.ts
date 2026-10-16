@@ -6,6 +6,7 @@ const db = cloud.database()
 
 interface GetEventsEvent {
   status?: 'all' | 'upcoming' | 'ongoing' | 'finished'
+  id?: string
 }
 
 const statusMap: Record<string, { text: string; class: string }> = {
@@ -14,26 +15,38 @@ const statusMap: Record<string, { text: string; class: string }> = {
   finished: { text: '已结束', class: 'finished' }
 }
 
+function mapEvent(item: Record<string, any>) {
+  return {
+    ...item,
+    statusText: statusMap[item.status]?.text || item.status,
+    statusClass: statusMap[item.status]?.class || ''
+  }
+}
+
 export const main = async (event: GetEventsEvent) => {
-  const { status = 'all' } = event
+  const { status = 'all', id = '' } = event
 
   try {
+    if (id) {
+      const one = await db.collection('events').doc(String(id)).get()
+      if (!one.data) {
+        return { success: false, error: '没有找到这场比赛' }
+      }
+      return { success: true, data: [mapEvent(one.data)] }
+    }
+
     let query = db.collection('events')
     if (status !== 'all') {
       query = query.where({ status })
     }
 
     const res = await query.orderBy('startTime', 'desc').limit(50).get()
-
-    const events = res.data.map((item: Record<string, any>) => ({
-      ...item,
-      statusText: statusMap[item.status]?.text || item.status,
-      statusClass: statusMap[item.status]?.class || ''
-    }))
-
-    return { success: true, data: events }
+    return { success: true, data: res.data.map(mapEvent) }
   } catch (err) {
     const error = err as Error
+    if (id) {
+      return { success: false, error: '没有找到这场比赛' }
+    }
     return { success: false, error: error.message }
   }
 }
