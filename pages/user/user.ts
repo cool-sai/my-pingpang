@@ -1,3 +1,5 @@
+import { TabIndex } from '../../utils/tab'
+
 const userApp = getApp<IAppOption>()
 
 interface IUserStats {
@@ -37,11 +39,19 @@ Page({
   },
 
   onShow() {
+    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
+      this.getTabBar().setData({ selected: TabIndex.User })
+    }
     if (userApp.globalData.isLogin) {
       this.setData({
         userInfo: userApp.globalData.userInfo
       })
       this.loadUserStats()
+    } else {
+      this.setData({
+        userInfo: null,
+        stats: { totalMatches: 0, winRate: 0, score: 0 }
+      })
     }
   },
 
@@ -62,6 +72,25 @@ Page({
         }
       })
     }
+  },
+
+  onLogout() {
+    wx.showModal({
+      title: '退出登录',
+      content: '退出后可以重新登录',
+      confirmText: '退出',
+      confirmColor: '#d14343',
+      success: (res) => {
+        if (res.confirm) {
+          userApp.logout()
+          this.setData({
+            userInfo: null,
+            stats: { totalMatches: 0, winRate: 0, score: 0 }
+          })
+          wx.showToast({ title: '已退出登录', icon: 'none' })
+        }
+      }
+    })
   },
 
   onLogin() {

@@ -1,3 +1,5 @@
+import { TabIndex } from '../../utils/tab'
+
 const matchApp = getApp<IAppOption>()
 
 type MatchStatus = 'all' | 'pending' | 'completed'
@@ -14,6 +16,9 @@ Page({
   },
 
   onShow() {
+    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
+      this.getTabBar().setData({ selected: TabIndex.Match })
+    }
     if (matchApp.globalData.isLogin) {
       void this.loadMatches()
     }

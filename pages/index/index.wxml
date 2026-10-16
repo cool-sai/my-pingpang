@@ -1,4 +1,4 @@
-<view class="container">
+<view class="container has-tab">
   <!-- 顶部区域 -->
   <view class="header">
     <view class="user-section">

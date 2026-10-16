@@ -1,5 +1,5 @@
 .container {
-  padding: 24rpx 0 calc(32rpx + env(safe-area-inset-bottom));
+  padding: 24rpx 0 calc(32rpx + 48px + env(safe-area-inset-bottom));
 }
 
 .profile-card {
@@ -149,4 +149,16 @@
   border-top: 4rpx solid #c5ced6;
   border-right: 4rpx solid #c5ced6;
   transform: rotate(45deg);
+}
+
+.logout-btn {
+  height: 92rpx;
+  margin: 24rpx 24rpx 0;
+  background: #ffffff;
+  border: 1rpx solid rgba(22, 40, 30, 0.06);
+  border-radius: 24rpx;
+  box-shadow: 0 8rpx 28rpx rgba(24, 39, 32, 0.05);
+  color: #d14343;
+  font-size: 30rpx;
+  font-weight: 600;
 }

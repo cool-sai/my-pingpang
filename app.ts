@@ -72,6 +72,14 @@ const appConfig = {
         callback?.fail?.(err.errMsg || '登录失败')
       }
     })
+  },
+
+  logout() {
+    this.globalData.userInfo = null
+    this.globalData.openid = ''
+    this.globalData.isLogin = false
+    wx.removeStorageSync('openid')
+    wx.removeStorageSync('userInfo')
   }
 }
 

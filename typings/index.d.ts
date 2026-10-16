@@ -42,4 +42,5 @@ interface IAppOption {
     options: ICallFunctionOptions
   ) => Promise<ICloudCallResult<T>>
   login: (callback?: ILoginCallback) => void
+  logout: () => void
 }

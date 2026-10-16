@@ -1,3 +1,5 @@
+import { TabIndex } from '../../utils/tab'
+
 const rankApp = getApp<IAppOption>()
 
 type RankFilter = 'all' | 'club'
@@ -20,6 +22,9 @@ Page({
   },
 
   onShow() {
+    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
+      this.getTabBar().setData({ selected: TabIndex.Rank })
+    }
     void this.loadRankings()
   },
 

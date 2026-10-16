@@ -1,3 +1,5 @@
+import { TabIndex } from '../../utils/tab'
+
 const clubApp = getApp<IAppOption>()
 
 type ClubSort = 'score' | 'members'
@@ -14,6 +16,9 @@ Page({
   },
 
   onShow() {
+    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
+      this.getTabBar().setData({ selected: TabIndex.Club })
+    }
     void this.loadClubs()
   },
 

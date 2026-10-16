@@ -1,3 +1,5 @@
+import { TabIndex } from '../../utils/tab'
+
 const indexApp = getApp<IAppOption>()
 
 interface IHomeData {
@@ -19,11 +21,16 @@ Page({
   },
 
   onShow() {
+    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
+      this.getTabBar().setData({ selected: TabIndex.Index })
+    }
     if (indexApp.globalData.isLogin) {
       this.setData({
         userInfo: indexApp.globalData.userInfo
       })
       void this.loadData()
+    } else {
+      this.setData({ userInfo: null })
     }
   },
 

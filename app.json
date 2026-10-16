@@ -16,8 +16,10 @@
   },
   "style": "v2",
   "sitemapLocation": "sitemap.json",
+  "usingComponents": {},
   "lazyCodeLoading": "requiredComponents",
   "tabBar": {
+    "custom": true,
     "color": "#999999",
     "selectedColor": "#148f4c",
     "borderStyle": "black",
@@ -25,32 +27,32 @@
     "list": [
       {
         "pagePath": "pages/index/index",
-        "iconPath": "images/home.png",
-        "selectedIconPath": "images/home-active.png",
+        "iconPath": "images/tab-home.png",
+        "selectedIconPath": "images/tab-home-active.png",
         "text": "首页"
       },
       {
         "pagePath": "pages/match/match",
-        "iconPath": "images/contact.png",
-        "selectedIconPath": "images/contact-active.png",
+        "iconPath": "images/tab-match.png",
+        "selectedIconPath": "images/tab-match-active.png",
         "text": "比赛"
       },
       {
         "pagePath": "pages/rank/rank",
-        "iconPath": "images/home.png",
-        "selectedIconPath": "images/home-active.png",
+        "iconPath": "images/tab-rank.png",
+        "selectedIconPath": "images/tab-rank-active.png",
         "text": "排名"
       },
       {
         "pagePath": "pages/club/club",
-        "iconPath": "images/contact.png",
-        "selectedIconPath": "images/contact-active.png",
+        "iconPath": "images/tab-club.png",
+        "selectedIconPath": "images/tab-club-active.png",
         "text": "俱乐部"
       },
       {
         "pagePath": "pages/user/user",
-        "iconPath": "images/home.png",
-        "selectedIconPath": "images/home-active.png",
+        "iconPath": "images/tab-user.png",
+        "selectedIconPath": "images/tab-user-active.png",
         "text": "我的"
       }
     ]

@@ -39,4 +39,6 @@
       <view class="menu-arrow"></view>
     </view>
   </view>
+
+  <button class="logout-btn" wx:if="{{userInfo}}" hover-class="none" bindtap="onLogout">退出登录</button>
 </view>

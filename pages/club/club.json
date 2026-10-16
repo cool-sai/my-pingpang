@@ -1,4 +1,5 @@
 {
   "navigationBarTitleText": "俱乐部",
-  "enablePullDownRefresh": true
+  "enablePullDownRefresh": true,
+  "usingComponents": {}
 }

@@ -1,4 +1,5 @@
 {
   "navigationBarTitleText": "乒乓球约战",
-  "enablePullDownRefresh": true
+  "enablePullDownRefresh": true,
+  "usingComponents": {}
 }

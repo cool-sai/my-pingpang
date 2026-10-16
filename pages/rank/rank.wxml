@@ -1,4 +1,4 @@
-<view class="container">
+<view class="container has-tab">
   <!-- 我的排名 -->
   <view class="my-rank" wx:if="{{myRank}}">
     <text class="my-rank-label">我的排名</text>
