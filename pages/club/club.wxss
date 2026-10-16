@@ -1,15 +1,15 @@
 .club-list {
   display: flex;
   flex-direction: column;
-  gap: 16rpx;
 }
 
 .club-item {
-  padding: 24rpx;
+  padding: 28rpx 32rpx;
   background: #ffffff;
-  border: 1rpx solid rgba(22, 40, 30, 0.06);
-  border-radius: 24rpx;
-  box-shadow: 0 8rpx 28rpx rgba(24, 39, 32, 0.05);
+  border: none;
+  border-bottom: 1rpx solid rgba(22, 40, 30, 0.08);
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .club-header {
@@ -24,7 +24,7 @@
   height: 84rpx;
   margin-right: 20rpx;
   background: linear-gradient(135deg, #148f4c 0%, #2fbe68 100%);
-  border-radius: 22rpx;
+  border-radius: 0;
   color: #ffffff;
   font-size: 36rpx;
   font-weight: 700;

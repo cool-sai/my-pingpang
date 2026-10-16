@@ -1,5 +1,3 @@
-import { TabIndex } from '../../utils/tab'
-
 const matchApp = getApp<IAppOption>()
 
 type MatchStatus = 'all' | 'pending' | 'completed'
@@ -16,12 +14,7 @@ Page({
   },
 
   onShow() {
-    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
-      this.getTabBar().setData({ selected: TabIndex.Match })
-    }
-    if (matchApp.globalData.isLogin) {
-      void this.loadMatches()
-    }
+    void this.loadMatches()
   },
 
   async loadMatches() {
@@ -55,7 +48,15 @@ Page({
   },
 
   goToCreateMatch() {
-    wx.navigateTo({ url: '/pages/match/create' })
+    matchApp.requireLogin('登录后才能发起比赛', {
+      success: () => {
+        wx.navigateTo({ url: '/pages/match/create' })
+      },
+      fail: (error) => {
+        if (error === '取消登录') return
+        wx.showToast({ title: '登录失败', icon: 'none' })
+      }
+    })
   },
 
   goToMatchDetail(e: WechatMiniprogram.BaseEvent) {

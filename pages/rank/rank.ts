@@ -14,10 +14,12 @@ Page({
     rankings: [] as Array<Record<string, any>>,
     isLoading: false,
     filter: 'all' as RankFilter,
-    myRank: null as Record<string, any> | null
+    myRank: null as Record<string, any> | null,
+    isLogin: false
   },
 
   onLoad() {
+    this.setData({ isLogin: rankApp.globalData.isLogin })
     void this.loadRankings()
   },
 
@@ -25,6 +27,7 @@ Page({
     if (typeof this.getTabBar === 'function' && this.getTabBar()) {
       this.getTabBar().setData({ selected: TabIndex.Rank })
     }
+    this.setData({ isLogin: rankApp.globalData.isLogin })
     void this.loadRankings()
   },
 
@@ -36,9 +39,11 @@ Page({
         data: { filter: this.data.filter }
       })
       if (res.result.success) {
+        const isLogin = rankApp.globalData.isLogin
         this.setData({
           rankings: res.result.data.list || [],
-          myRank: res.result.data.myRank || null
+          myRank: isLogin ? (res.result.data.myRank || null) : null,
+          isLogin
         })
       }
     } catch (err) {
@@ -58,6 +63,18 @@ Page({
     const filter = (e.currentTarget.dataset.filter || 'all') as RankFilter
     this.setData({ filter }, () => {
       void this.loadRankings()
+    })
+  },
+
+  onViewMyRank() {
+    rankApp.requireLogin('登录后查看我的排名', {
+      success: () => {
+        void this.loadRankings()
+      },
+      fail: (error) => {
+        if (error === '取消登录') return
+        wx.showToast({ title: '登录失败', icon: 'none' })
+      }
     })
   },
 

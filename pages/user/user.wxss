@@ -1,17 +1,17 @@
 .container {
-  padding: 24rpx 0 calc(32rpx + 48px + env(safe-area-inset-bottom));
+  padding: 0 0 calc(32rpx + 48px + env(safe-area-inset-bottom));
 }
 
 .profile-card {
-  margin: 0 24rpx 24rpx;
+  margin: 0;
   background: linear-gradient(160deg, #127a42 0%, #2fbe68 100%);
-  border-radius: 32rpx;
-  box-shadow: 0 16rpx 36rpx rgba(18, 122, 66, 0.22);
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .profile-card--authed {
   margin-bottom: 0;
-  padding-bottom: 56rpx;
+  padding-bottom: 0;
 }
 
 .profile-content {
@@ -63,12 +63,13 @@
 .stats-section {
   display: flex;
   align-items: center;
-  margin: -36rpx 48rpx 24rpx;
+  margin: 0;
   padding: 28rpx 8rpx;
   background: #ffffff;
-  border: 1rpx solid rgba(22, 40, 30, 0.06);
-  border-radius: 24rpx;
-  box-shadow: 0 10rpx 28rpx rgba(24, 39, 32, 0.06);
+  border: none;
+  border-bottom: 1rpx solid rgba(22, 40, 30, 0.08);
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .stat-item {
@@ -101,12 +102,12 @@
 }
 
 .menu-section {
-  margin: 0 24rpx;
+  margin: 16rpx 0 0;
   background: #ffffff;
-  border: 1rpx solid rgba(22, 40, 30, 0.06);
-  border-radius: 24rpx;
+  border: none;
+  border-radius: 0;
   overflow: hidden;
-  box-shadow: 0 8rpx 28rpx rgba(24, 39, 32, 0.05);
+  box-shadow: none;
 }
 
 .menu-item {
@@ -153,11 +154,11 @@
 
 .logout-btn {
   height: 92rpx;
-  margin: 24rpx 24rpx 0;
+  margin: 16rpx 0 0;
   background: #ffffff;
-  border: 1rpx solid rgba(22, 40, 30, 0.06);
-  border-radius: 24rpx;
-  box-shadow: 0 8rpx 28rpx rgba(24, 39, 32, 0.05);
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
   color: #d14343;
   font-size: 30rpx;
   font-weight: 600;

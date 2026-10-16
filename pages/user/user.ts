@@ -13,6 +13,7 @@ interface IMenuItem {
   icon: string
   title: string
   url: string
+  tab?: boolean
 }
 
 Page({
@@ -24,10 +25,9 @@ Page({
       score: 0
     } as IUserStats,
     menuItems: [
-      { id: 'matches', icon: '🎾', title: '我的比赛', url: '/pages/match/match' },
-      { id: 'clubs', icon: '🏠', title: '我的俱乐部', url: '/pages/club/my' },
-      { id: 'favorites', icon: '⭐', title: '我的收藏', url: '/pages/user/favorites' },
-      { id: 'settings', icon: '⚙️', title: '设置', url: '/pages/user/settings' }
+      { id: 'record', icon: '🏓', title: '我的战绩', url: '/pages/match/match' },
+      { id: 'score', icon: '🏆', title: '我的积分', url: '/pages/rank/rank', tab: true },
+      { id: 'credit', icon: '✅', title: '我的信用', url: '' }
     ] as IMenuItem[]
   },
 
@@ -110,7 +110,9 @@ Page({
   },
 
   goToMenu(e: WechatMiniprogram.BaseEvent) {
+    const id = e.currentTarget.dataset.id
     const url = e.currentTarget.dataset.url
+    const tab = e.currentTarget.dataset.tab
     if (!userApp.globalData.isLogin) {
       wx.showModal({
         title: '提示',
@@ -120,6 +122,19 @@ Page({
           if (res.confirm) this.onLogin()
         }
       })
+      return
+    }
+    if (id === 'credit') {
+      const credit = userApp.globalData.userInfo?.creditScore || 80
+      wx.showModal({
+        title: '我的信用',
+        content: `当前信用分 ${credit}。新用户从 80 分起算，报名后无故缺席会扣分。`,
+        showCancel: false
+      })
+      return
+    }
+    if (tab) {
+      wx.switchTab({ url })
       return
     }
     wx.navigateTo({ url })

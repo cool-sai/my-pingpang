@@ -1,0 +1,19 @@
+<view class="container has-submit" wx:if="{{event}}">
+  <view class="detail-card">
+    <text class="status-pill {{event.status === 'ongoing' ? 'status-pill--success' : event.status === 'finished' ? 'status-pill--muted' : 'status-pill--info'}}">{{event.statusText}}</text>
+    <text class="detail-title">{{event.name}}</text>
+    <text class="detail-line">时间 {{event.startTime || '待定'}}</text>
+    <text class="detail-line">地点 {{event.location || '待定'}}</text>
+    <text class="detail-line">已报名 {{event.signupCount || 0}} 人</text>
+    <text class="detail-desc">{{event.description || '积分赛报名后请按时到场。无故缺席会影响信用分。'}}</text>
+  </view>
+</view>
+<view class="container" wx:elif="{{!isLoading}}">
+  <view class="empty-tip">没有找到这场赛事</view>
+</view>
+
+<view class="submit-bar" wx:if="{{event}}">
+  <button class="submit-btn" hover-class="none" disabled="{{signed || event.status === 'finished'}}" bindtap="onSignup">
+    {{signed ? '已报名' : event.status === 'finished' ? '报名已结束' : '报名'}}
+  </button>
+</view>

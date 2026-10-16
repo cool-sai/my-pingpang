@@ -23,9 +23,12 @@ export const main = async () => {
       .orderBy('totalScore', 'desc')
       .limit(5)
       .field({
+        _id: true,
         name: true,
         totalScore: true,
-        memberCount: true
+        memberCount: true,
+        city: true,
+        location: true
       })
       .get()
 
@@ -35,9 +38,12 @@ export const main = async () => {
       })
       .limit(5)
       .field({
+        _id: true,
         name: true,
         startTime: true,
-        status: true
+        status: true,
+        location: true,
+        signupCount: true
       })
       .get()
 
@@ -53,7 +59,10 @@ export const main = async () => {
     return {
       success: true,
       data: {
-        topPlayers: topPlayers.data,
+        topPlayers: topPlayers.data.map((item: Record<string, any>, index: number) => ({
+          ...item,
+          rank: index + 1
+        })),
         hotClubs: hotClubs.data,
         currentEvents: events
       }

@@ -1,0 +1,22 @@
+.detail-card {
+  padding: 32rpx;
+  background: #ffffff;
+  border-radius: 0;
+}
+
+.detail-title {
+  display: block;
+  margin-top: 20rpx;
+  color: #17211b;
+  font-size: 36rpx;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.detail-line {
+  display: block;
+  margin-top: 16rpx;
+  color: #526070;
+  font-size: 28rpx;
+  line-height: 1.4;
+}

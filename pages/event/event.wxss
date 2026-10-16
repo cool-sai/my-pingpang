@@ -1,18 +1,18 @@
 .event-list {
   display: flex;
   flex-direction: column;
-  gap: 16rpx;
 }
 
 .event-item {
   display: flex;
   align-items: center;
   gap: 20rpx;
-  padding: 24rpx;
+  padding: 28rpx 32rpx;
   background: #ffffff;
-  border: 1rpx solid rgba(22, 40, 30, 0.06);
-  border-radius: 24rpx;
-  box-shadow: 0 8rpx 28rpx rgba(24, 39, 32, 0.05);
+  border: none;
+  border-bottom: 1rpx solid rgba(22, 40, 30, 0.08);
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .event-cover {
@@ -23,7 +23,7 @@
   width: 112rpx;
   height: 112rpx;
   background: linear-gradient(135deg, #fff6d8 0%, #ffefba 100%);
-  border-radius: 20rpx;
+  border-radius: 0;
 }
 
 .event-icon {

@@ -38,6 +38,26 @@ const appConfig = {
     return callCloudFunction<T>(options)
   },
 
+  requireLogin(reason: string, callback?: ILoginCallback) {
+    if (this.globalData.isLogin && this.globalData.userInfo) {
+      callback?.success?.(this.globalData.userInfo)
+      return
+    }
+
+    wx.showModal({
+      title: '需要登录',
+      content: reason,
+      confirmText: '登录',
+      success: (res) => {
+        if (res.confirm) {
+          this.login(callback)
+          return
+        }
+        callback?.fail?.('取消登录')
+      }
+    })
+  },
+
   login(callback?: ILoginCallback) {
     wx.getUserProfile({
       desc: '用于完善个人资料',

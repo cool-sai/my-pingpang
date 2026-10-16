@@ -1,0 +1,24 @@
+<view class="container" wx:if="{{club}}">
+  <view class="detail-card">
+    <text class="detail-title">{{club.name}}</text>
+    <text class="detail-line">{{club.city || club.location || '地点待定'}}</text>
+    <text class="detail-desc">{{club.description || '还没有球馆介绍'}}</text>
+    <view class="stat-row">
+      <view class="stat">
+        <text class="stat-value">{{club.memberCount || 0}}</text>
+        <text class="stat-label">成员</text>
+      </view>
+      <view class="stat">
+        <text class="stat-value">{{club.totalScore || 0}}</text>
+        <text class="stat-label">总积分</text>
+      </view>
+      <view class="stat">
+        <text class="stat-value">{{club.matchCount || 0}}</text>
+        <text class="stat-label">比赛</text>
+      </view>
+    </view>
+  </view>
+</view>
+<view class="container" wx:elif="{{!isLoading}}">
+  <view class="empty-tip">没有找到这家球馆</view>
+</view>

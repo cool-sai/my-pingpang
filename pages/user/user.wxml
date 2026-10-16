@@ -4,7 +4,7 @@
     <view class="profile-content" wx:if="{{userInfo}}">
       <image class="avatar" src="{{userInfo.avatar || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCI+PGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iNTAiIGZpbGw9IiNlMGUwZTAiLz48Y2lyY2xlIGN4PSI1MCIgY3k9IjM4IiByPSIxOCIgZmlsbD0iI2JkYmRiZCIvPjxlbGxpcHNlIGN4PSI1MCIgY3k9Ijg1IiByeD0iMjgiIHJ5PSIyMiIgZmlsbD0iI2JkYmRiZCIvPjwvc3ZnPg=='}}" />
       <text class="nickname">{{userInfo.nickname}}</text>
-      <text class="score">积分: {{userInfo.score}}</text>
+      <text class="score">积分 {{userInfo.score || 0}} · 信用分 {{userInfo.creditScore || 80}}</text>
     </view>
     <view class="profile-content" wx:else>
       <image class="avatar" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCI+PGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iNTAiIGZpbGw9IiNlMGUwZTAiLz48Y2lyY2xlIGN4PSI1MCIgY3k9IjM4IiByPSIxOCIgZmlsbD0iI2JkYmRiZCIvPjxlbGxpcHNlIGN4PSI1MCIgY3k9Ijg1IiByeD0iMjgiIHJ5PSIyMiIgZmlsbD0iI2JkYmRiZCIvPjwvc3ZnPg==" />
@@ -33,7 +33,7 @@
 
   <!-- 菜单列表 -->
   <view class="menu-section">
-    <view class="menu-item" wx:for="{{menuItems}}" wx:key="id" data-url="{{item.url}}" bindtap="goToMenu">
+    <view class="menu-item" wx:for="{{menuItems}}" wx:key="id" data-id="{{item.id}}" data-url="{{item.url}}" data-tab="{{item.tab}}" bindtap="goToMenu">
       <text class="menu-icon">{{item.icon}}</text>
       <text class="menu-title">{{item.title}}</text>
       <view class="menu-arrow"></view>

@@ -5,10 +5,10 @@
   gap: 20rpx;
   min-height: 112rpx;
   padding: 28rpx 32rpx;
-  margin-bottom: 20rpx;
+  margin-bottom: 0;
   background: linear-gradient(135deg, #127a42 0%, #2fbe68 100%);
-  border-radius: 28rpx;
-  box-shadow: 0 16rpx 36rpx rgba(18, 122, 66, 0.22);
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .my-rank-label {
@@ -41,23 +41,23 @@
 .rank-list {
   display: flex;
   flex-direction: column;
-  gap: 16rpx;
 }
 
 .rank-item {
   display: flex;
   align-items: center;
   min-height: 120rpx;
-  padding: 20rpx 24rpx;
+  padding: 20rpx 32rpx;
   background: #ffffff;
-  border: 1rpx solid rgba(22, 40, 30, 0.06);
-  border-radius: 24rpx;
-  box-shadow: 0 8rpx 28rpx rgba(24, 39, 32, 0.05);
+  border: none;
+  border-bottom: 1rpx solid rgba(22, 40, 30, 0.08);
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .rank-item.top {
-  background: linear-gradient(135deg, #fffaf0 0%, #fff4dc 100%);
-  border-color: rgba(245, 176, 61, 0.22);
+  background: #ffffff;
+  border-bottom-color: rgba(22, 40, 30, 0.08);
 }
 
 .rank-num {

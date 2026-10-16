@@ -33,12 +33,15 @@ Page({
   },
 
   onLoad() {
-    if (!createMatchApp.globalData.userInfo) {
-      wx.showToast({ title: '请先登录', icon: 'none' })
-      setTimeout(() => {
-        wx.switchTab({ url: '/pages/user/user' })
-      }, 1000)
-    }
+    if (createMatchApp.globalData.isLogin) return
+    createMatchApp.requireLogin('登录后才能发起比赛', {
+      fail: (error) => {
+        if (error !== '取消登录') {
+          wx.showToast({ title: '登录失败', icon: 'none' })
+        }
+        wx.navigateBack()
+      }
+    })
   },
 
   setSearchKeyword(e: IValueEvent) {

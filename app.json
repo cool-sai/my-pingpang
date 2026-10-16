@@ -1,11 +1,15 @@
 {
   "pages": [
     "pages/index/index",
+    "pages/news/detail",
     "pages/match/match",
     "pages/match/create",
+    "pages/match/detail",
     "pages/rank/rank",
     "pages/club/club",
+    "pages/club/detail",
     "pages/event/event",
+    "pages/event/detail",
     "pages/user/user"
   ],
   "window": {
@@ -32,10 +36,10 @@
         "text": "首页"
       },
       {
-        "pagePath": "pages/match/match",
+        "pagePath": "pages/event/event",
         "iconPath": "images/tab-match.png",
         "selectedIconPath": "images/tab-match-active.png",
-        "text": "比赛"
+        "text": "赛事"
       },
       {
         "pagePath": "pages/rank/rank",
@@ -47,7 +51,7 @@
         "pagePath": "pages/club/club",
         "iconPath": "images/tab-club.png",
         "selectedIconPath": "images/tab-club-active.png",
-        "text": "俱乐部"
+        "text": "球馆"
       },
       {
         "pagePath": "pages/user/user",

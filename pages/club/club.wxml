@@ -1,8 +1,8 @@
 <view class="container has-fab">
   <!-- 筛选 -->
   <view class="filter-tabs">
-    <view class="tab {{sortBy === 'score' ? 'active' : ''}}" data-sort="score" bindtap="switchSort">积分排序</view>
-    <view class="tab {{sortBy === 'members' ? 'active' : ''}}" data-sort="members" bindtap="switchSort">人数排序</view>
+    <view class="tab {{sortBy === 'score' ? 'active' : ''}}" data-sort="score" bindtap="switchSort">热度</view>
+    <view class="tab {{sortBy === 'members' ? 'active' : ''}}" data-sort="members" bindtap="switchSort">人数</view>
   </view>
 
   <!-- 俱乐部列表 -->
@@ -12,7 +12,7 @@
         <view class="club-avatar">{{item.name.charAt(0)}}</view>
         <view class="club-info">
           <text class="club-name">{{item.name}}</text>
-          <text class="club-desc">{{item.description || '暂无描述'}}</text>
+          <text class="club-desc">{{item.city || item.location || item.description || '球馆'}}</text>
         </view>
       </view>
       <view class="club-stats">
@@ -32,8 +32,8 @@
     </view>
 
     <view class="empty-tip" wx:if="{{clubs.length === 0 && !isLoading}}">
-      <text>暂无俱乐部</text>
-      <text class="empty-subtip">创建第一个俱乐部吧</text>
+      <text>暂无球馆</text>
+      <text class="empty-subtip">附近还没有收录球馆</text>
     </view>
   </view>
 

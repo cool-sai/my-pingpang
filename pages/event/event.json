@@ -1,4 +1,5 @@
 {
-  "navigationBarTitleText": "赛事中心",
-  "enablePullDownRefresh": true
+  "navigationBarTitleText": "赛事",
+  "enablePullDownRefresh": true,
+  "usingComponents": {}
 }

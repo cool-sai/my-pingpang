@@ -1,0 +1,11 @@
+<view class="article" wx:if="{{news}}">
+  <image wx:if="{{news.cover}}" class="cover" src="{{news.cover}}" mode="aspectFill" />
+  <view class="body">
+    <text class="title">{{news.title}}</text>
+    <text class="date">{{news.date}}</text>
+    <text class="paragraph" wx:for="{{news.content}}" wx:key="*this">{{item}}</text>
+  </view>
+</view>
+<view class="article" wx:else>
+  <view class="empty-tip">没有找到这篇资讯</view>
+</view>

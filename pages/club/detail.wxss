@@ -1,0 +1,48 @@
+.detail-card {
+  padding: 32rpx;
+  background: #ffffff;
+  border-radius: 0;
+}
+
+.detail-title {
+  display: block;
+  color: #17211b;
+  font-size: 40rpx;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.detail-line,
+.detail-desc {
+  display: block;
+  margin-top: 16rpx;
+  color: #526070;
+  font-size: 28rpx;
+  line-height: 1.5;
+}
+
+.stat-row {
+  display: flex;
+  margin-top: 32rpx;
+}
+
+.stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-value {
+  color: #148f4c;
+  font-size: 36rpx;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.stat-label {
+  margin-top: 8rpx;
+  color: #6d7b8a;
+  font-size: 24rpx;
+  line-height: 1.2;
+}

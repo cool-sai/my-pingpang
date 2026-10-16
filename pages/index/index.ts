@@ -1,91 +1,67 @@
+import { newsList } from '../../data/news'
 import { TabIndex } from '../../utils/tab'
 
 const indexApp = getApp<IAppOption>()
 
-interface IHomeData {
-  topPlayers: IUserInfo[]
-  hotClubs: Array<Record<string, any>>
-  currentEvents: Array<Record<string, any>>
+interface IEventCard {
+  _id: string
+  name: string
+  startTime?: string
+  location?: string
+  status?: string
+  statusText?: string
+  signupCount?: number
 }
 
 Page({
   data: {
-    userInfo: null as IUserInfo | null,
-    topPlayers: [] as IUserInfo[],
-    hotClubs: [] as Array<Record<string, any>>,
-    currentEvents: [] as Array<Record<string, any>>
-  },
-
-  onLoad() {
-    this.checkLogin()
+    news: newsList,
+    events: [] as IEventCard[]
   },
 
   onShow() {
     if (typeof this.getTabBar === 'function' && this.getTabBar()) {
       this.getTabBar().setData({ selected: TabIndex.Index })
     }
-    if (indexApp.globalData.isLogin) {
-      this.setData({
-        userInfo: indexApp.globalData.userInfo
-      })
-      void this.loadData()
-    } else {
-      this.setData({ userInfo: null })
-    }
+    void this.loadEvents()
   },
 
   onPullDownRefresh() {
-    void this.loadData().finally(() => {
+    void this.loadEvents().finally(() => {
       wx.stopPullDownRefresh()
     })
   },
 
-  checkLogin() {
-    if (!indexApp.globalData.isLogin) {
-      wx.showModal({
-        title: '提示',
-        content: '请先登录后使用',
-        confirmText: '去登录',
-        success: (res) => {
-          if (res.confirm) {
-            wx.switchTab({ url: '/pages/user/user' })
-          }
-        }
-      })
-    }
-  },
-
-  async loadData() {
+  async loadEvents() {
     try {
-      const res = await indexApp.callFunction<IHomeData>({
-        name: 'getHomeData'
+      const [ongoingRes, upcomingRes] = await Promise.all([
+        indexApp.callFunction<IEventCard[]>({ name: 'getEvents', data: { status: 'ongoing' } }),
+        indexApp.callFunction<IEventCard[]>({ name: 'getEvents', data: { status: 'upcoming' } })
+      ])
+      this.setData({
+        events: [
+          ...(ongoingRes.result.success ? ongoingRes.result.data : []),
+          ...(upcomingRes.result.success ? upcomingRes.result.data : [])
+        ]
       })
-
-      if (res.result.success) {
-        this.setData({
-          topPlayers: res.result.data.topPlayers || [],
-          hotClubs: res.result.data.hotClubs || [],
-          currentEvents: res.result.data.currentEvents || []
-        })
-      }
     } catch (err) {
-      console.error('加载首页数据失败', err)
+      console.error('加载首页赛事失败', err)
     }
   },
 
-  goToMatch() {
-    wx.navigateTo({ url: '/pages/match/match' })
+  goToNews(e: WechatMiniprogram.BaseEvent) {
+    const newsId = e.currentTarget.dataset.id
+    if (!newsId) return
+    wx.navigateTo({ url: `/pages/news/detail?id=${newsId}` })
   },
 
-  goToRank() {
-    wx.switchTab({ url: '/pages/rank/rank' })
+  goToEventDetail(e: WechatMiniprogram.BaseEvent) {
+    const eventId = e.currentTarget.dataset.id
+    if (!eventId) return
+    wx.navigateTo({ url: `/pages/event/detail?id=${eventId}` })
   },
 
   goToEvent() {
     wx.switchTab({ url: '/pages/event/event' })
-  },
-
-  goToClub() {
-    wx.switchTab({ url: '/pages/club/club' })
   }
 })

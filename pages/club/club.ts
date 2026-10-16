@@ -58,6 +58,14 @@ Page({
   },
 
   goToCreateClub() {
-    wx.navigateTo({ url: '/pages/club/create' })
+    clubApp.requireLogin('登录后才能创建球馆', {
+      success: () => {
+        wx.showToast({ title: '创建球馆下一版开放', icon: 'none' })
+      },
+      fail: (error) => {
+        if (error === '取消登录') return
+        wx.showToast({ title: '登录失败', icon: 'none' })
+      }
+    })
   }
 })
