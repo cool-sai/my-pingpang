@@ -4,11 +4,16 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "typecheck:cloudfunctions": "tsc -p tsconfig.cloudfunctions.json --noEmit",
-    "build:cloudfunctions": "tsc -p tsconfig.cloudfunctions.json && node scripts/build-cloudfunctions.mjs"
+    "build:cloudfunctions": "tsc -p tsconfig.cloudfunctions.json && node scripts/build-cloudfunctions.mjs",
+    "typecheck:schema": "tsc -p schema --noEmit",
+    "schema:dev": "node schema/serve.mjs"
   },
   "devDependencies": {
     "@types/node": "^25.5.2",
+    "esbuild": "^0.25.12",
     "miniprogram-api-typings": "^5.1.2",
+    "preact": "^11.1.1",
+    "tsx": "^4.23.15",
     "typescript": "^6.0.2"
   }
 }

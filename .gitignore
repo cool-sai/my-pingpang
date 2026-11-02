@@ -1,2 +1,5 @@
 **/node_modules/
 .cloudfunctions-dist/
+
+# schema viewer esbuild output
+schema/.serve/
