@@ -88,6 +88,8 @@ export interface Signups {
   openid: string
   nickname: string
   avatar: string
+  avatarUrl?: string
+  avatarExpire?: number
   createTime: ServerDateValue
 }
 

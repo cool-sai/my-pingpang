@@ -1,0 +1,26 @@
+.person {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 24rpx 32rpx;
+  background: #ffffff;
+  border-bottom: 1rpx solid rgba(22, 40, 30, 0.08);
+}
+
+.person-avatar {
+  flex-shrink: 0;
+  width: 72rpx;
+  height: 72rpx;
+  background: #e7eeea;
+  border-radius: 50%;
+}
+
+.person-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: #17211b;
+  font-size: 30rpx;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}

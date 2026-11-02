@@ -196,10 +196,12 @@ export const schema: SchemaModel = {
         },
         avatar: {
           type: 'string',
-          note: '报名时抄头像，可空',
+          note: '报名时抄的 cloud:// 文件号，可空',
           port: true,
           copyFrom: 'users.avatar',
         },
+        avatarUrl: { type: 'string', note: '头像临时链接，过期后重签', optional: true },
+        avatarExpire: { type: 'number', note: '临时链接到期时间，毫秒', optional: true },
         createTime: { type: 'serverDate', note: '服务器时间' },
       },
     },

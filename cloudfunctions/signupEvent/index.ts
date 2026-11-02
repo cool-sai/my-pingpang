@@ -6,6 +6,8 @@ cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 
 const db = cloud.database({ throwOnNotFound: false })
 
+const AVATAR_TTL_SEC = 86400
+
 async function ensureSignups() {
   try {
     await db.createCollection('signups')
@@ -14,7 +16,57 @@ async function ensureSignups() {
   }
 }
 
-export const main = async (event: { id?: string }) => {
+async function signAvatar(fileID: string) {
+  if (fileID.indexOf('cloud://') !== 0) {
+    return { avatarUrl: fileID, avatarExpire: 0 }
+  }
+  try {
+    const res = await cloud.getTempFileURL({
+      fileList: [{ fileID, maxAge: AVATAR_TTL_SEC }]
+    })
+    const item = res && res.fileList && res.fileList[0]
+    if (item && item.status === 0 && item.tempFileURL) {
+      return {
+        avatarUrl: String(item.tempFileURL),
+        avatarExpire: Date.now() + AVATAR_TTL_SEC * 1000
+      }
+    }
+  } catch (err) {
+    console.error('换取头像链接失败', err)
+  }
+  return { avatarUrl: '', avatarExpire: 0 }
+}
+
+async function cancelSignup(id: string, openid: string) {
+  const signupId = `${id}_${openid}`
+  await ensureSignups()
+  try {
+    const signupCount = await db.runTransaction(async (transaction) => {
+      const eventSnap = await transaction.collection('events').doc(id).get()
+      const current = eventSnap.data as Events | undefined
+      if (!current) throw new Error('没有找到这场比赛')
+      const signupSnap = await transaction.collection('signups').doc(signupId).get()
+      const next = Math.max(0, (Number(current.signupCount) || 0) - (signupSnap && signupSnap.data ? 1 : 0))
+      if (signupSnap && signupSnap.data) {
+        await transaction.collection('signups').doc(signupId).remove()
+        await transaction.collection('events').doc(id).update({
+          data: { signupCount: next, updateTime: db.serverDate() }
+        })
+      }
+      return next
+    })
+    return { success: true, data: { signupCount } }
+  } catch (err) {
+    const error = err as Error
+    const message = error.message || '取消失败'
+    if (/没有找到这场比赛/.test(message)) {
+      return { success: false, error: message }
+    }
+    return { success: false, error: '取消失败' }
+  }
+}
+
+export const main = async (event: { id?: string; action?: string }) => {
   const wxContext = cloud.getWXContext()
   const openid = wxContext.OPENID
   if (!openid) {
@@ -34,15 +86,21 @@ export const main = async (event: { id?: string }) => {
   if (!user.profileReady) {
     return { success: false, error: '请先填写昵称' }
   }
+  if (event.action === 'cancel') {
+    return cancelSignup(id, openid)
+  }
 
   const signupId = `${id}_${openid}`
   const nickname = String(user.nickname || '球友').slice(0, 32)
   const avatar = String(user.avatar || '')
+  const signedAvatar = await signAvatar(avatar)
   const row: SignupsInsert = {
     eventId: id,
     openid,
     nickname,
     avatar,
+    avatarUrl: signedAvatar.avatarUrl,
+    avatarExpire: signedAvatar.avatarExpire,
     createTime: db.serverDate()
   }
 

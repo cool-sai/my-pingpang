@@ -18,7 +18,8 @@ Page({
     isLoading: true,
     isOwner: false,
     deleting: false,
-    signing: false
+    signing: false,
+    showManage: false
   },
 
   onLoad(query: Record<string, string | undefined>) {
@@ -71,6 +72,29 @@ Page({
     }
   },
 
+  goToRoster() {
+    if (!this.data.eventId) return
+    wx.navigateTo({ url: `/pages/event/roster?id=${this.data.eventId}` })
+  },
+
+  onSignupTap() {
+    if (!this.data.event || this.data.signing) return
+    if (this.data.signed) {
+      wx.showModal({
+        title: '取消报名？',
+        confirmText: '取消报名',
+        confirmColor: '#d14343',
+        success: (res) => {
+          if (!res.confirm) return
+          void this.submitCancel()
+        }
+      })
+      return
+    }
+    if (this.data.full || this.data.event.status === 'finished') return
+    this.onSignup()
+  },
+
   onSignup() {
     if (!this.data.event || this.data.signed || this.data.signing || this.data.full || this.data.event.status === 'finished') return
     detailApp.requireLogin('登录后才能报名', {
@@ -106,6 +130,28 @@ Page({
     }
   },
 
+  async submitCancel() {
+    if (this.data.signing) return
+    this.setData({ signing: true })
+    try {
+      const res = await detailApp.callFunction<{ signupCount?: number }>({
+        name: 'signupEvent',
+        data: { id: this.data.eventId, action: 'cancel' }
+      })
+      if (!res.result.success) {
+        wx.showToast({ title: res.result.error || '取消失败', icon: 'none' })
+        return
+      }
+      await this.loadEvent(this.data.eventId)
+      wx.showToast({ title: '已取消报名', icon: 'success' })
+    } catch (err) {
+      wx.showToast({ title: '取消失败', icon: 'none' })
+      console.error(err)
+    } finally {
+      this.setData({ signing: false })
+    }
+  },
+
   openLocation() {
     const event = this.data.event
     if (!event || !event.hasMap) return
@@ -121,13 +167,26 @@ Page({
     })
   },
 
+  openManage() {
+    if (!this.data.isOwner) return
+    this.setData({ showManage: true })
+  },
+
+  closeManage() {
+    this.setData({ showManage: false })
+  },
+
+  stopMove() {},
+
   goToEdit() {
     if (!this.data.eventId) return
+    this.setData({ showManage: false })
     wx.navigateTo({ url: `/pages/event/edit?id=${this.data.eventId}` })
   },
 
   onDelete() {
     if (this.data.deleting || !this.data.event) return
+    this.setData({ showManage: false })
     const name = this.data.event.name || '这场比赛'
     wx.showModal({
       title: '删除这场比赛？',

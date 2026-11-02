@@ -1,11 +1,10 @@
 <view class="container has-submit" wx:if="{{event}}">
   <view class="hero">
+    <text class="hero-title">{{event.name}}</text>
     <view class="tags">
       <text class="tag tag--{{event.status}}">{{event.statusText}}</text>
       <text class="tag tag--format" wx:if="{{event.format}}">{{event.format}}</text>
     </view>
-    <text class="hero-title">{{event.name}}</text>
-    <text class="hero-who">发起人 {{event.creatorName || '球友'}}</text>
   </view>
 
   <view class="sheet">
@@ -17,17 +16,10 @@
       <text class="line-k">地点</text>
       <text class="line-v {{event.hasMap ? 'line-v--link' : ''}}">{{event.location || '待定'}}</text>
     </view>
-  </view>
-
-  <view class="quota">
-    <view class="quota-side">
-      <text class="quota-num">{{event.signupCount || 0}}</text>
-      <text class="quota-label">已报名</text>
-    </view>
-    <text class="quota-sep">/</text>
-    <view class="quota-side">
-      <text class="quota-num quota-num--max">{{event.maxPlayers > 0 ? event.maxPlayers : '不限'}}</text>
-      <text class="quota-label">上限</text>
+    <view class="line">
+      <text class="line-k">人数</text>
+      <text class="line-v">{{(event.signupCount || 0) + '/' + (event.maxPlayers > 0 ? event.maxPlayers : '不限')}}</text>
+      <text class="roster-link" bindtap="goToRoster">参赛名单</text>
     </view>
   </view>
 
@@ -35,27 +27,27 @@
     <text class="block-k">说明</text>
     <text class="block-v">{{event.description || '暂无说明'}}</text>
   </view>
-
-  <view class="block">
-    <text class="block-k">报名 {{signups.length}}</text>
-    <view class="person" wx:for="{{signups}}" wx:key="openid">
-      <image class="person-avatar" mode="aspectFill" src="{{item.avatar}}" />
-      <text class="person-name">{{item.nickname}}</text>
-    </view>
-    <text class="block-empty" wx:if="{{signups.length === 0}}">还没有人报名</text>
-  </view>
-
-  <view class="owner-bar" wx:if="{{isOwner}}">
-    <button class="owner-btn" hover-class="none" bindtap="goToEdit">编辑</button>
-    <button class="owner-btn owner-btn--danger" hover-class="none" loading="{{deleting}}" disabled="{{deleting}}" bindtap="onDelete">删除</button>
-  </view>
 </view>
 <view class="container" wx:elif="{{!isLoading}}">
   <view class="empty-tip">没有找到这场比赛</view>
 </view>
 
-<view class="submit-bar" wx:if="{{event}}">
-  <button class="submit-btn" hover-class="none" loading="{{signing}}" disabled="{{signing || signed || event.status === 'finished' || full}}" bindtap="onSignup">
-    {{signed ? '已报名' : event.status === 'finished' ? '报名已结束' : full ? '人数已满' : '报名'}}
-  </button>
+<view class="submit-bar detail-bar" wx:if="{{event}}">
+  <text wx:if="{{isOwner}}" class="manage-text" bindtap="openManage">管理</text>
+  <button
+    class="submit-btn {{signed ? 'submit-btn--ghost' : ''}}"
+    hover-class="none"
+    loading="{{signing}}"
+    disabled="{{signing || (!signed && (event.status === 'finished' || full))}}"
+    bindtap="onSignupTap"
+  >{{signed ? '取消报名' : event.status === 'finished' ? '已结束' : full ? '已满' : '报名'}}</button>
 </view>
+
+<view class="manage-mask {{showManage ? 'manage-mask--on' : ''}}" wx:if="{{isOwner}}" catchtouchmove="stopMove" bindtap="closeManage"></view>
+<view class="manage-sheet {{showManage ? 'manage-sheet--on' : ''}}" wx:if="{{isOwner}}" catchtouchmove="stopMove">
+  <view class="manage-action" bindtap="goToEdit">编辑</view>
+  <view class="manage-action manage-action--danger" bindtap="onDelete">删除</view>
+  <view class="manage-gap"></view>
+  <view class="manage-action" bindtap="closeManage">取消</view>
+</view>
+

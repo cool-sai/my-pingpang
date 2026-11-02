@@ -27,11 +27,18 @@ function signupTime(value) {
     const parsed = Date.parse(String(value || ''));
     return Number.isNaN(parsed) ? 0 : parsed;
 }
-async function readableAvatars(fileIDs) {
+const AVATAR_TTL_SEC = 86400;
+const AVATAR_SKEW_MS = 5 * 60 * 1000;
+function avatarStillValid(row, now) {
+    const url = String(row.avatarUrl || '');
+    const expire = Number(row.avatarExpire) || 0;
+    return url.indexOf('https://') === 0 && expire > now + AVATAR_SKEW_MS;
+}
+async function signAvatars(fileIDs) {
     const cloudIDs = Array.from(new Set(fileIDs.filter((fileID) => fileID.indexOf('cloud://') === 0)));
     const urls = new Map();
     for (let i = 0; i < cloudIDs.length; i += 50) {
-        const fileList = cloudIDs.slice(i, i + 50).map((fileID) => ({ fileID, maxAge: 60 * 60 }));
+        const fileList = cloudIDs.slice(i, i + 50).map((fileID) => ({ fileID, maxAge: AVATAR_TTL_SEC }));
         try {
             const res = await cloud.getTempFileURL({ fileList });
             const list = (res && res.fileList) || [];
@@ -53,13 +60,32 @@ async function loadSignups(eventId) {
         const rows = res.data
             .slice()
             .sort((a, b) => signupTime(a.createTime) - signupTime(b.createTime));
-        const urls = await readableAvatars(rows.map((item) => String(item.avatar || '')));
-        return rows.map((item) => {
-            const fileID = String(item.avatar || '');
+        const now = Date.now();
+        const stale = rows.filter((row) => {
+            const fileID = String(row.avatar || '');
+            return fileID.indexOf('cloud://') === 0 && !avatarStillValid(row, now);
+        });
+        const urls = await signAvatars(stale.map((row) => String(row.avatar || '')));
+        const avatarExpire = now + AVATAR_TTL_SEC * 1000;
+        await Promise.all(stale.map(async (row) => {
+            const fileID = String(row.avatar || '');
+            const avatarUrl = urls.get(fileID);
+            if (!avatarUrl || !row._id)
+                return;
+            try {
+                await db.collection('signups').doc(row._id).update({ data: { avatarUrl, avatarExpire } });
+            }
+            catch (err) {
+                console.error('保存头像链接失败', err);
+            }
+        }));
+        return rows.map((row) => {
+            const fileID = String(row.avatar || '');
+            const saved = avatarStillValid(row, now) ? String(row.avatarUrl || '') : '';
             return {
-                openid: item.openid,
-                nickname: item.nickname || '球友',
-                avatar: urls.get(fileID) || (fileID.indexOf('cloud://') === 0 ? '' : fileID)
+                openid: row.openid,
+                nickname: row.nickname || '球友',
+                avatar: saved || urls.get(fileID) || (fileID.indexOf('cloud://') === 0 ? '' : fileID)
             };
         });
     }
