@@ -1,6 +1,6 @@
 import type { JSX } from 'preact'
 import { useMemo } from 'preact/hooks'
-import { schema } from '../models'
+import { schema } from '../../cloudfunctions/common/models'
 import { Card } from './Card'
 import { Edges } from './Edges'
 import {

@@ -1,5 +1,5 @@
 import type { JSX } from 'preact'
-import { schema } from '../models'
+import { schema } from '../../cloudfunctions/common/models'
 import type { Selection } from '../lib'
 import { collectionMatches } from '../lib'
 

@@ -1,5 +1,5 @@
 /**
- * Schema Explorer (Preact) — runtime UI over schema/models.ts
+ * Schema Explorer (Preact) — runtime UI over cloudfunctions/common/models.ts
  */
 import { render } from 'preact'
 import { App } from './App'

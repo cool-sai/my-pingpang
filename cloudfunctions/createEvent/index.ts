@@ -1,8 +1,15 @@
+import type { EventFormat, EventStatus, EventsInsert } from '../common/types'
+
 const cloud = require('wx-server-sdk')
 
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 
 const db = cloud.database()
+
+type EventInputFields = Pick<
+  EventsInsert,
+  'name' | 'startTime' | 'location' | 'description' | 'format' | 'status' | 'maxPlayers'
+>
 
 function isRealDateTime(value: string) {
   const [datePart, timePart] = value.split(' ')
@@ -13,7 +20,9 @@ function isRealDateTime(value: string) {
   return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day
 }
 
-function readEventFields(input: Record<string, any>) {
+function readEventFields(
+  input: Record<string, any>
+): { error: string; value?: undefined } | { error?: undefined; value: EventInputFields } {
   const name = String(input.name || '').trim()
   const startTime = String(input.startTime || '').trim()
   const location = String(input.location || '').trim()
@@ -21,8 +30,8 @@ function readEventFields(input: Record<string, any>) {
   const format = String(input.format || '').trim()
   const status = String(input.status || '').trim()
   const maxPlayers = Number.parseInt(String(input.maxPlayers ?? '0'), 10)
-  const formats = ['积分赛', '循环赛', '淘汰赛']
-  const statuses = ['upcoming', 'ongoing', 'finished']
+  const formats: EventFormat[] = ['积分赛', '循环赛', '淘汰赛']
+  const statuses: EventStatus[] = ['upcoming', 'ongoing', 'finished']
 
   if (!name) return { error: '请填写比赛名称' }
   if (name.length > 30) return { error: '比赛名称最多 30 字' }
@@ -31,15 +40,23 @@ function readEventFields(input: Record<string, any>) {
   }
   if (!location) return { error: '请填写地点' }
   if (location.length > 40) return { error: '地点最多 40 字' }
-  if (formats.indexOf(format) < 0) return { error: '请选择赛制' }
-  if (statuses.indexOf(status) < 0) return { error: '请选择状态' }
+  if ((formats as string[]).indexOf(format) < 0) return { error: '请选择赛制' }
+  if ((statuses as string[]).indexOf(status) < 0) return { error: '请选择状态' }
   if (!Number.isInteger(maxPlayers) || maxPlayers < 0 || maxPlayers > 128 || (maxPlayers !== 0 && maxPlayers < 2)) {
     return { error: '人数上限填 2 到 128，不限制就留空' }
   }
   if (description.length > 300) return { error: '说明最多 300 字' }
 
   return {
-    value: { name, startTime, location, description, format, status, maxPlayers }
+    value: {
+      name,
+      startTime,
+      location,
+      description,
+      format: format as EventFormat,
+      status: status as EventStatus,
+      maxPlayers,
+    },
   }
 }
 
@@ -58,16 +75,15 @@ export const main = async (event: Record<string, any>) => {
   try {
     const userRes = await db.collection('users').where({ openid }).limit(1).get()
     const creatorName = String(userRes.data[0]?.nickname || '球友')
-    const added = await db.collection('events').add({
-      data: {
-        ...parsed.value,
-        signupCount: 0,
-        creatorOpenid: openid,
-        creatorName,
-        createTime: db.serverDate(),
-        updateTime: db.serverDate()
-      }
-    })
+    const data: EventsInsert = {
+      ...parsed.value,
+      signupCount: 0,
+      creatorOpenid: openid,
+      creatorName,
+      createTime: db.serverDate(),
+      updateTime: db.serverDate(),
+    }
+    const added = await db.collection('events').add({ data })
 
     return { success: true, data: { _id: added._id } }
   } catch (err) {

@@ -1,5 +1,5 @@
 import type { JSX } from 'preact'
-import { schema } from '../models'
+import { schema } from '../../cloudfunctions/common/models'
 import { asList, findField, type Selection } from '../lib'
 
 type Props = {

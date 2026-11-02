@@ -10,9 +10,21 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "jsxImportSource": "preact",
-    "types": ["node"],
-    "lib": ["ES2020", "DOM"]
+    "types": [
+      "node"
+    ],
+    "lib": [
+      "ES2020",
+      "DOM"
+    ]
   },
-  "include": ["./**/*.ts", "./**/*.tsx"],
-  "exclude": [".serve"]
+  "include": [
+    "./**/*.ts",
+    "./**/*.tsx",
+    "../cloudfunctions/common/models.ts",
+    "../cloudfunctions/common/types.ts"
+  ],
+  "exclude": [
+    ".serve"
+  ]
 }

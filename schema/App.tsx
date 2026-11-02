@@ -1,6 +1,6 @@
 import type { JSX } from 'preact'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks'
-import { schema } from './models'
+import { schema } from '../cloudfunctions/common/models'
 import { Toolbar } from './components/Toolbar'
 import { Sidebar } from './components/Sidebar'
 import { Inspector } from './components/Inspector'

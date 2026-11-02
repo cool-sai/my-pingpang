@@ -1,5 +1,5 @@
 import type { JSX } from 'preact'
-import type { CollectionDef, FieldDef } from '../models'
+import type { CollectionDef, FieldDef } from '../../cloudfunctions/common/models'
 import { asList, portId, type Selection } from '../lib'
 
 type Props = {

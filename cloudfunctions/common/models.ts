@@ -1,6 +1,7 @@
 /**
- * Schema-as-Code — 云数据库唯一真相来源。
+ * Schema-as-Code — 云数据库唯一真相来源（cloudfunctions/common）。
  * 改字段 / 关系只动这里，再跑 `npm run schema:dev` 在浏览器里实时查看。
+ * 文档 TS 类型见同目录 `types.ts`。
  *
  * 约定：
  * - key: 业务主键（openid）或文档 _id

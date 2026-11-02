@@ -3,7 +3,7 @@ import {
   type CollectionDef,
   type FieldDef,
   type FieldPath,
-} from './models'
+} from '../cloudfunctions/common/models'
 
 export const CARD_W = 280
 export const GAP_X = 64

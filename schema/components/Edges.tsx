@@ -1,6 +1,6 @@
 import type { JSX } from 'preact'
 import { useLayoutEffect, useState } from 'preact/hooks'
-import { schema } from '../models'
+import { schema } from '../../cloudfunctions/common/models'
 import { asList, collectionOfPort, CARD_W, type Pos, type Selection } from '../lib'
 
 type Pt = { x: number; y: number }
