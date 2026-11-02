@@ -130,7 +130,7 @@ export const schema: SchemaModel = {
       blurb: '创建、编辑、删除比赛',
       key: '_id',
       fields: {
-        _id: { type: 'string', note: '文档 id' },
+        _id: { type: 'string', note: '文档 id', port: true },
         creatorOpenid: {
           type: 'string',
           note: '发起人',
@@ -155,8 +155,8 @@ export const schema: SchemaModel = {
         description: { type: 'string', note: '最多 300 字' },
         format: {
           type: 'enum',
-          values: ['积分赛', '循环赛', '淘汰赛'],
-          note: '积分赛 / 循环赛 / 淘汰赛',
+          values: ['分段赛', '淘汰赛', '积分赛', '循环赛'],
+          note: '新建选分段赛或淘汰赛。旧数据还有积分赛、循环赛',
         },
         status: {
           type: 'enum',
@@ -164,9 +164,43 @@ export const schema: SchemaModel = {
           note: 'upcoming / ongoing / finished',
         },
         maxPlayers: { type: 'number', note: '0 为不限' },
-        signupCount: { type: 'number', note: '创建时为 0' },
+        signupCount: { type: 'number', note: '报名时加一' },
         createTime: { type: 'serverDate', note: '服务器时间' },
         updateTime: { type: 'serverDate', note: '服务器时间' },
+      },
+    },
+
+    signups: {
+      label: '报名',
+      blurb: '一场比赛里的报名记录，一人一条',
+      key: '_id',
+      fields: {
+        _id: { type: 'string', note: 'eventId 加 openid' },
+        eventId: {
+          type: 'string',
+          note: '哪场比赛',
+          port: true,
+          ref: 'events._id',
+        },
+        openid: {
+          type: 'string',
+          note: '报名人',
+          port: true,
+          ref: 'users.openid',
+        },
+        nickname: {
+          type: 'string',
+          note: '报名时抄昵称',
+          port: true,
+          copyFrom: 'users.nickname',
+        },
+        avatar: {
+          type: 'string',
+          note: '报名时抄头像，可空',
+          port: true,
+          copyFrom: 'users.avatar',
+        },
+        createTime: { type: 'serverDate', note: '服务器时间' },
       },
     },
 
@@ -270,13 +304,34 @@ export const schema: SchemaModel = {
 
   footnotes: [
     '注册序号来自 <code class="text-stone-800">counters</code> 里的一条文档 <code class="text-stone-800">userSeq</code>，字段 <code class="text-stone-800">n</code> 在事务里加一。',
-    '报名名单不在任何集合里，存在手机本地的 <code class="text-stone-800">eventSignups</code>。<code class="text-stone-800">signupCount</code> 创建后没有云函数再改。',
+    '报名在 <code class="text-stone-800">signups</code>。文档 id 是比赛 id 加 openid。<code class="text-stone-800">signupEvent</code> 写入时把 <code class="text-stone-800">events.signupCount</code> 加一。',
     '<code class="text-stone-800">users.score</code> 是积分。<code class="text-stone-800">matches.player1.score</code> 是本场比分。',
     '页面上的信用分 <code class="text-stone-800">creditScore</code> 不在 <code class="text-stone-800">users</code> 里，读不到时按 80 显示。',
     'denorm 不回填：改昵称/头像后，旧的 <code class="text-stone-800">events.creatorName</code> 与 <code class="text-stone-800">matches.player*</code> 快照不会自动更新。',
   ],
 
   edges: [
+    {
+      kind: 'ref',
+      from: 'signups.eventId',
+      to: 'events._id',
+      label: 'eventId',
+      style: 'straight',
+    },
+    {
+      kind: 'ref',
+      from: 'signups.openid',
+      to: 'users.openid',
+      label: 'openid',
+      style: 'straight',
+    },
+    {
+      kind: 'copy',
+      from: 'signups.nickname',
+      to: 'users.nickname',
+      label: '报名时抄昵称',
+      style: 'straight',
+    },
     {
       kind: 'ref',
       from: 'events.creatorOpenid',
@@ -312,7 +367,7 @@ export const schema: SchemaModel = {
   ],
 
   layout: {
-    top: ['events', 'users', 'matches'],
+    top: ['events', 'signups', 'users', 'matches'],
     bottom: ['clubs'],
   },
 }

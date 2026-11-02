@@ -75,6 +75,30 @@
   min-width: 0;
 }
 
+.count-step {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.count-step-btn {
+  width: 64rpx;
+  height: 64rpx;
+  color: #148f4c;
+  font-size: 40rpx;
+  line-height: 60rpx;
+  text-align: center;
+}
+
+.count-step-input {
+  width: 88rpx;
+  height: 64rpx;
+  color: #17211b;
+  font-size: 32rpx;
+  line-height: 64rpx;
+  text-align: center;
+}
+
 .field-picker {
   display: block;
 }

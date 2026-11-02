@@ -7,7 +7,7 @@
 /** CloudBase `db.serverDate()` 返回值占位 */
 export type ServerDateValue = unknown
 
-export type EventFormat = '积分赛' | '循环赛' | '淘汰赛'
+export type EventFormat = '分段赛' | '淘汰赛' | '积分赛' | '循环赛'
 export type EventStatus = 'upcoming' | 'ongoing' | 'finished'
 export type MatchWinner = 'player1' | 'player2' | 'draw'
 
@@ -82,6 +82,15 @@ export interface Matches {
   createTime: ServerDateValue
 }
 
+export interface Signups {
+  _id: string
+  eventId: string
+  openid: string
+  nickname: string
+  avatar: string
+  createTime: ServerDateValue
+}
+
 export interface Clubs {
   _id: string
   name: string
@@ -97,6 +106,7 @@ export interface Clubs {
 export type UsersInsert = Omit<Users, '_id'>
 export type EventsInsert = Omit<Events, '_id'>
 export type MatchesInsert = Omit<Matches, '_id'>
+export type SignupsInsert = Omit<Signups, '_id'>
 export type ClubsInsert = Omit<Clubs, '_id'>
 
 /** 创建、编辑约战时由调用方提交的字段 */

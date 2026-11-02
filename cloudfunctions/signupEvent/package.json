@@ -1,0 +1,9 @@
+{
+  "name": "signupEvent",
+  "version": "1.0.0",
+  "description": "报名比赛",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

@@ -1,36 +1,48 @@
 <view class="container has-submit" wx:if="{{event}}">
   <view class="hero">
-    <text class="hero-status hero-status--{{event.status}}">{{event.statusText}}</text>
+    <view class="tags">
+      <text class="tag tag--{{event.status}}">{{event.statusText}}</text>
+      <text class="tag tag--format" wx:if="{{event.format}}">{{event.format}}</text>
+    </view>
     <text class="hero-title">{{event.name}}</text>
     <text class="hero-who">发起人 {{event.creatorName || '球友'}}</text>
   </view>
 
-  <view class="info">
-    <view class="info-row">
-      <text class="info-k">时间</text>
-      <text class="info-v">{{event.startTime || '待定'}}</text>
+  <view class="sheet">
+    <view class="line">
+      <text class="line-k">时间</text>
+      <text class="line-v">{{event.startTime || '待定'}}</text>
     </view>
-    <view class="info-row" bindtap="openLocation">
-      <text class="info-k">地点</text>
-      <view class="info-v">
-        <text class="info-place">{{event.location || '待定'}}</text>
-        <text class="info-address" wx:if="{{event.locationAddress && event.locationAddress !== event.location}}">{{event.locationAddress}}</text>
-        <text class="info-map" wx:if="{{event.hasMap}}">查看地图</text>
-      </view>
-    </view>
-    <view class="info-row">
-      <text class="info-k">赛制</text>
-      <text class="info-v">{{event.format || '未设置'}}</text>
-    </view>
-    <view class="info-row">
-      <text class="info-k">人数</text>
-      <text class="info-v">已报名 {{event.signupCount || 0}} 人{{event.maxPlayers > 0 ? ' / 上限 ' + event.maxPlayers + ' 人' : ' / 不限'}}</text>
+    <view class="line" bindtap="openLocation">
+      <text class="line-k">地点</text>
+      <text class="line-v {{event.hasMap ? 'line-v--link' : ''}}">{{event.location || '待定'}}</text>
     </view>
   </view>
 
-  <view class="desc">
-    <text class="desc-k">说明</text>
-    <text class="desc-v">{{event.description || '暂无说明'}}</text>
+  <view class="quota">
+    <view class="quota-side">
+      <text class="quota-num">{{event.signupCount || 0}}</text>
+      <text class="quota-label">已报名</text>
+    </view>
+    <text class="quota-sep">/</text>
+    <view class="quota-side">
+      <text class="quota-num quota-num--max">{{event.maxPlayers > 0 ? event.maxPlayers : '不限'}}</text>
+      <text class="quota-label">上限</text>
+    </view>
+  </view>
+
+  <view class="block">
+    <text class="block-k">说明</text>
+    <text class="block-v">{{event.description || '暂无说明'}}</text>
+  </view>
+
+  <view class="block">
+    <text class="block-k">报名 {{signups.length}}</text>
+    <view class="person" wx:for="{{signups}}" wx:key="openid">
+      <image class="person-avatar" mode="aspectFill" src="{{item.avatar}}" />
+      <text class="person-name">{{item.nickname}}</text>
+    </view>
+    <text class="block-empty" wx:if="{{signups.length === 0}}">还没有人报名</text>
   </view>
 
   <view class="owner-bar" wx:if="{{isOwner}}">
@@ -43,7 +55,7 @@
 </view>
 
 <view class="submit-bar" wx:if="{{event}}">
-  <button class="submit-btn" hover-class="none" disabled="{{signed || event.status === 'finished'}}" bindtap="onSignup">
-    {{signed ? '已报名' : event.status === 'finished' ? '报名已结束' : '报名'}}
+  <button class="submit-btn" hover-class="none" loading="{{signing}}" disabled="{{signing || signed || event.status === 'finished' || full}}" bindtap="onSignup">
+    {{signed ? '已报名' : event.status === 'finished' ? '报名已结束' : full ? '人数已满' : '报名'}}
   </button>
 </view>

@@ -29,7 +29,7 @@ function readEventFields(
   const format = String(input.format || '').trim()
   const status = String(input.status || '').trim()
   const maxPlayers = Number.parseInt(String(input.maxPlayers ?? '0'), 10)
-  const formats: EventFormat[] = ['积分赛', '循环赛', '淘汰赛']
+  const formats: EventFormat[] = ['分段赛', '淘汰赛', '积分赛', '循环赛']
   const statuses: EventStatus[] = ['upcoming', 'ongoing', 'finished']
 
   if (!name) return { error: '请填写比赛名称' }

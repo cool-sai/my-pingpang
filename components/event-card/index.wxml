@@ -17,6 +17,6 @@
   </view>
   <view class="card-foot">
     <text class="card-who">{{event.creatorName || '球友'}}</text>
-    <text class="card-count">已报名 {{event.signupCount || 0}}{{event.maxPlayers > 0 ? '/' + event.maxPlayers : ' 人'}}</text>
+    <text class="card-count">已报名 {{event.maxPlayers > 0 ? (event.signupCount || 0) + '/' + event.maxPlayers : (event.signupCount || 0)}}</text>
   </view>
 </view>

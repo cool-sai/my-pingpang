@@ -6,6 +6,26 @@ cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 
 const db = cloud.database()
 
+async function removeSignups(eventId: string) {
+  for (let i = 0; i < 5; i += 1) {
+    let rows: Array<{ _id?: string }> = []
+    try {
+      const res = await db.collection('signups').where({ eventId }).limit(100).get()
+      rows = res.data as Array<{ _id?: string }>
+    } catch (err) {
+      return
+    }
+    if (!rows.length) return
+    await Promise.all(
+      rows
+        .map((row) => String(row._id || ''))
+        .filter((rowId) => rowId)
+        .map((rowId) => db.collection('signups').doc(rowId).remove())
+    )
+    if (rows.length < 100) return
+  }
+}
+
 export const main = async (event: { id?: string }) => {
   const wxContext = cloud.getWXContext()
   const openid = wxContext.OPENID
@@ -28,6 +48,7 @@ export const main = async (event: { id?: string }) => {
       return { success: false, error: '只能删除自己发起的比赛' }
     }
 
+    await removeSignups(id)
     await db.collection('events').doc(id).remove()
     return { success: true, data: { _id: id } }
   } catch (err) {

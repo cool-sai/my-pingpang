@@ -2,7 +2,7 @@
   <view class="container has-submit">
     <view class="field">
       <text class="field-label">名称</text>
-      <input class="field-input" maxlength="30" placeholder="例如周末积分赛" placeholder-class="field-placeholder" value="{{name}}" data-field="name" bindinput="setField" />
+      <input class="field-input" maxlength="30" placeholder="例如周末分段赛" placeholder-class="field-placeholder" value="{{name}}" data-field="name" bindinput="setField" />
     </view>
     <view class="field">
       <text class="field-label">日期</text>
@@ -37,7 +37,11 @@
     </view>
     <view class="field">
       <text class="field-label">人数</text>
-      <input class="field-input" type="number" maxlength="3" placeholder="上限，留空则不限" placeholder-class="field-placeholder" value="{{maxPlayers}}" data-field="maxPlayers" bindinput="setField" />
+      <view class="count-step">
+        <view class="count-step-btn" data-delta="-1" bindtap="stepPlayers">－</view>
+        <input class="count-step-input" type="number" maxlength="3" value="{{maxPlayers}}" bindinput="setPlayers" bindblur="blurPlayers" />
+        <view class="count-step-btn" data-delta="1" bindtap="stepPlayers">＋</view>
+      </view>
     </view>
     <view class="field field--block">
       <text class="field-label">说明</text>

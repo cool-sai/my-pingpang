@@ -1,8 +1,24 @@
 const editApp = getApp<IAppOption>()
 
-const FORMATS = ['积分赛', '循环赛', '淘汰赛']
+const FORMATS = ['分段赛', '淘汰赛']
 const STATUS_LABELS = ['报名中', '进行中', '已结束']
 const STATUS_VALUES = ['upcoming', 'ongoing', 'finished']
+
+function readPlayers(value: unknown) {
+  const parsed = Number(value)
+  if (!Number.isInteger(parsed) || parsed <= 0) return 0
+  if (parsed > 128) return 128
+  return parsed
+}
+
+function shiftPlayers(current: number, delta: number) {
+  if (delta > 0) {
+    if (current <= 0) return 2
+    return Math.min(128, current + 1)
+  }
+  if (current <= 2) return 0
+  return current - 1
+}
 
 Page({
   data: {
@@ -17,7 +33,7 @@ Page({
     latitude: null as number | null,
     longitude: null as number | null,
     description: '',
-    maxPlayers: '',
+    maxPlayers: 0,
     formats: FORMATS,
     statusLabels: STATUS_LABELS,
     formatIndex: 0,
@@ -68,10 +84,13 @@ Page({
 
       const startTime = String(event.startTime || '')
       const matched = /^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2})$/.exec(startTime)
-      const formatIndex = Math.max(0, FORMATS.indexOf(event.format))
+      const savedFormat = String(event.format || '')
+      const formats = !savedFormat || FORMATS.indexOf(savedFormat) >= 0 ? FORMATS : [savedFormat, ...FORMATS]
+      const formatIndex = Math.max(0, formats.indexOf(savedFormat))
       const statusIndex = Math.max(0, STATUS_VALUES.indexOf(event.status))
       this.setData({
         ready: true,
+        formats,
         name: event.name || '',
         date: matched ? matched[1] : '',
         time: matched ? matched[2] : '',
@@ -80,7 +99,7 @@ Page({
         latitude: event.latitude != null && Number.isFinite(Number(event.latitude)) ? Number(event.latitude) : null,
         longitude: event.longitude != null && Number.isFinite(Number(event.longitude)) ? Number(event.longitude) : null,
         description: event.description || '',
-        maxPlayers: Number(event.maxPlayers) > 0 ? String(event.maxPlayers) : '',
+        maxPlayers: readPlayers(event.maxPlayers),
         formatIndex,
         statusIndex
       })
@@ -93,8 +112,22 @@ Page({
 
   setField(e: WechatMiniprogram.CustomEvent<{ value?: string }>) {
     const field = e.currentTarget.dataset.field
-    if (field !== 'name' && field !== 'description' && field !== 'maxPlayers') return
+    if (field !== 'name' && field !== 'description') return
     this.setData({ [field]: e.detail.value || '' })
+  },
+
+  setPlayers(e: WechatMiniprogram.CustomEvent<{ value?: string }>) {
+    const digits = String(e.detail.value || '').replace(/\D/g, '').slice(0, 3)
+    this.setData({ maxPlayers: digits === '' ? 0 : Number(digits) })
+  },
+
+  blurPlayers() {
+    this.setData({ maxPlayers: readPlayers(this.data.maxPlayers) })
+  },
+
+  stepPlayers(e: WechatMiniprogram.TouchEvent) {
+    const delta = Number(e.currentTarget.dataset.delta) || 0
+    this.setData({ maxPlayers: shiftPlayers(readPlayers(this.data.maxPlayers), delta) })
   },
 
   setDate(e: WechatMiniprogram.CustomEvent<{ value?: string }>) {
@@ -155,8 +188,7 @@ Page({
     const latitude = this.data.latitude
     const longitude = this.data.longitude
     const description = this.data.description.trim()
-    const maxRaw = this.data.maxPlayers.trim()
-    let maxPlayers = 0
+    const maxPlayers = readPlayers(this.data.maxPlayers)
 
     if (!name) {
       wx.showToast({ title: '请填写比赛名称', icon: 'none' })
@@ -174,12 +206,9 @@ Page({
       wx.showToast({ title: '请在地图上选择地点', icon: 'none' })
       return
     }
-    if (maxRaw) {
-      maxPlayers = Number.parseInt(maxRaw, 10)
-      if (!Number.isInteger(maxPlayers) || maxPlayers < 2 || maxPlayers > 128) {
-        wx.showToast({ title: '人数上限填 2 到 128，不限制就留空', icon: 'none' })
-        return
-      }
+    if (Number(this.data.maxPlayers) === 1) {
+      wx.showToast({ title: '人数填 0，或填 2 到 128', icon: 'none' })
+      return
     }
     if (description.length > 300) {
       wx.showToast({ title: '说明最多 300 字', icon: 'none' })
@@ -194,7 +223,7 @@ Page({
       latitude,
       longitude,
       description,
-      format: FORMATS[this.data.formatIndex] || FORMATS[0],
+      format: this.data.formats[this.data.formatIndex] || FORMATS[0],
       status: STATUS_VALUES[this.data.statusIndex] || STATUS_VALUES[0],
       maxPlayers
     }

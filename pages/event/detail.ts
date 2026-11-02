@@ -1,23 +1,28 @@
+import { avatarSrc } from '../../utils/avatar'
+
 const detailApp = getApp<IAppOption>()
-const SIGNUP_KEY = 'eventSignups'
+
+interface ISignupRow {
+  openid: string
+  nickname: string
+  avatar: string
+}
 
 Page({
   data: {
     eventId: '',
     event: null as Record<string, any> | null,
+    signups: [] as ISignupRow[],
     signed: false,
+    full: false,
     isLoading: true,
     isOwner: false,
-    deleting: false
+    deleting: false,
+    signing: false
   },
 
   onLoad(query: Record<string, string | undefined>) {
-    const eventId = query.id || ''
-    const signedIds = (wx.getStorageSync(SIGNUP_KEY) || []) as string[]
-    this.setData({
-      eventId,
-      signed: signedIds.indexOf(eventId) >= 0
-    })
+    this.setData({ eventId: query.id || '' })
   },
 
   onShow() {
@@ -45,9 +50,19 @@ Page({
           Number.isFinite(longitude)
       }
       const openid = detailApp.globalData.openid
+      const signups = (Array.isArray(event && event.signups) ? event.signups : []).map((item: ISignupRow) => ({
+        openid: String(item.openid || ''),
+        nickname: item.nickname || '球友',
+        avatar: avatarSrc(item.avatar)
+      }))
+      const signupCount = Number(event && event.signupCount) || 0
+      const maxPlayers = Number(event && event.maxPlayers) || 0
       this.setData({
         event,
-        isOwner: !!(event && openid && event.creatorOpenid === openid)
+        signups,
+        isOwner: !!(event && openid && event.creatorOpenid === openid),
+        signed: !!(openid && signups.some((item) => item.openid === openid)),
+        full: !!(event && maxPlayers > 0 && signupCount >= maxPlayers)
       })
     } catch (err) {
       console.error('加载赛事详情失败', err)
@@ -57,24 +72,38 @@ Page({
   },
 
   onSignup() {
-    if (!this.data.event || this.data.signed || this.data.event.status === 'finished') return
+    if (!this.data.event || this.data.signed || this.data.signing || this.data.full || this.data.event.status === 'finished') return
     detailApp.requireLogin('登录后才能报名', {
       success: () => {
-        const ids = ((wx.getStorageSync(SIGNUP_KEY) || []) as string[]).slice()
-        if (ids.indexOf(this.data.eventId) < 0) ids.push(this.data.eventId)
-        wx.setStorageSync(SIGNUP_KEY, ids)
-        const openid = detailApp.globalData.openid
-        this.setData({
-          signed: true,
-          isOwner: !!(this.data.event && openid && this.data.event.creatorOpenid === openid)
-        })
-        wx.showToast({ title: '报名成功', icon: 'success' })
+        void this.submitSignup()
       },
       fail: (error) => {
         if (error === '取消登录') return
         wx.showToast({ title: '登录失败', icon: 'none' })
       }
     })
+  },
+
+  async submitSignup() {
+    if (this.data.signing) return
+    this.setData({ signing: true })
+    try {
+      const res = await detailApp.callFunction<{ signupCount?: number }>({
+        name: 'signupEvent',
+        data: { id: this.data.eventId }
+      })
+      if (!res.result.success) {
+        wx.showToast({ title: res.result.error || '报名失败', icon: 'none' })
+        return
+      }
+      await this.loadEvent(this.data.eventId)
+      wx.showToast({ title: '报名成功', icon: 'success' })
+    } catch (err) {
+      wx.showToast({ title: '报名失败', icon: 'none' })
+      console.error(err)
+    } finally {
+      this.setData({ signing: false })
+    }
   },
 
   openLocation() {
