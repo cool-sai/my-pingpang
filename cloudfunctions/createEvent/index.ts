@@ -1,15 +1,10 @@
-import type { EventFormat, EventStatus, EventsInsert } from '../common/types'
+import type { EventFormat, EventInput, EventStatus, EventsInsert, Users } from '../common/types'
 
 const cloud = require('wx-server-sdk')
 
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 
 const db = cloud.database()
-
-type EventInputFields = Pick<
-  EventsInsert,
-  'name' | 'startTime' | 'location' | 'description' | 'format' | 'status' | 'maxPlayers'
->
 
 function isRealDateTime(value: string) {
   const [datePart, timePart] = value.split(' ')
@@ -22,7 +17,7 @@ function isRealDateTime(value: string) {
 
 function readEventFields(
   input: Record<string, any>
-): { error: string; value?: undefined } | { error?: undefined; value: EventInputFields } {
+): { error: string; value?: undefined } | { error?: undefined; value: EventInput } {
   const name = String(input.name || '').trim()
   const startTime = String(input.startTime || '').trim()
   const location = String(input.location || '').trim()
@@ -74,7 +69,8 @@ export const main = async (event: Record<string, any>) => {
 
   try {
     const userRes = await db.collection('users').where({ openid }).limit(1).get()
-    const creatorName = String(userRes.data[0]?.nickname || '球友')
+    const creator = userRes.data[0] as Users | undefined
+    const creatorName = String(creator?.nickname || '球友')
     const data: EventsInsert = {
       ...parsed.value,
       signupCount: 0,

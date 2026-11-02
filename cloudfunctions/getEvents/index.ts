@@ -1,3 +1,5 @@
+import type { Events, EventStatus } from '../common/types'
+
 const cloud = require('wx-server-sdk')
 
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
@@ -5,17 +7,17 @@ cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
 
 interface GetEventsEvent {
-  status?: 'all' | 'upcoming' | 'ongoing' | 'finished'
+  status?: 'all' | EventStatus
   id?: string
 }
 
-const statusMap: Record<string, { text: string; class: string }> = {
+const statusMap: Record<EventStatus, { text: string; class: string }> = {
   upcoming: { text: '报名中', class: 'upcoming' },
   ongoing: { text: '进行中', class: 'ongoing' },
   finished: { text: '已结束', class: 'finished' }
 }
 
-function mapEvent(item: Record<string, any>) {
+function mapEvent(item: Events) {
   return {
     ...item,
     statusText: statusMap[item.status]?.text || item.status,
@@ -32,7 +34,7 @@ export const main = async (event: GetEventsEvent) => {
       if (!one.data) {
         return { success: false, error: '没有找到这场比赛' }
       }
-      return { success: true, data: [mapEvent(one.data)] }
+      return { success: true, data: [mapEvent(one.data as Events)] }
     }
 
     let query = db.collection('events')
@@ -41,7 +43,7 @@ export const main = async (event: GetEventsEvent) => {
     }
 
     const res = await query.orderBy('startTime', 'desc').limit(50).get()
-    return { success: true, data: res.data.map(mapEvent) }
+    return { success: true, data: (res.data as Events[]).map(mapEvent) }
   } catch (err) {
     const error = err as Error
     if (id) {

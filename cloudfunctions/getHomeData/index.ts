@@ -1,3 +1,5 @@
+import type { Clubs, Events, Users } from '../common/types'
+
 const cloud = require('wx-server-sdk')
 
 cloud.init({
@@ -5,6 +7,10 @@ cloud.init({
 })
 
 const db = cloud.database()
+
+type HomePlayer = Pick<Users, 'openid' | 'nickname' | 'avatar' | 'score'>
+type HomeClub = Pick<Clubs, '_id' | 'name' | 'totalScore' | 'memberCount' | 'city' | 'location'>
+type HomeEvent = Pick<Events, '_id' | 'name' | 'startTime' | 'status' | 'location' | 'signupCount'>
 
 export const main = async () => {
   try {
@@ -47,7 +53,7 @@ export const main = async () => {
       })
       .get()
 
-    const events = currentEvents.data.map((item: Record<string, any>) => ({
+    const events = (currentEvents.data as HomeEvent[]).map((item) => ({
       ...item,
       statusText: item.status === 'upcoming'
         ? '报名中'
@@ -59,11 +65,11 @@ export const main = async () => {
     return {
       success: true,
       data: {
-        topPlayers: topPlayers.data.map((item: Record<string, any>, index: number) => ({
+        topPlayers: (topPlayers.data as HomePlayer[]).map((item, index) => ({
           ...item,
           rank: index + 1
         })),
-        hotClubs: hotClubs.data,
+        hotClubs: hotClubs.data as HomeClub[],
         currentEvents: events
       }
     }

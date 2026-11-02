@@ -84,6 +84,23 @@ export type EventsInsert = Omit<Events, '_id'>
 export type MatchesInsert = Omit<Matches, '_id'>
 export type ClubsInsert = Omit<Clubs, '_id'>
 
+/** 创建、编辑约战时由调用方提交的字段 */
+export type EventInput = Pick<
+  Events,
+  'name' | 'startTime' | 'location' | 'description' | 'format' | 'status' | 'maxPlayers'
+>
+
+/** 编辑约战时实际写入的字段 */
+export type EventsUpdate = EventInput & Pick<Events, 'updateTime'>
+
+/** 资料页保存的字段 */
+export type UsersProfilePatch = Pick<Users, 'nickname' | 'avatar' | 'profileReady' | 'updateTime'>
+
+/** counters 集合里 _id 为 userSeq 的文档 */
+export interface UserSeq {
+  n: number
+}
+
 /** 集合名 → 文档类型 */
 export interface Collections {
   users: Users

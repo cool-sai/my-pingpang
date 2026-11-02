@@ -1,3 +1,5 @@
+import type { Users } from '../common/types'
+
 const cloud = require('wx-server-sdk')
 
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
@@ -22,12 +24,12 @@ export const main = async (event: GetRankingsEvent) => {
 
     const res = await query.limit(100).get()
 
-    const list = res.data.map((item: Record<string, any>, index: number) => ({
+    const list = (res.data as Users[]).map((item, index) => ({
       ...item,
       rank: index + 1
     }))
 
-    const myRank = list.find((item: Record<string, any>) => item.openid === openid) || null
+    const myRank = list.find((item) => item.openid === openid) || null
 
     return { success: true, data: { list, myRank } }
   } catch (err) {

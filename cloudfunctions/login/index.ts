@@ -1,3 +1,5 @@
+import type { UserSeq, Users, UsersInsert } from '../common/types'
+
 declare function require(name: string): any
 
 const cloud = require('wx-server-sdk')
@@ -26,10 +28,12 @@ async function ensureCounter() {
 
   const ref = db.collection('counters').doc(COUNTER_ID)
   const snap = await ref.get()
-  if (snap.data && Number.isFinite(Number(snap.data.n))) return
+  const counter = snap.data as UserSeq | undefined
+  if (counter && Number.isFinite(Number(counter.n))) return
 
   try {
-    await ref.set({ data: { n: 0 } })
+    const initial: UserSeq = { n: 0 }
+    await ref.set({ data: initial })
   } catch (err) {
     const again = await ref.get()
     if (!again.data) throw err
@@ -41,12 +45,14 @@ async function allocateUserNo() {
   return db.runTransaction(async (transaction: any) => {
     const ref = transaction.collection('counters').doc(COUNTER_ID)
     const snap = await ref.get()
-    const current = Number(snap.data && snap.data.n)
+    const counter = snap.data as UserSeq | undefined
+    const current = Number(counter && counter.n)
     if (!Number.isFinite(current) || current < 0) {
       throw new Error('序号计数损坏')
     }
     const next = current + 1
-    await ref.update({ data: { n: next } })
+    const nextCounter: UserSeq = { n: next }
+    await ref.update({ data: nextCounter })
     return next
   })
 }
@@ -63,12 +69,12 @@ export const main = async () => {
     if (userResult.data.length > 0) {
       return {
         success: true,
-        data: userResult.data[0]
+        data: userResult.data[0] as Users
       }
     }
 
     const userNo = await allocateUserNo()
-    const newUser = {
+    const newUser: UsersInsert = {
       openid,
       nickname: `用户${userNo}`,
       avatar: '',

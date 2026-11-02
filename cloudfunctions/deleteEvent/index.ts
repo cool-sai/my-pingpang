@@ -1,3 +1,5 @@
+import type { Events } from '../common/types'
+
 const cloud = require('wx-server-sdk')
 
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
@@ -18,10 +20,11 @@ export const main = async (event: { id?: string }) => {
 
   try {
     const current = await db.collection('events').doc(id).get()
-    if (!current.data) {
+    const currentEvent = current.data as Events | undefined
+    if (!currentEvent) {
       return { success: false, error: '没有找到这场比赛' }
     }
-    if (current.data.creatorOpenid !== openid) {
+    if (currentEvent.creatorOpenid !== openid) {
       return { success: false, error: '只能删除自己发起的比赛' }
     }
 

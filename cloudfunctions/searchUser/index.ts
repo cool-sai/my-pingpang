@@ -1,3 +1,5 @@
+import type { Users } from '../common/types'
+
 const cloud = require('wx-server-sdk')
 
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
@@ -32,7 +34,10 @@ export const main = async (event: SearchUserEvent) => {
       })
       .get()
 
-    return { success: true, data: res.data }
+    return {
+      success: true,
+      data: res.data as Pick<Users, 'openid' | 'nickname' | 'avatar' | 'score'>[]
+    }
   } catch (err) {
     const error = err as Error
     return { success: false, error: error.message }

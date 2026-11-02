@@ -1,3 +1,5 @@
+import type { MatchWinner, MatchesInsert, Users } from '../common/types'
+
 const cloud = require('wx-server-sdk')
 
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
@@ -67,8 +69,8 @@ export const main = async (event: CreateMatchEvent) => {
       return { success: false, error: '用户不存在' }
     }
 
-    const player1 = player1Res.data[0]
-    const player2 = player2Res.data[0]
+    const player1 = player1Res.data[0] as Users
+    const player2 = player2Res.data[0] as Users
 
     const p1Wins = player1Score > player2Score
     const p2Wins = player2Score > player1Score
@@ -91,9 +93,9 @@ export const main = async (event: CreateMatchEvent) => {
       newP2Score = player2.score + p2ScoreChange
     }
 
-    const winner = p1Wins ? 'player1' : p2Wins ? 'player2' : 'draw'
+    const winner: MatchWinner = p1Wins ? 'player1' : p2Wins ? 'player2' : 'draw'
 
-    const match = {
+    const match: MatchesInsert = {
       player1Openid: openid,
       player2Openid: opponentOpenid,
       player1: {

@@ -1,3 +1,5 @@
+import type { Users, UsersProfilePatch } from '../common/types'
+
 declare function require(name: string): any
 
 const cloud = require('wx-server-sdk')
@@ -43,19 +45,20 @@ export const main = async (event: { nickname?: unknown; avatar?: unknown }) => {
       return { success: false, error: '请先登录' }
     }
 
+    const patch: UsersProfilePatch = {
+      nickname: nicknameResult.nickname,
+      avatar: avatarResult.avatar,
+      profileReady: true,
+      updateTime: db.serverDate()
+    }
     await db.collection('users').where({ openid }).update({
-      data: {
-        nickname: nicknameResult.nickname,
-        avatar: avatarResult.avatar,
-        profileReady: true,
-        updateTime: db.serverDate()
-      }
+      data: patch
     })
 
     const saved = await db.collection('users').where({ openid }).limit(1).get()
     return {
       success: true,
-      data: saved.data[0]
+      data: saved.data[0] as Users
     }
   } catch (err) {
     const error = err as Error

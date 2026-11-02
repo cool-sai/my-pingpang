@@ -1,3 +1,5 @@
+import type { Matches } from '../common/types'
+
 const cloud = require('wx-server-sdk')
 
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
@@ -27,7 +29,7 @@ export const main = async (event: GetMatchesEvent) => {
 
     const res = await query.orderBy('createTime', 'desc').limit(50).get()
 
-    const matches = res.data.map((item: Record<string, any>) => ({
+    const matches = (res.data as Matches[]).map((item) => ({
       ...item,
       statusText: item.status === 'pending' ? '待确认' : '已结束'
     }))
