@@ -5,6 +5,26 @@ const cloud = require('wx-server-sdk');
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 const db = cloud.database({ throwOnNotFound: false });
 const AVATAR_TTL_SEC = 86400;
+const AVATAR_FALLBACK_SEC = 10 * 60;
+function secondsOf(raw) {
+    const value = Number(raw);
+    if (!Number.isFinite(value) || value <= 0)
+        return AVATAR_FALLBACK_SEC;
+    const seconds = value > AVATAR_TTL_SEC * 2 ? Math.round(value / 1000) : Math.round(value);
+    if (seconds <= 0)
+        return AVATAR_FALLBACK_SEC;
+    return Math.min(seconds, AVATAR_TTL_SEC);
+}
+function readTemp(item) {
+    if (!item)
+        return null;
+    const avatarUrl = String(item.tempFileURL || '');
+    if (avatarUrl.indexOf('https://') !== 0)
+        return null;
+    if (item.status !== undefined && item.status !== 0 && String(item.status) !== '0')
+        return null;
+    return { avatarUrl, avatarMaxAge: secondsOf(item.maxAge) };
+}
 async function ensureSignups() {
     try {
         await db.createCollection('signups');
@@ -15,24 +35,29 @@ async function ensureSignups() {
 }
 async function signAvatar(fileID) {
     if (fileID.indexOf('cloud://') !== 0) {
-        return { avatarUrl: fileID, avatarExpire: 0 };
+        return { avatarUrl: fileID, avatarExpire: 0, avatarMaxAge: 0 };
     }
-    try {
-        const res = await cloud.getTempFileURL({
-            fileList: [{ fileID, maxAge: AVATAR_TTL_SEC }]
-        });
-        const item = res && res.fileList && res.fileList[0];
-        if (item && item.status === 0 && item.tempFileURL) {
-            return {
-                avatarUrl: String(item.tempFileURL),
-                avatarExpire: Date.now() + AVATAR_TTL_SEC * 1000
-            };
+    const attempts = [
+        [{ fileID, maxAge: AVATAR_TTL_SEC }],
+        [fileID]
+    ];
+    for (let i = 0; i < attempts.length; i += 1) {
+        try {
+            const res = await cloud.getTempFileURL({ fileList: attempts[i] });
+            const signed = readTemp(res && res.fileList && res.fileList[0]);
+            if (signed) {
+                return {
+                    avatarUrl: signed.avatarUrl,
+                    avatarExpire: Date.now() + signed.avatarMaxAge * 1000,
+                    avatarMaxAge: signed.avatarMaxAge
+                };
+            }
+        }
+        catch (err) {
+            console.error('换取头像链接失败', err);
         }
     }
-    catch (err) {
-        console.error('换取头像链接失败', err);
-    }
-    return { avatarUrl: '', avatarExpire: 0 };
+    return { avatarUrl: '', avatarExpire: 0, avatarMaxAge: 0 };
 }
 async function cancelSignup(id, openid) {
     const signupId = `${id}_${openid}`;
@@ -96,6 +121,7 @@ const main = async (event) => {
         avatar,
         avatarUrl: signedAvatar.avatarUrl,
         avatarExpire: signedAvatar.avatarExpire,
+        avatarMaxAge: signedAvatar.avatarMaxAge,
         createTime: db.serverDate()
     };
     await ensureSignups();

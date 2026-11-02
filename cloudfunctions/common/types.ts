@@ -90,6 +90,8 @@ export interface Signups {
   avatar: string
   avatarUrl?: string
   avatarExpire?: number
+  /** 微信返回的临时链接有效秒数。旧数据没有，下次读名单会重签 */
+  avatarMaxAge?: number
   createTime: ServerDateValue
 }
 

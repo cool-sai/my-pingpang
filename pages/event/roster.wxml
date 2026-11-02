@@ -1,6 +1,6 @@
 <view class="container" wx:if="{{!isLoading}}">
   <view class="person" wx:for="{{signups}}" wx:key="openid">
-    <image class="person-avatar" mode="aspectFill" src="{{item.avatar}}" />
+    <image class="person-avatar" mode="aspectFill" src="{{item.avatar}}" data-openid="{{item.openid}}" binderror="onAvatarError" />
     <text class="person-name">{{item.nickname}}</text>
   </view>
   <view class="empty-tip" wx:if="{{signups.length === 0}}">还没有人报名</view>

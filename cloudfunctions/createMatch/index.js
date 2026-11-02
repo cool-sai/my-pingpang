@@ -86,25 +86,28 @@ const main = async (event) => {
             createTime: db.serverDate()
         };
         const matchRes = await db.collection('matches').add({ data: match });
+        // 注意：输家/平局时不能写 winMatches: 0，否则会把历史胜负场重置成 0
+        const p1Data = {
+            score: newP1Score,
+            totalMatches: db.command.inc(1),
+            updateTime: db.serverDate()
+        };
+        const p2Data = {
+            score: newP2Score,
+            totalMatches: db.command.inc(1),
+            updateTime: db.serverDate()
+        };
+        if (p1Wins) {
+            p1Data.winMatches = db.command.inc(1);
+            p2Data.loseMatches = db.command.inc(1);
+        }
+        else if (p2Wins) {
+            p1Data.loseMatches = db.command.inc(1);
+            p2Data.winMatches = db.command.inc(1);
+        }
         await Promise.all([
-            db.collection('users').where({ openid }).update({
-                data: {
-                    score: newP1Score,
-                    totalMatches: db.command.inc(1),
-                    winMatches: p1Wins ? db.command.inc(1) : 0,
-                    loseMatches: p2Wins ? db.command.inc(1) : 0,
-                    updateTime: db.serverDate()
-                }
-            }),
-            db.collection('users').where({ openid: opponentOpenid }).update({
-                data: {
-                    score: newP2Score,
-                    totalMatches: db.command.inc(1),
-                    winMatches: p2Wins ? db.command.inc(1) : 0,
-                    loseMatches: p1Wins ? db.command.inc(1) : 0,
-                    updateTime: db.serverDate()
-                }
-            })
+            db.collection('users').where({ openid }).update({ data: p1Data }),
+            db.collection('users').where({ openid: opponentOpenid }).update({ data: p2Data })
         ]);
         return {
             success: true,
