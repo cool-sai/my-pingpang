@@ -8,6 +8,8 @@ interface IUserInfo {
   loseMatches?: number
   userNo?: number
   profileReady?: boolean
+  province?: string
+  city?: string
   [key: string]: any
 }
 

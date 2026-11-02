@@ -102,6 +102,7 @@ const appConfig = {
     this.globalData.isLogin = false
     wx.removeStorageSync('openid')
     wx.removeStorageSync('userInfo')
+    wx.removeStorageSync('homeEventRegion')
   }
 }
 

@@ -13,6 +13,9 @@ Page({
     date: '',
     time: '',
     location: '',
+    locationAddress: '',
+    latitude: null as number | null,
+    longitude: null as number | null,
     description: '',
     maxPlayers: '',
     formats: FORMATS,
@@ -73,6 +76,9 @@ Page({
         date: matched ? matched[1] : '',
         time: matched ? matched[2] : '',
         location: event.location || '',
+        locationAddress: event.locationAddress || '',
+        latitude: event.latitude != null && Number.isFinite(Number(event.latitude)) ? Number(event.latitude) : null,
+        longitude: event.longitude != null && Number.isFinite(Number(event.longitude)) ? Number(event.longitude) : null,
         description: event.description || '',
         maxPlayers: Number(event.maxPlayers) > 0 ? String(event.maxPlayers) : '',
         formatIndex,
@@ -87,7 +93,7 @@ Page({
 
   setField(e: WechatMiniprogram.CustomEvent<{ value?: string }>) {
     const field = e.currentTarget.dataset.field
-    if (field !== 'name' && field !== 'location' && field !== 'description' && field !== 'maxPlayers') return
+    if (field !== 'name' && field !== 'description' && field !== 'maxPlayers') return
     this.setData({ [field]: e.detail.value || '' })
   },
 
@@ -107,11 +113,47 @@ Page({
     this.setData({ statusIndex: Number(e.detail.value) || 0 })
   },
 
+  pickLocation() {
+    const options: WechatMiniprogram.ChooseLocationOption = {
+      success: (res) => {
+        const name = String(res.name || '').trim()
+        const address = String(res.address || '').trim()
+        const label = (name || address).slice(0, 80)
+        if (!label || !Number.isFinite(res.latitude) || !Number.isFinite(res.longitude)) {
+          wx.showToast({ title: '没有选到地点', icon: 'none' })
+          return
+        }
+        this.setData({
+          location: label,
+          locationAddress: address.slice(0, 120),
+          latitude: res.latitude,
+          longitude: res.longitude
+        })
+      },
+      fail: (err) => {
+        const message = String(err.errMsg || '')
+        if (message.indexOf('cancel') >= 0) return
+        wx.showModal({
+          title: '无法打开地图',
+          content: message || '请允许使用位置信息',
+          showCancel: false
+        })
+      }
+    }
+    if (this.data.latitude != null && this.data.longitude != null) {
+      options.latitude = this.data.latitude
+      options.longitude = this.data.longitude
+    }
+    wx.chooseLocation(options)
+  },
+
   async submit() {
     if (this.data.submitting) return
 
     const name = this.data.name.trim()
     const location = this.data.location.trim()
+    const latitude = this.data.latitude
+    const longitude = this.data.longitude
     const description = this.data.description.trim()
     const maxRaw = this.data.maxPlayers.trim()
     let maxPlayers = 0
@@ -128,12 +170,8 @@ Page({
       wx.showToast({ title: '请选择比赛时间', icon: 'none' })
       return
     }
-    if (!location) {
-      wx.showToast({ title: '请填写地点', icon: 'none' })
-      return
-    }
-    if (location.length > 40) {
-      wx.showToast({ title: '地点最多 40 字', icon: 'none' })
+    if (!location || latitude == null || longitude == null) {
+      wx.showToast({ title: '请在地图上选择地点', icon: 'none' })
       return
     }
     if (maxRaw) {
@@ -152,6 +190,9 @@ Page({
       name,
       startTime: `${this.data.date} ${this.data.time}`,
       location,
+      locationAddress: this.data.locationAddress.trim(),
+      latitude,
+      longitude,
       description,
       format: FORMATS[this.data.formatIndex] || FORMATS[0],
       status: STATUS_VALUES[this.data.statusIndex] || STATUS_VALUES[0],

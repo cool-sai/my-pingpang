@@ -9,6 +9,8 @@ const db = cloud.database()
 interface GetEventsEvent {
   status?: 'all' | EventStatus
   id?: string
+  province?: string
+  city?: string
 }
 
 const statusMap: Record<EventStatus, { text: string; class: string }> = {
@@ -37,9 +39,15 @@ export const main = async (event: GetEventsEvent) => {
       return { success: true, data: [mapEvent(one.data as Events)] }
     }
 
+    const province = String(event.province || '').trim()
+    const city = String(event.city || '').trim()
+    const where: { status?: EventStatus; province?: string; city?: string } = {}
+    if (status !== 'all') where.status = status
+    if (province) where.province = province
+    if (city) where.city = city
     let query = db.collection('events')
-    if (status !== 'all') {
-      query = query.where({ status })
+    if (Object.keys(where).length > 0) {
+      query = query.where(where)
     }
 
     const res = await query.orderBy('startTime', 'desc').limit(50).get()

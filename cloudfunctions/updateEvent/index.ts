@@ -1,6 +1,7 @@
 import type { EventFormat, EventInput, EventStatus, Events, EventsUpdate } from '../common/types'
 
 const cloud = require('wx-server-sdk')
+const reverseGeocode = require('./reverseGeocode')
 
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 
@@ -21,6 +22,9 @@ function readEventFields(
   const name = String(input.name || '').trim()
   const startTime = String(input.startTime || '').trim()
   const location = String(input.location || '').trim()
+  const locationAddress = String(input.locationAddress || '').trim()
+  const latitude = Number(input.latitude)
+  const longitude = Number(input.longitude)
   const description = String(input.description || '').trim()
   const format = String(input.format || '').trim()
   const status = String(input.status || '').trim()
@@ -33,8 +37,19 @@ function readEventFields(
   if (!/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(startTime) || !isRealDateTime(startTime)) {
     return { error: '请选择比赛时间' }
   }
-  if (!location) return { error: '请填写地点' }
-  if (location.length > 40) return { error: '地点最多 40 字' }
+  if (!location) return { error: '请在地图上选择地点' }
+  if (location.length > 80) return { error: '地点名称最多 80 字' }
+  if (locationAddress.length > 120) return { error: '详细地址最多 120 字' }
+  if (
+    !Number.isFinite(latitude) ||
+    latitude < -90 ||
+    latitude > 90 ||
+    !Number.isFinite(longitude) ||
+    longitude < -180 ||
+    longitude > 180
+  ) {
+    return { error: '请在地图上选择地点' }
+  }
   if ((formats as string[]).indexOf(format) < 0) return { error: '请选择赛制' }
   if ((statuses as string[]).indexOf(status) < 0) return { error: '请选择状态' }
   if (!Number.isInteger(maxPlayers) || maxPlayers < 0 || maxPlayers > 128 || (maxPlayers !== 0 && maxPlayers < 2)) {
@@ -47,6 +62,9 @@ function readEventFields(
       name,
       startTime,
       location,
+      locationAddress,
+      latitude,
+      longitude,
       description,
       format: format as EventFormat,
       status: status as EventStatus,
@@ -82,8 +100,11 @@ export const main = async (event: Record<string, any>) => {
       return { success: false, error: '只能修改自己发起的比赛' }
     }
 
-    const data: EventsUpdate = {
+    const region = await reverseGeocode(parsed.value.latitude, parsed.value.longitude)
+    const data: EventsUpdate & { province: string; city: string } = {
       ...parsed.value,
+      province: region.province,
+      city: region.city,
       updateTime: db.serverDate(),
     }
     await db.collection('events').doc(id).update({ data })

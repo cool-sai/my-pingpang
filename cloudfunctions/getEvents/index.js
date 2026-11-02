@@ -26,9 +26,18 @@ const main = async (event) => {
             }
             return { success: true, data: [mapEvent(one.data)] };
         }
+        const province = String(event.province || '').trim();
+        const city = String(event.city || '').trim();
+        const where = {};
+        if (status !== 'all')
+            where.status = status;
+        if (province)
+            where.province = province;
+        if (city)
+            where.city = city;
         let query = db.collection('events');
-        if (status !== 'all') {
-            query = query.where({ status });
+        if (Object.keys(where).length > 0) {
+            query = query.where(where);
         }
         const res = await query.orderBy('startTime', 'desc').limit(50).get();
         return { success: true, data: res.data.map(mapEvent) };

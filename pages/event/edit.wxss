@@ -12,6 +12,55 @@
   padding: 28rpx 32rpx 32rpx;
 }
 
+.field--place {
+  align-items: flex-start;
+  padding-top: 28rpx;
+  padding-bottom: 28rpx;
+}
+
+.field--place .field-label {
+  padding-top: 4rpx;
+}
+
+.field-place {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  padding-right: 28rpx;
+}
+
+.field-place::after {
+  content: '';
+  position: absolute;
+  right: 4rpx;
+  top: 14rpx;
+  width: 14rpx;
+  height: 14rpx;
+  border-right: 3rpx solid #b0b8c0;
+  border-bottom: 3rpx solid #b0b8c0;
+  transform: rotate(45deg);
+}
+
+.field-place-name {
+  display: block;
+  color: #17211b;
+  font-size: 30rpx;
+  line-height: 1.4;
+}
+
+.field-place.is-placeholder .field-place-name {
+  color: #a3adb8;
+}
+
+.field-place-addr {
+  display: block;
+  margin-top: 6rpx;
+  padding-right: 8rpx;
+  color: #6d7b8a;
+  font-size: 24rpx;
+  line-height: 1.4;
+}
+
 .field-label {
   flex-shrink: 0;
   width: 112rpx;

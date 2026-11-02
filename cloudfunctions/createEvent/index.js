@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.main = void 0;
 const cloud = require('wx-server-sdk');
+const reverseGeocode = require('./reverseGeocode');
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 const db = cloud.database();
 function isRealDateTime(value) {
@@ -17,6 +18,9 @@ function readEventFields(input) {
     const name = String(input.name || '').trim();
     const startTime = String(input.startTime || '').trim();
     const location = String(input.location || '').trim();
+    const locationAddress = String(input.locationAddress || '').trim();
+    const latitude = Number(input.latitude);
+    const longitude = Number(input.longitude);
     const description = String(input.description || '').trim();
     const format = String(input.format || '').trim();
     const status = String(input.status || '').trim();
@@ -31,9 +35,19 @@ function readEventFields(input) {
         return { error: '请选择比赛时间' };
     }
     if (!location)
-        return { error: '请填写地点' };
-    if (location.length > 40)
-        return { error: '地点最多 40 字' };
+        return { error: '请在地图上选择地点' };
+    if (location.length > 80)
+        return { error: '地点名称最多 80 字' };
+    if (locationAddress.length > 120)
+        return { error: '详细地址最多 120 字' };
+    if (!Number.isFinite(latitude) ||
+        latitude < -90 ||
+        latitude > 90 ||
+        !Number.isFinite(longitude) ||
+        longitude < -180 ||
+        longitude > 180) {
+        return { error: '请在地图上选择地点' };
+    }
     if (formats.indexOf(format) < 0)
         return { error: '请选择赛制' };
     if (statuses.indexOf(status) < 0)
@@ -44,7 +58,18 @@ function readEventFields(input) {
     if (description.length > 300)
         return { error: '说明最多 300 字' };
     return {
-        value: { name, startTime, location, description, format, status, maxPlayers }
+        value: {
+            name,
+            startTime,
+            location,
+            locationAddress,
+            latitude,
+            longitude,
+            description,
+            format: format,
+            status: status,
+            maxPlayers,
+        },
     };
 }
 const main = async (event) => {
@@ -59,17 +84,20 @@ const main = async (event) => {
     }
     try {
         const userRes = await db.collection('users').where({ openid }).limit(1).get();
-        const creatorName = String(userRes.data[0]?.nickname || '球友');
-        const added = await db.collection('events').add({
-            data: {
-                ...parsed.value,
-                signupCount: 0,
-                creatorOpenid: openid,
-                creatorName,
-                createTime: db.serverDate(),
-                updateTime: db.serverDate()
-            }
-        });
+        const creator = userRes.data[0];
+        const creatorName = String(creator?.nickname || '球友');
+        const region = await reverseGeocode(parsed.value.latitude, parsed.value.longitude);
+        const data = {
+            ...parsed.value,
+            province: region.province,
+            city: region.city,
+            signupCount: 0,
+            creatorOpenid: openid,
+            creatorName,
+            createTime: db.serverDate(),
+            updateTime: db.serverDate(),
+        };
+        const added = await db.collection('events').add({ data });
         return { success: true, data: { _id: added._id } };
     }
     catch (err) {

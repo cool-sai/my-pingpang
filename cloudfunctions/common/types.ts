@@ -22,6 +22,10 @@ export interface Users {
   totalMatches: number
   winMatches: number
   loseMatches: number
+  /** 首页筛选的省，可空 */
+  province?: string
+  /** 首页筛选的市，可空 */
+  city?: string
   createTime: ServerDateValue
   updateTime: ServerDateValue
 }
@@ -32,7 +36,18 @@ export interface Events {
   creatorName: string
   name: string
   startTime: string
+  /** 地图选点的名称；旧数据可能只有这段文字 */
   location: string
+  /** 地图返回的详细地址，旧数据没有 */
+  locationAddress?: string
+  /** 纬度，旧数据没有 */
+  latitude?: number
+  /** 经度，旧数据没有 */
+  longitude?: number
+  /** 腾讯逆地址解析的省，旧数据没有 */
+  province?: string
+  /** 腾讯逆地址解析的市，旧数据没有 */
+  city?: string
   description: string
   format: EventFormat
   status: EventStatus
@@ -88,13 +103,20 @@ export type ClubsInsert = Omit<Clubs, '_id'>
 export type EventInput = Pick<
   Events,
   'name' | 'startTime' | 'location' | 'description' | 'format' | 'status' | 'maxPlayers'
->
+> & {
+  locationAddress: string
+  latitude: number
+  longitude: number
+}
 
 /** 编辑约战时实际写入的字段 */
 export type EventsUpdate = EventInput & Pick<Events, 'updateTime'>
 
 /** 资料页保存的字段 */
 export type UsersProfilePatch = Pick<Users, 'nickname' | 'avatar' | 'profileReady' | 'updateTime'>
+
+/** 首页筛选省市 */
+export type UsersRegionPatch = Pick<Users, 'province' | 'city' | 'updateTime'>
 
 /** counters 集合里 _id 为 userSeq 的文档 */
 export interface UserSeq {

@@ -21,13 +21,18 @@
   </swiper>
 
   <view class="list-head">
-    <text class="list-title">比赛</text>
-    <view class="list-actions">
-      <text class="list-action" bindtap="goToCreate">创建</text>
-      <text class="list-action" bindtap="goToEvent">更多</text>
+    <view class="region-side">
+      <picker mode="region" level="city" bindchange="setRegion" value="{{region}}">
+        <view class="region-pick">{{regionText}}</view>
+      </picker>
+      <text wx:if="{{province}}" class="region-clear" bindtap="clearRegion">全部</text>
     </view>
+    <text class="list-action" bindtap="goToCreate">创建</text>
   </view>
 
+  <view class="list-loading" wx:if="{{isLoading}}">
+    <view class="list-spinner"></view>
+  </view>
   <event-card wx:for="{{events}}" wx:key="_id" event="{{item}}" bind:select="goToEventDetail" />
-  <view class="empty-tip" wx:if="{{events.length === 0}}">附近还没有比赛</view>
+  <view class="empty-tip" wx:if="{{!isLoading && events.length === 0}}">{{province ? '这个城市还没有比赛' : '附近还没有比赛'}}</view>
 </view>

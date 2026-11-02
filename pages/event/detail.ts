@@ -35,6 +35,15 @@ Page({
         data: { id: eventId, status: 'all' }
       })
       const event = (res.result.data || []).find((item) => item._id === eventId) || null
+      if (event) {
+        const latitude = Number(event.latitude)
+        const longitude = Number(event.longitude)
+        event.hasMap =
+          event.latitude != null &&
+          event.longitude != null &&
+          Number.isFinite(latitude) &&
+          Number.isFinite(longitude)
+      }
       const openid = detailApp.globalData.openid
       this.setData({
         event,
@@ -65,6 +74,21 @@ Page({
         if (error === '取消登录') return
         wx.showToast({ title: '登录失败', icon: 'none' })
       }
+    })
+  },
+
+  openLocation() {
+    const event = this.data.event
+    if (!event || !event.hasMap) return
+    const latitude = Number(event.latitude)
+    const longitude = Number(event.longitude)
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return
+    wx.openLocation({
+      latitude,
+      longitude,
+      name: event.location || '',
+      address: event.locationAddress || event.location || '',
+      scale: 16
     })
   },
 

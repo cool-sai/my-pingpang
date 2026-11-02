@@ -10,9 +10,13 @@
       <text class="info-k">时间</text>
       <text class="info-v">{{event.startTime || '待定'}}</text>
     </view>
-    <view class="info-row">
+    <view class="info-row" bindtap="openLocation">
       <text class="info-k">地点</text>
-      <text class="info-v">{{event.location || '待定'}}</text>
+      <view class="info-v">
+        <text class="info-place">{{event.location || '待定'}}</text>
+        <text class="info-address" wx:if="{{event.locationAddress && event.locationAddress !== event.location}}">{{event.locationAddress}}</text>
+        <text class="info-map" wx:if="{{event.hasMap}}">查看地图</text>
+      </view>
     </view>
     <view class="info-row">
       <text class="info-k">赛制</text>

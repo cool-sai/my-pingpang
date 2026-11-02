@@ -16,9 +16,12 @@
         <view class="field-value field-value--pick {{time ? '' : 'is-placeholder'}}">{{time || '选择时间'}}</view>
       </picker>
     </view>
-    <view class="field">
+    <view class="field field--place" bindtap="pickLocation">
       <text class="field-label">地点</text>
-      <input class="field-input" maxlength="40" placeholder="球馆或场地" placeholder-class="field-placeholder" value="{{location}}" data-field="location" bindinput="setField" />
+      <view class="field-place {{location ? '' : 'is-placeholder'}}">
+        <text class="field-place-name">{{location || '在地图上选择'}}</text>
+        <text class="field-place-addr" wx:if="{{locationAddress}}">{{locationAddress}}</text>
+      </view>
     </view>
     <view class="field">
       <text class="field-label">赛制</text>

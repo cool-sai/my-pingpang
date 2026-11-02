@@ -21,6 +21,12 @@
     "backgroundColor": "#f2f5f3"
   },
   "style": "v2",
+  "permission": {
+    "scope.userLocation": {
+      "desc": "用于在地图上选择比赛地点，方便球友导航"
+    }
+  },
+  "requiredPrivateInfos": ["chooseLocation"],
   "sitemapLocation": "sitemap.json",
   "usingComponents": {},
   "lazyCodeLoading": "requiredComponents",
@@ -36,12 +42,6 @@
         "iconPath": "images/tab-home.png",
         "selectedIconPath": "images/tab-home-active.png",
         "text": "首页"
-      },
-      {
-        "pagePath": "pages/event/event",
-        "iconPath": "images/tab-match.png",
-        "selectedIconPath": "images/tab-match-active.png",
-        "text": "赛事"
       },
       {
         "pagePath": "pages/rank/rank",

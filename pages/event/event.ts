@@ -1,5 +1,3 @@
-import { TabIndex } from '../../utils/tab'
-
 const eventApp = getApp<IAppOption>()
 
 type EventStatus = 'all' | 'upcoming' | 'ongoing' | 'finished'
@@ -16,9 +14,6 @@ Page({
   },
 
   onShow() {
-    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
-      this.getTabBar().setData({ selected: TabIndex.Event })
-    }
     void this.loadEvents()
   },
 

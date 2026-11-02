@@ -71,6 +71,24 @@
   line-height: 1.4;
 }
 
+.info-place,
+.info-address,
+.info-map {
+  display: block;
+}
+
+.info-address {
+  margin-top: 6rpx;
+  color: #6d7b8a;
+  font-size: 24rpx;
+}
+
+.info-map {
+  margin-top: 8rpx;
+  color: #148f4c;
+  font-size: 24rpx;
+}
+
 .desc {
   padding: 28rpx 32rpx 32rpx;
 }
