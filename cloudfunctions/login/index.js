@@ -23,10 +23,12 @@ async function ensureCounter() {
     }
     const ref = db.collection('counters').doc(COUNTER_ID);
     const snap = await ref.get();
-    if (snap.data && Number.isFinite(Number(snap.data.n)))
+    const counter = snap.data;
+    if (counter && Number.isFinite(Number(counter.n)))
         return;
     try {
-        await ref.set({ data: { n: 0 } });
+        const initial = { n: 0 };
+        await ref.set({ data: initial });
     }
     catch (err) {
         const again = await ref.get();
@@ -39,12 +41,14 @@ async function allocateUserNo() {
     return db.runTransaction(async (transaction) => {
         const ref = transaction.collection('counters').doc(COUNTER_ID);
         const snap = await ref.get();
-        const current = Number(snap.data && snap.data.n);
+        const counter = snap.data;
+        const current = Number(counter && counter.n);
         if (!Number.isFinite(current) || current < 0) {
             throw new Error('序号计数损坏');
         }
         const next = current + 1;
-        await ref.update({ data: { n: next } });
+        const nextCounter = { n: next };
+        await ref.update({ data: nextCounter });
         return next;
     });
 }

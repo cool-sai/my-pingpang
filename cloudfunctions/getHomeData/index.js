@@ -22,9 +22,12 @@ const main = async () => {
             .orderBy('totalScore', 'desc')
             .limit(5)
             .field({
+            _id: true,
             name: true,
             totalScore: true,
-            memberCount: true
+            memberCount: true,
+            city: true,
+            location: true
         })
             .get();
         const currentEvents = await db.collection('events')
@@ -33,9 +36,12 @@ const main = async () => {
         })
             .limit(5)
             .field({
+            _id: true,
             name: true,
             startTime: true,
-            status: true
+            status: true,
+            location: true,
+            signupCount: true
         })
             .get();
         const events = currentEvents.data.map((item) => ({
@@ -49,7 +55,10 @@ const main = async () => {
         return {
             success: true,
             data: {
-                topPlayers: topPlayers.data,
+                topPlayers: topPlayers.data.map((item, index) => ({
+                    ...item,
+                    rank: index + 1
+                })),
                 hotClubs: hotClubs.data,
                 currentEvents: events
             }

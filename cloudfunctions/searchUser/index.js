@@ -25,7 +25,10 @@ const main = async (event) => {
             score: true
         })
             .get();
-        return { success: true, data: res.data };
+        return {
+            success: true,
+            data: res.data
+        };
     }
     catch (err) {
         const error = err;
