@@ -39,60 +39,41 @@ function signupTime(value: unknown) {
   return Number.isNaN(parsed) ? 0 : parsed
 }
 
-const AVATAR_TTL_SEC = 86400
-const AVATAR_FALLBACK_SEC = 10 * 60
-const AVATAR_SKEW_MS = 5 * 60 * 1000
 const AVATAR_BYTE_LIMIT = 350 * 1024
 
-function secondsOf(raw: unknown) {
-  const value = Number(raw)
-  if (!Number.isFinite(value) || value <= 0) return AVATAR_FALLBACK_SEC
-  const seconds = value > AVATAR_TTL_SEC * 2 ? Math.round(value / 1000) : Math.round(value)
-  if (seconds <= 0) return AVATAR_FALLBACK_SEC
-  return Math.min(seconds, AVATAR_TTL_SEC)
-}
+// 与 common/signFileUrls.ts 保持一致：cloud:// → 临时 https；不管过期
+const TEMP_BATCH = 50
 
-function readTemp(item?: { tempFileURL?: string; status?: number | string; maxAge?: number }) {
-  if (!item) return null
-  const url = String(item.tempFileURL || '')
-  if (url.indexOf('https://') !== 0) return null
-  if (item.status !== undefined && item.status !== 0 && String(item.status) !== '0') return null
-  return { url, maxAge: secondsOf(item.maxAge) }
-}
-
-function avatarStillValid(row: Signups, now: number) {
-  const url = String(row.avatarUrl || '')
-  const maxAge = Number(row.avatarMaxAge)
-  const expire = Number(row.avatarExpire) || 0
-  if (url.indexOf('https://') !== 0 || !Number.isFinite(maxAge) || maxAge <= 0) return false
-  const skew = Math.min(AVATAR_SKEW_MS, (maxAge * 1000) / 2)
-  return expire > now + skew
-}
-
-async function requestTemp(fileList: Array<string | { fileID: string; maxAge: number }>) {
-  try {
-    const res = await cloud.getTempFileURL({ fileList })
-    return ((res && res.fileList) || []) as Array<{ fileID?: string; tempFileURL?: string; status?: number | string; maxAge?: number; errMsg?: string }>
-  } catch (err) {
-    console.error('换取头像链接失败', err)
-    return []
-  }
-}
-
-async function signAvatars(fileIDs: string[]) {
-  const cloudIDs = Array.from(new Set(fileIDs.filter((fileID) => fileID.indexOf('cloud://') === 0)))
-  const urls = new Map<string, { url: string; maxAge: number }>()
-  for (let i = 0; i < cloudIDs.length; i += 50) {
-    const batch = cloudIDs.slice(i, i + 50)
-    let list = await requestTemp(batch.map((fileID) => ({ fileID, maxAge: AVATAR_TTL_SEC })))
-    const gotUrl = list.some((item) => item && String(item.tempFileURL || '').indexOf('https://') === 0)
-    if (!gotUrl) list = await requestTemp(batch)
+async function signFileUrls(fileIDs: string[]) {
+  const cloudIDs = Array.from(new Set(fileIDs.filter((id) => id && id.indexOf('cloud://') === 0)))
+  const urls = new Map<string, string>()
+  for (let i = 0; i < cloudIDs.length; i += TEMP_BATCH) {
+    const batch = cloudIDs.slice(i, i + TEMP_BATCH)
+    let list: Array<{ tempFileURL?: string; status?: number | string }> = []
+    try {
+      const res = await cloud.getTempFileURL({ fileList: batch })
+      list = (res && res.fileList) || []
+    } catch (err) {
+      console.error('换取临时链接失败', err)
+    }
     batch.forEach((fileID, index) => {
-      const signed = readTemp(list[index])
-      if (signed) urls.set(fileID, signed)
+      const item = list[index]
+      const url = String(item && item.tempFileURL || '')
+      if (url.indexOf('https://') !== 0) return
+      if (item && item.status !== undefined && item.status !== 0 && String(item.status) !== '0') return
+      urls.set(fileID, url)
     })
   }
   return urls
+}
+
+async function withCoverUrls<T extends { cover?: string }>(items: T[]) {
+  const urls = await signFileUrls(items.map((item) => String(item.cover || '')))
+  return items.map((item) => {
+    const fileID = String(item.cover || '')
+    const coverUrl = urls.get(fileID) || (fileID.indexOf('https://') === 0 ? fileID : '')
+    return { ...item, coverUrl }
+  })
 }
 
 async function loadSignups(eventId: string) {
@@ -101,41 +82,14 @@ async function loadSignups(eventId: string) {
     const rows = (res.data as Signups[])
       .slice()
       .sort((a, b) => signupTime(a.createTime) - signupTime(b.createTime))
-    const now = Date.now()
-    const stale = rows.filter((row) => {
-      const fileID = String(row.avatar || '')
-      return fileID.indexOf('cloud://') === 0 && !avatarStillValid(row, now)
-    })
-    const urls = await signAvatars(stale.map((row) => String(row.avatar || '')))
-    await Promise.all(stale.map(async (row) => {
-      const fileID = String(row.avatar || '')
-      const signed = urls.get(fileID)
-      if (!signed || !row._id) return
-      try {
-        await db.collection('signups').doc(row._id).update({
-          data: {
-            avatarUrl: signed.url,
-            avatarExpire: now + signed.maxAge * 1000,
-            avatarMaxAge: signed.maxAge
-          }
-        })
-      } catch (err) {
-        console.error('保存头像链接失败', err)
-      }
-    }))
+    const urls = await signFileUrls(rows.map((row) => String(row.avatar || '')))
     return rows.map((row) => {
       const fileID = String(row.avatar || '')
-      const saved = avatarStillValid(row, now) ? String(row.avatarUrl || '') : ''
-      const fresh = urls.get(fileID)
-      const avatarMaxAge = fresh ? fresh.maxAge : (saved ? Number(row.avatarMaxAge) || 0 : 0)
-      const avatarExpire = fresh ? now + fresh.maxAge * 1000 : (saved ? Number(row.avatarExpire) || 0 : 0)
+      const avatar = urls.get(fileID) || (fileID.indexOf('https://') === 0 ? fileID : (fileID.indexOf('cloud://') === 0 ? '' : fileID))
       return {
         openid: row.openid,
         nickname: row.nickname || '球友',
-        avatar: saved || (fresh && fresh.url) || (fileID.indexOf('cloud://') === 0 ? '' : fileID),
-        avatarMaxAge,
-        avatarExpire,
-        avatarFrom: fresh ? 'signed' : (saved ? 'cache' : 'none')
+        avatar
       }
     })
   } catch (err) {
@@ -187,7 +141,9 @@ export const main = async (event: GetEventsEvent) => {
         return { success: false, error: '没有找到这场比赛' }
       }
       const signups = await loadSignups(String(id))
-      return { success: true, data: [{ ...mapEvent(one.data as Events), signups }] }
+      // cover 保持库内 fileID；coverUrl 为临时 https，供非上传者展示
+      const [mapped] = await withCoverUrls([mapEvent(one.data as Events)])
+      return { success: true, data: [{ ...mapped, signups }] }
     }
 
     const province = String(event.province || '').trim()
@@ -202,7 +158,9 @@ export const main = async (event: GetEventsEvent) => {
     }
 
     const res = await query.orderBy('startTime', 'desc').limit(50).get()
-    return { success: true, data: (res.data as Events[]).map(mapEvent) }
+    // cover 保持库内 fileID；coverUrl 为临时 https，供非上传者展示
+    const data = await withCoverUrls((res.data as Events[]).map(mapEvent))
+    return { success: true, data }
   } catch (err) {
     const error = err as Error
     if (id) {

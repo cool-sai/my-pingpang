@@ -15,6 +15,7 @@ function isRealDateTime(value) {
     return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day;
 }
 function readEventFields(input) {
+    const cover = String(input.cover || '').trim();
     const name = String(input.name || '').trim();
     const startTime = String(input.startTime || '').trim();
     const location = String(input.location || '').trim();
@@ -27,6 +28,11 @@ function readEventFields(input) {
     const maxPlayers = Number.parseInt(String(input.maxPlayers ?? '0'), 10);
     const formats = ['分段赛', '淘汰赛', '积分赛', '循环赛'];
     const statuses = ['upcoming', 'ongoing', 'finished'];
+    if (cover && cover.indexOf('cloud://') !== 0) {
+        return { error: '封面图无效，请重新选择' };
+    }
+    if (cover.length > 512)
+        return { error: '封面图无效' };
     if (!name)
         return { error: '请填写比赛名称' };
     if (name.length > 30)
@@ -59,6 +65,7 @@ function readEventFields(input) {
         return { error: '说明最多 300 字' };
     return {
         value: {
+            cover,
             name,
             startTime,
             location,

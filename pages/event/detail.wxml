@@ -1,4 +1,5 @@
 <view class="container has-submit" wx:if="{{event}}">
+  <image wx:if="{{event.coverUrl || event.cover}}" class="cover" src="{{event.coverUrl || event.cover}}" mode="aspectFill" />
   <view class="hero">
     <text class="hero-title">{{event.name}}</text>
     <view class="tags">

@@ -6,7 +6,9 @@
     <view class="tab {{status === 'finished' ? 'active' : ''}}" data-status="finished" bindtap="switchStatus">已结束</view>
   </view>
 
-  <event-card wx:for="{{events}}" wx:key="_id" event="{{item}}" bind:select="goToEventDetail" />
+  <view class="event-list">
+    <event-card wx:for="{{events}}" wx:key="_id" event="{{item}}" bind:select="goToEventDetail" />
+  </view>
 
   <view class="empty-tip" wx:if="{{events.length === 0 && !isLoading}}">
     <text>还没有比赛</text>

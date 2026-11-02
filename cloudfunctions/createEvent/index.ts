@@ -19,6 +19,7 @@ function isRealDateTime(value: string) {
 function readEventFields(
   input: Record<string, any>
 ): { error: string; value?: undefined } | { error?: undefined; value: EventInput } {
+  const cover = String(input.cover || '').trim()
   const name = String(input.name || '').trim()
   const startTime = String(input.startTime || '').trim()
   const location = String(input.location || '').trim()
@@ -32,6 +33,10 @@ function readEventFields(
   const formats: EventFormat[] = ['分段赛', '淘汰赛', '积分赛', '循环赛']
   const statuses: EventStatus[] = ['upcoming', 'ongoing', 'finished']
 
+  if (cover && cover.indexOf('cloud://') !== 0) {
+    return { error: '封面图无效，请重新选择' }
+  }
+  if (cover.length > 512) return { error: '封面图无效' }
   if (!name) return { error: '请填写比赛名称' }
   if (name.length > 30) return { error: '比赛名称最多 30 字' }
   if (!/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(startTime) || !isRealDateTime(startTime)) {
@@ -59,6 +64,7 @@ function readEventFields(
 
   return {
     value: {
+      cover,
       name,
       startTime,
       location,

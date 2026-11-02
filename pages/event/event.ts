@@ -1,6 +1,10 @@
+import { readEventPending, replaceEventInList } from '../../utils/event-list-sync'
+
 const eventApp = getApp<IAppOption>()
 
 type EventStatus = 'all' | 'upcoming' | 'ongoing' | 'finished'
+
+let lastEventPatchAt = 0
 
 Page({
   data: {
@@ -14,7 +18,38 @@ Page({
   },
 
   onShow() {
-    void this.loadEvents()
+    void this.refreshPendingEventCard()
+  },
+
+  async refreshPendingEventCard() {
+    const pending = readEventPending()
+    if (!pending || pending.at === lastEventPatchAt) return
+    lastEventPatchAt = pending.at
+    if (pending.kind === 'remove') {
+      this.setData({
+        events: replaceEventInList(this.data.events, pending.id, null)
+      })
+      return
+    }
+    try {
+      const res = await eventApp.callFunction<Record<string, any>>({
+        name: 'getEvent',
+        data: { id: pending.id }
+      })
+      if (!res.result.success || !res.result.data) {
+        this.setData({
+          events: replaceEventInList(this.data.events, pending.id, null)
+        })
+        return
+      }
+      this.setData({
+        events: replaceEventInList(this.data.events, pending.id, res.result.data, {
+          status: this.data.status
+        })
+      })
+    } catch (err) {
+      console.error('刷新比赛卡片失败', err)
+    }
   },
 
   async loadEvents() {

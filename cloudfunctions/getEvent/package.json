@@ -1,0 +1,9 @@
+{
+  "name": "getEvent",
+  "version": "1.0.0",
+  "description": "按 id 获取单场比赛",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

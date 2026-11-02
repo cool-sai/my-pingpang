@@ -1,3 +1,5 @@
+import { markEventNeedRefresh } from '../../utils/event-list-sync'
+
 const editApp = getApp<IAppOption>()
 
 const FORMATS = ['分段赛', '淘汰赛']
@@ -25,6 +27,9 @@ Page({
     eventId: '',
     ready: false,
     submitting: false,
+    cover: '',
+    coverLocal: '',
+    coverPreview: '',
     name: '',
     date: '',
     time: '',
@@ -88,9 +93,13 @@ Page({
       const formats = !savedFormat || FORMATS.indexOf(savedFormat) >= 0 ? FORMATS : [savedFormat, ...FORMATS]
       const formatIndex = Math.max(0, formats.indexOf(savedFormat))
       const statusIndex = Math.max(0, STATUS_VALUES.indexOf(event.status))
+      const cover = String(event.cover || '')
       this.setData({
         ready: true,
         formats,
+        cover,
+        coverLocal: '',
+        coverPreview: String(event.coverUrl || cover),
         name: event.name || '',
         date: matched ? matched[1] : '',
         time: matched ? matched[2] : '',
@@ -180,6 +189,33 @@ Page({
     wx.chooseLocation(options)
   },
 
+  pickCover() {
+    wx.chooseMedia({
+      count: 1,
+      mediaType: ['image'],
+      sourceType: ['album', 'camera'],
+      sizeType: ['compressed'],
+      success: (res) => {
+        const file = (res.tempFiles || [])[0]
+        const path = file && file.tempFilePath ? String(file.tempFilePath) : ''
+        if (!path) {
+          wx.showToast({ title: '没有选到图片', icon: 'none' })
+          return
+        }
+        this.setData({ coverLocal: path, coverPreview: path })
+      },
+      fail: (err) => {
+        const message = String(err.errMsg || '')
+        if (message.indexOf('cancel') >= 0) return
+        wx.showToast({ title: '无法选择图片', icon: 'none' })
+      }
+    })
+  },
+
+  clearCover() {
+    this.setData({ cover: '', coverLocal: '', coverPreview: '' })
+  },
+
   async submit() {
     if (this.data.submitting) return
 
@@ -215,22 +251,33 @@ Page({
       return
     }
 
-    const payload = {
-      name,
-      startTime: `${this.data.date} ${this.data.time}`,
-      location,
-      locationAddress: this.data.locationAddress.trim(),
-      latitude,
-      longitude,
-      description,
-      format: this.data.formats[this.data.formatIndex] || FORMATS[0],
-      status: STATUS_VALUES[this.data.statusIndex] || STATUS_VALUES[0],
-      maxPlayers
-    }
-
     this.setData({ submitting: true })
     wx.showLoading({ title: this.data.eventId ? '保存中' : '发布中' })
     try {
+      let cover = this.data.cover
+      if (this.data.coverLocal) {
+        const openid = editApp.globalData.openid || 'user'
+        const uploaded = await wx.cloud.uploadFile({
+          cloudPath: `event-covers/${openid}-${Date.now()}.jpg`,
+          filePath: this.data.coverLocal
+        })
+        cover = uploaded.fileID
+      }
+
+      const payload = {
+        cover,
+        name,
+        startTime: `${this.data.date} ${this.data.time}`,
+        location,
+        locationAddress: this.data.locationAddress.trim(),
+        latitude,
+        longitude,
+        description,
+        format: this.data.formats[this.data.formatIndex] || FORMATS[0],
+        status: STATUS_VALUES[this.data.statusIndex] || STATUS_VALUES[0],
+        maxPlayers
+      }
+
       const res = await editApp.callFunction<{ _id?: string }>({
         name: this.data.eventId ? 'updateEvent' : 'createEvent',
         data: this.data.eventId ? { id: this.data.eventId, ...payload } : payload
@@ -240,6 +287,8 @@ Page({
         wx.showToast({ title: res.result.error || '保存失败', icon: 'none' })
         return
       }
+      const savedId = String(this.data.eventId || (res.result.data && res.result.data._id) || '')
+      if (savedId) markEventNeedRefresh(savedId)
       wx.showToast({ title: this.data.eventId ? '已保存' : '已发布', icon: 'success' })
       wx.navigateBack()
     } catch (err) {

@@ -1,3 +1,10 @@
+.cover {
+  display: block;
+  width: 100%;
+  height: 360rpx;
+  background: #e8efe9;
+}
+
 .hero,
 .sheet,
 .block {

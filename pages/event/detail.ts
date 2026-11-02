@@ -1,4 +1,5 @@
 import { avatarSrc } from '../../utils/avatar'
+import { markEventNeedRefresh, markEventRemoved } from '../../utils/event-list-sync'
 
 const detailApp = getApp<IAppOption>()
 
@@ -65,6 +66,7 @@ Page({
         signed: !!(openid && signups.some((item) => item.openid === openid)),
         full: !!(event && maxPlayers > 0 && signupCount >= maxPlayers)
       })
+      if (event && event._id) markEventNeedRefresh(String(event._id))
     } catch (err) {
       console.error('加载赛事详情失败', err)
     } finally {

@@ -48,6 +48,7 @@ function regionView(province: string, city: string, region: string[]) {
 
 interface IEventCard {
   cover?: string
+  coverUrl?: string
   _id: string
   name: string
   startTime?: string

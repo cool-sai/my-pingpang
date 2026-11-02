@@ -1,5 +1,16 @@
 <block wx:if="{{ready}}">
   <view class="container has-submit">
+    <view class="field field--cover">
+      <text class="field-label">封面</text>
+      <view class="cover-box" bindtap="pickCover">
+        <image wx:if="{{coverPreview}}" class="cover-preview" src="{{coverPreview}}" mode="aspectFill" />
+        <view wx:else class="cover-empty">
+          <text class="cover-empty-title">添加封面图</text>
+          <text class="cover-empty-sub">列表和详情页顶部会显示</text>
+        </view>
+        <view wx:if="{{coverPreview}}" class="cover-clear" catchtap="clearCover">清除</view>
+      </view>
+    </view>
     <view class="field">
       <text class="field-label">名称</text>
       <input class="field-input" maxlength="30" placeholder="例如周末分段赛" placeholder-class="field-placeholder" value="{{name}}" data-field="name" bindinput="setField" />

@@ -34,6 +34,10 @@ export interface Events {
   _id: string
   creatorOpenid: string
   creatorName: string
+  /** 封面云文件 fileID（cloud://），库内永久存；旧数据可空。接口另返回 coverUrl 临时 https 供展示 */
+  cover?: string
+  /** 仅接口返回：getTempFileURL 后的临时 https；不入库 */
+  coverUrl?: string
   name: string
   startTime: string
   /** 地图选点的名称；旧数据可能只有这段文字 */
@@ -87,10 +91,13 @@ export interface Signups {
   eventId: string
   openid: string
   nickname: string
+  /** 永久 cloud://（或 https）；展示时由接口现签临时链 */
   avatar: string
+  /** 旧字段：曾缓存临时 https，现不再写入/读取 */
   avatarUrl?: string
+  /** 旧字段：曾记录临时链到期，现不再写入/读取 */
   avatarExpire?: number
-  /** 微信返回的临时链接有效秒数。旧数据没有，下次读名单会重签 */
+  /** 旧字段：曾记录 maxAge，现不再写入/读取 */
   avatarMaxAge?: number
   createTime: ServerDateValue
 }
@@ -118,6 +125,8 @@ export type EventInput = Pick<
   Events,
   'name' | 'startTime' | 'location' | 'description' | 'format' | 'status' | 'maxPlayers'
 > & {
+  /** 封面 cloud:// fileID；空字符串表示不设/清除 */
+  cover: string
   locationAddress: string
   latitude: number
   longitude: number

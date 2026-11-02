@@ -6,57 +6,12 @@ cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 
 const db = cloud.database({ throwOnNotFound: false })
 
-const AVATAR_TTL_SEC = 86400
-const AVATAR_FALLBACK_SEC = 10 * 60
-
-function secondsOf(raw: unknown) {
-  const value = Number(raw)
-  if (!Number.isFinite(value) || value <= 0) return AVATAR_FALLBACK_SEC
-  const seconds = value > AVATAR_TTL_SEC * 2 ? Math.round(value / 1000) : Math.round(value)
-  if (seconds <= 0) return AVATAR_FALLBACK_SEC
-  return Math.min(seconds, AVATAR_TTL_SEC)
-}
-
-function readTemp(item?: { tempFileURL?: string; status?: number | string; maxAge?: number }) {
-  if (!item) return null
-  const avatarUrl = String(item.tempFileURL || '')
-  if (avatarUrl.indexOf('https://') !== 0) return null
-  if (item.status !== undefined && item.status !== 0 && String(item.status) !== '0') return null
-  return { avatarUrl, avatarMaxAge: secondsOf(item.maxAge) }
-}
-
 async function ensureSignups() {
   try {
     await db.createCollection('signups')
   } catch (err) {
     // 集合已经有了
   }
-}
-
-async function signAvatar(fileID: string) {
-  if (fileID.indexOf('cloud://') !== 0) {
-    return { avatarUrl: fileID, avatarExpire: 0, avatarMaxAge: 0 }
-  }
-  const attempts = [
-    [{ fileID, maxAge: AVATAR_TTL_SEC }],
-    [fileID]
-  ]
-  for (let i = 0; i < attempts.length; i += 1) {
-    try {
-      const res = await cloud.getTempFileURL({ fileList: attempts[i] })
-      const signed = readTemp(res && res.fileList && res.fileList[0])
-      if (signed) {
-        return {
-          avatarUrl: signed.avatarUrl,
-          avatarExpire: Date.now() + signed.avatarMaxAge * 1000,
-          avatarMaxAge: signed.avatarMaxAge
-        }
-      }
-    } catch (err) {
-      console.error('换取头像链接失败', err)
-    }
-  }
-  return { avatarUrl: '', avatarExpire: 0, avatarMaxAge: 0 }
 }
 
 async function cancelSignup(id: string, openid: string) {
@@ -114,16 +69,13 @@ export const main = async (event: { id?: string; action?: string }) => {
 
   const signupId = `${id}_${openid}`
   const nickname = String(user.nickname || '球友').slice(0, 32)
+  // 库内只存永久 cloud://（或其它原始值）；展示时由 getEvents/getEvent 现签临时 https
   const avatar = String(user.avatar || '')
-  const signedAvatar = await signAvatar(avatar)
   const row: SignupsInsert = {
     eventId: id,
     openid,
     nickname,
     avatar,
-    avatarUrl: signedAvatar.avatarUrl,
-    avatarExpire: signedAvatar.avatarExpire,
-    avatarMaxAge: signedAvatar.avatarMaxAge,
     createTime: db.serverDate()
   }
 

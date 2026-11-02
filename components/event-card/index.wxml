@@ -1,6 +1,6 @@
 <view class="card" hover-class="card--pressed" bindtap="onTap">
   <view class="card-cover-wrap">
-    <image wx:if="{{event.cover}}" class="card-cover" src="{{event.cover}}" mode="aspectFill" />
+    <image wx:if="{{event.coverUrl || event.cover}}" class="card-cover" src="{{event.coverUrl || event.cover}}" mode="aspectFill" />
     <view wx:else class="card-cover card-cover--empty"></view>
   </view>
   <view class="card-body">
