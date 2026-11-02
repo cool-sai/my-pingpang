@@ -7,6 +7,38 @@
       {
         "type": "folder",
         "value": "docs"
+      },
+      {
+        "type": "folder",
+        "value": "schema"
+      },
+      {
+        "type": "folder",
+        "value": "scripts"
+      },
+      {
+        "type": "folder",
+        "value": "node_modules"
+      },
+      {
+        "type": "folder",
+        "value": ".cloudbase"
+      },
+      {
+        "type": "folder",
+        "value": ".git"
+      },
+      {
+        "type": "file",
+        "value": "package-lock.json"
+      },
+      {
+        "type": "file",
+        "value": "package.json"
+      },
+      {
+        "type": "suffix",
+        "value": ".md"
       }
     ],
     "include": []
