@@ -39,6 +39,10 @@
       {
         "type": "suffix",
         "value": ".md"
+      },
+      {
+        "type": "folder",
+        "value": ".cloudfunctions-dist"
       }
     ],
     "include": []

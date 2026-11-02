@@ -1,10 +1,12 @@
-import { mkdir, readdir, rm, stat, copyFile } from 'node:fs/promises'
+import { mkdir, readdir, stat, copyFile } from 'node:fs/promises'
 import path from 'node:path'
 
 const rootDir = process.cwd()
 const distRoot = path.join(rootDir, '.cloudfunctions-dist', 'cloudfunctions')
 const functionsRoot = path.join(rootDir, 'cloudfunctions')
 
+// Keep .cloudfunctions-dist: WeChat DevTools TS plugin reads compiled JS from outDir.
+// Only copy each function's index.js back into cloudfunctions/<name>/ for upload/runtime.
 const entries = await readdir(distRoot, { withFileTypes: true })
 
 for (const entry of entries) {
@@ -25,5 +27,3 @@ for (const entry of entries) {
   await mkdir(targetDir, { recursive: true })
   await copyFile(builtIndexPath, targetIndexPath)
 }
-
-await rm(path.join(rootDir, '.cloudfunctions-dist'), { recursive: true, force: true })
