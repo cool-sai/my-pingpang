@@ -1,0 +1,21 @@
+<form bindsubmit="submit">
+  <view class="container has-submit">
+    <view class="avatar-block">
+      <button class="avatar-btn" hover-class="none" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+        <image class="avatar" mode="aspectFill" src="{{pickedAvatar || avatar || placeholder}}" />
+      </button>
+      <text class="avatar-tip">{{pickedAvatar || avatar ? '点击头像可以更换' : '头像可以不填'}}</text>
+      <text class="avatar-clear" wx:if="{{pickedAvatar || avatar}}" bindtap="clearAvatar">去掉头像</text>
+    </view>
+
+    <view class="field">
+      <text class="field-label">昵称</text>
+      <input class="field-input" type="nickname" name="nickname" maxlength="20" placeholder="请填写昵称" placeholder-class="field-placeholder" value="{{nickname}}" />
+    </view>
+    <view class="hint" wx:if="{{required}}">第一次使用需要保存一个昵称。默认是「用户」加注册序号，可以改成自己的。</view>
+  </view>
+
+  <view class="submit-bar">
+    <button class="submit-btn" hover-class="none" form-type="submit" loading="{{submitting}}" disabled="{{submitting}}">保存</button>
+  </view>
+</form>

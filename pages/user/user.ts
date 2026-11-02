@@ -1,3 +1,4 @@
+import { AVATAR_PLACEHOLDER } from '../../utils/avatar'
 import { TabIndex } from '../../utils/tab'
 
 const userApp = getApp<IAppOption>()
@@ -18,6 +19,7 @@ interface IMenuItem {
 
 Page({
   data: {
+    placeholder: AVATAR_PLACEHOLDER,
     userInfo: null as IUserInfo | null,
     stats: {
       totalMatches: 0,
@@ -100,13 +102,24 @@ Page({
           userInfo
         })
         this.loadUserStats()
+        if (!userInfo.profileReady) {
+          wx.navigateTo({ url: '/pages/user/profile?required=1' })
+          return
+        }
         wx.showToast({ title: '登录成功', icon: 'success' })
       },
       fail: (err) => {
-        wx.showToast({ title: '登录失败', icon: 'none' })
-        console.error('登录失败', err)
+        wx.showModal({
+          title: '登录失败',
+          content: String(err || '登录失败'),
+          showCancel: false
+        })
       }
     })
+  },
+
+  onEditProfile() {
+    wx.navigateTo({ url: '/pages/user/profile' })
   },
 
   goToMenu(e: WechatMiniprogram.BaseEvent) {

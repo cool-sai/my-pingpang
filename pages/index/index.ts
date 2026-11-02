@@ -2,6 +2,7 @@ import { newsList } from '../../data/news'
 import { TabIndex } from '../../utils/tab'
 
 const indexApp = getApp<IAppOption>()
+let promptedProfile = false
 
 interface IEventCard {
   _id: string
@@ -25,6 +26,11 @@ Page({
   onShow() {
     if (typeof this.getTabBar === 'function' && this.getTabBar()) {
       this.getTabBar().setData({ selected: TabIndex.Index })
+    }
+    const user = indexApp.globalData.userInfo
+    if (!promptedProfile && indexApp.globalData.isLogin && user && !user.profileReady) {
+      promptedProfile = true
+      wx.navigateTo({ url: '/pages/user/profile?required=1' })
     }
     void this.loadEvents()
   },

@@ -2,12 +2,13 @@
   <!-- 用户信息区域 -->
   <view class="profile-card {{userInfo ? 'profile-card--authed' : ''}}">
     <view class="profile-content" wx:if="{{userInfo}}">
-      <image class="avatar" src="{{userInfo.avatar || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCI+PGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iNTAiIGZpbGw9IiNlMGUwZTAiLz48Y2lyY2xlIGN4PSI1MCIgY3k9IjM4IiByPSIxOCIgZmlsbD0iI2JkYmRiZCIvPjxlbGxpcHNlIGN4PSI1MCIgY3k9Ijg1IiByeD0iMjgiIHJ5PSIyMiIgZmlsbD0iI2JkYmRiZCIvPjwvc3ZnPg=='}}" />
+      <image class="avatar" src="{{userInfo.avatar || placeholder}}" />
       <text class="nickname">{{userInfo.nickname}}</text>
       <text class="score">积分 {{userInfo.score || 0}} · 信用分 {{userInfo.creditScore || 80}}</text>
+      <button class="login-btn" hover-class="none" bindtap="onEditProfile">{{userInfo.profileReady ? '修改资料' : '设置昵称'}}</button>
     </view>
     <view class="profile-content" wx:else>
-      <image class="avatar" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCI+PGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iNTAiIGZpbGw9IiNlMGUwZTAiLz48Y2lyY2xlIGN4PSI1MCIgY3k9IjM4IiByPSIxOCIgZmlsbD0iI2JkYmRiZCIvPjxlbGxpcHNlIGN4PSI1MCIgY3k9Ijg1IiByeD0iMjgiIHJ5PSIyMiIgZmlsbD0iI2JkYmRiZCIvPjwvc3ZnPg==" />
+      <image class="avatar" src="{{placeholder}}" />
       <text class="nickname">点击下方按钮登录</text>
       <button class="login-btn" hover-class="none" bindtap="onLogin">微信登录</button>
     </view>

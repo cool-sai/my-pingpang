@@ -6,6 +6,8 @@ interface IUserInfo {
   totalMatches?: number
   winMatches?: number
   loseMatches?: number
+  userNo?: number
+  profileReady?: boolean
   [key: string]: any
 }
 
@@ -43,5 +45,6 @@ interface IAppOption {
   ) => Promise<ICloudCallResult<T>>
   login: (callback?: ILoginCallback) => void
   requireLogin: (reason: string, callback?: ILoginCallback) => void
+  saveUser: (userInfo: IUserInfo) => void
   logout: () => void
 }

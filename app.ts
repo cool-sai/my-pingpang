@@ -38,8 +38,20 @@ const appConfig = {
     return callCloudFunction<T>(options)
   },
 
+  saveUser(userInfo: IUserInfo) {
+    this.globalData.userInfo = userInfo
+    this.globalData.openid = userInfo.openid || ''
+    this.globalData.isLogin = true
+    wx.setStorageSync('openid', userInfo.openid || '')
+    wx.setStorageSync('userInfo', userInfo)
+  },
+
   requireLogin(reason: string, callback?: ILoginCallback) {
     if (this.globalData.isLogin && this.globalData.userInfo) {
+      if (!this.globalData.userInfo.profileReady) {
+        wx.navigateTo({ url: '/pages/user/profile?required=1' })
+        return
+      }
       callback?.success?.(this.globalData.userInfo)
       return
     }
@@ -49,49 +61,39 @@ const appConfig = {
       content: reason,
       confirmText: '登录',
       success: (res) => {
-        if (res.confirm) {
-          this.login(callback)
+        if (!res.confirm) {
+          callback?.fail?.('取消登录')
           return
         }
-        callback?.fail?.('取消登录')
+        this.login({
+          success: (userInfo) => {
+            if (!userInfo.profileReady) {
+              wx.navigateTo({ url: '/pages/user/profile?required=1' })
+              return
+            }
+            callback?.success?.(userInfo)
+          },
+          fail: (error) => callback?.fail?.(error)
+        })
       }
     })
   },
 
   login(callback?: ILoginCallback) {
-    wx.getUserProfile({
-      desc: '用于完善个人资料',
-      success: async (res) => {
-        try {
-          const result = await callCloudFunction<IUserInfo>({
-            name: 'login',
-            data: {
-              userInfo: res.userInfo
-            }
-          })
-
-          const payload = result.result
-          if (payload.success) {
-            this.globalData.userInfo = payload.data
-            this.globalData.openid = payload.data.openid || ''
-            this.globalData.isLogin = true
-
-            wx.setStorageSync('openid', payload.data.openid || '')
-            wx.setStorageSync('userInfo', payload.data)
-
-            callback?.success?.(payload.data)
-          } else {
-            callback?.fail?.(payload.error || '登录失败')
-          }
-        } catch (err) {
-          const message = err instanceof Error ? err.message : '登录失败'
-          callback?.fail?.(message)
+    void callCloudFunction<IUserInfo>({ name: 'login' })
+      .then((result) => {
+        const payload = result.result
+        if (!payload.success) {
+          callback?.fail?.(payload.error || '登录失败')
+          return
         }
-      },
-      fail: (err) => {
-        callback?.fail?.(err.errMsg || '登录失败')
-      }
-    })
+        this.saveUser(payload.data)
+        callback?.success?.(payload.data)
+      })
+      .catch((err: unknown) => {
+        const error = err as { errMsg?: string; message?: string }
+        callback?.fail?.(error?.errMsg || error?.message || '登录失败')
+      })
   },
 
   logout() {

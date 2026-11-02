@@ -11,7 +11,8 @@
     "pages/event/event",
     "pages/event/detail",
     "pages/event/edit",
-    "pages/user/user"
+    "pages/user/user",
+    "pages/user/profile"
   ],
   "window": {
     "navigationBarTextStyle": "black",

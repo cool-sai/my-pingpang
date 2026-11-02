@@ -33,7 +33,8 @@ Page({
   },
 
   onLoad() {
-    if (createMatchApp.globalData.isLogin) return
+    const signedIn = createMatchApp.globalData.userInfo
+    if (createMatchApp.globalData.isLogin && signedIn?.profileReady) return
     createMatchApp.requireLogin('登录后才能发起比赛', {
       fail: (error) => {
         if (error !== '取消登录') {
