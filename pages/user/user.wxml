@@ -1,6 +1,8 @@
 <view class="container">
+  <nav-bar title="我的" tone="light" overlay align="left" bind:layout="onNavLayout" />
+
   <!-- 用户信息区域 -->
-  <view class="profile-card {{userInfo ? 'profile-card--authed' : ''}}">
+  <view class="profile-card {{userInfo ? 'profile-card--authed' : ''}}" style="padding-top: {{navPad}}px;">
     <view class="profile-content" wx:if="{{userInfo}}">
       <image class="avatar" src="{{userInfo.avatar || placeholder}}" />
       <text class="nickname">{{userInfo.nickname}}</text>

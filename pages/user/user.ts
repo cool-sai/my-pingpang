@@ -1,3 +1,4 @@
+import { getNavLayout } from '../../utils/nav'
 import { AVATAR_PLACEHOLDER } from '../../utils/avatar'
 import { TabIndex } from '../../utils/tab'
 
@@ -19,6 +20,7 @@ interface IMenuItem {
 
 Page({
   data: {
+    navPad: getNavLayout().navHeight,
     placeholder: AVATAR_PLACEHOLDER,
     userInfo: null as IUserInfo | null,
     stats: {
@@ -38,6 +40,11 @@ Page({
       this.setData({ userInfo: userApp.globalData.userInfo })
       this.loadUserStats()
     }
+  },
+
+  onNavLayout(e: WechatMiniprogram.CustomEvent<{ navHeight?: number }>) {
+    const navHeight = Number(e.detail.navHeight) || getNavLayout().navHeight
+    this.setData({ navPad: navHeight })
   },
 
   onShow() {

@@ -1,3 +1,4 @@
+import { getNavLayout } from '../../utils/nav'
 import { TabIndex } from '../../utils/tab'
 
 const clubApp = getApp<IAppOption>()
@@ -6,6 +7,7 @@ type ClubSort = 'score' | 'members'
 
 Page({
   data: {
+    navPad: getNavLayout().navHeight,
     clubs: [] as Array<Record<string, any>>,
     isLoading: false,
     sortBy: 'score' as ClubSort
@@ -13,6 +15,11 @@ Page({
 
   onLoad() {
     void this.loadClubs()
+  },
+
+  onNavLayout(e: WechatMiniprogram.CustomEvent<{ navHeight?: number }>) {
+    const navHeight = Number(e.detail.navHeight) || getNavLayout().navHeight
+    this.setData({ navPad: navHeight })
   },
 
   onShow() {

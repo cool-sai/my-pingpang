@@ -4,9 +4,9 @@
   justify-content: space-between;
   gap: 20rpx;
   min-height: 112rpx;
-  padding: 28rpx 32rpx;
+  padding: 28rpx 32rpx 32rpx;
   margin-bottom: 0;
-  background: linear-gradient(135deg, #127a42 0%, #2fbe68 100%);
+  background: linear-gradient(160deg, #0f6b3a 0%, #2fbe68 62%, #7ad69f 120%);
   border-radius: 0;
   box-shadow: none;
 }

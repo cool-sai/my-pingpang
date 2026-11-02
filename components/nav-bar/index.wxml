@@ -1,0 +1,21 @@
+<view
+  class="nav nav--{{tone}} {{overlay ? 'nav--overlay' : ''}} {{scrolled ? 'nav--scrolled' : ''}} nav-align--{{align}}"
+  style="padding-top: {{statusBarHeight}}px; height: {{navHeight}}px;"
+>
+  <view class="nav-inner" style="height: {{titleBarHeight}}px;">
+    <view
+      wx:if="{{showCity}}"
+      class="nav-city"
+      hover-class="nav-city--pressed"
+      bindtap="onCityTap"
+    >
+      <text class="nav-city-t">{{city || '全国'}}</text>
+      <text class="nav-city-caret"></text>
+    </view>
+    <view wx:else class="nav-title-wrap">
+      <text class="nav-title">{{title}}</text>
+      <text wx:if="{{subtitle}}" class="nav-sub">{{subtitle}}</text>
+    </view>
+  </view>
+</view>
+<view wx:if="{{!overlay}}" class="nav-spacer" style="height: {{navHeight}}px;"></view>

@@ -1,15 +1,21 @@
 <view class="container has-tab">
+  <nav-bar title="排名" tone="light" overlay align="left" bind:layout="onNavLayout" />
+
   <!-- 我的排名 -->
-  <view class="my-rank" wx:if="{{myRank}}">
+  <view class="my-rank" style="padding-top: {{navPad}}px;" wx:if="{{myRank}}">
     <text class="my-rank-label">我的排名</text>
     <view class="my-rank-info">
       <text class="my-rank-num">第{{myRank.rank}}名</text>
       <text class="my-rank-score">{{myRank.score}}分</text>
     </view>
   </view>
-  <view class="my-rank" wx:elif="{{!isLogin}}" bindtap="onViewMyRank">
+  <view class="my-rank" style="padding-top: {{navPad}}px;" wx:elif="{{!isLogin}}" bindtap="onViewMyRank">
     <text class="my-rank-label">我的排名</text>
     <text class="my-rank-num">登录查看</text>
+  </view>
+  <view class="my-rank" style="padding-top: {{navPad}}px;" wx:else>
+    <text class="my-rank-label">我的排名</text>
+    <text class="my-rank-num">暂无成绩</text>
   </view>
 
   <!-- 筛选 -->

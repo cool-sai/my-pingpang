@@ -10,7 +10,7 @@ const db = cloud.database()
 
 type HomePlayer = Pick<Users, 'openid' | 'nickname' | 'avatar' | 'score'>
 type HomeClub = Pick<Clubs, '_id' | 'name' | 'totalScore' | 'memberCount' | 'city' | 'location'>
-type HomeEvent = Pick<Events, '_id' | 'name' | 'startTime' | 'status' | 'location' | 'signupCount'>
+type HomeEvent = Pick<Events, '_id' | 'name' | 'cover' | 'startTime' | 'status' | 'location' | 'signupCount'>
 
 export const main = async () => {
   try {
@@ -46,6 +46,7 @@ export const main = async () => {
       .field({
         _id: true,
         name: true,
+        cover: true,
         startTime: true,
         status: true,
         location: true,

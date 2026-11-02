@@ -1,38 +1,126 @@
 <view class="home">
-  <swiper
-    class="banner"
-    indicator-dots
-    indicator-color="rgba(255,255,255,0.45)"
-    indicator-active-color="#ffffff"
-    autoplay="{{news.length > 1}}"
-    circular="{{news.length > 1}}"
-    interval="4000"
-    duration="500"
-  >
-    <swiper-item wx:for="{{news}}" wx:key="id">
-      <view class="banner-slide" data-id="{{item.id}}" bindtap="goToNews">
-        <image wx:if="{{item.cover}}" class="banner-cover" src="{{item.cover}}" mode="aspectFill" />
-        <view class="banner-mask">
-          <text class="banner-title">{{item.title}}</text>
-          <text class="banner-summary">{{item.summary}}</text>
+  <nav-bar
+    title="约球"
+    tone="light"
+    overlay
+    align="left"
+    scrolled="{{navScrolled}}"
+    showCity="{{navScrolled}}"
+    city="{{cityName || '全国'}}"
+    bind:layout="onNavLayout"
+    bind:citytap="openCitySheet"
+  />
+
+  <view class="hero" style="height: {{bannerHeight}}px;">
+    <swiper
+      class="hero-swiper"
+      indicator-dots
+      indicator-color="rgba(255,255,255,0.35)"
+      indicator-active-color="#ffffff"
+      autoplay="{{news.length > 1}}"
+      circular="{{news.length > 1}}"
+      interval="4200"
+      duration="520"
+      current="{{heroIndex}}"
+      bindchange="onHeroChange"
+    >
+      <swiper-item wx:for="{{news}}" wx:key="id">
+        <view class="hero-slide hero-slide--{{index % 3}}" data-id="{{item.id}}" bindtap="goToNews">
+          <image wx:if="{{item.cover}}" class="hero-cover" src="{{item.cover}}" mode="aspectFill" />
+          <view class="hero-glow"></view>
+          <view class="hero-orb hero-orb--a"></view>
+          <view class="hero-orb hero-orb--b"></view>
+          <view class="hero-mask">
+            <view class="hero-eyebrow">
+              <text class="hero-eyebrow-dot"></text>
+              <text class="hero-eyebrow-t">今日动态</text>
+            </view>
+            <text class="hero-title">{{item.title}}</text>
+            <text class="hero-summary">{{item.summary}}</text>
+            <view class="hero-cta">
+              <text class="hero-cta-t">查看详情</text>
+              <text class="hero-cta-arrow">›</text>
+            </view>
+          </view>
         </view>
+      </swiper-item>
+    </swiper>
+    <view class="hero-fade"></view>
+  </view>
+
+  <view class="city-dock {{navScrolled ? 'city-dock--handoff' : ''}}">
+    <view class="city-bar">
+      <view class="city-trigger" bindtap="openCitySheet" hover-class="city-trigger--pressed">
+        <view class="city-pin"><view class="city-pin-dot"></view></view>
+        <view class="city-copy">
+          <text class="city-trigger-k">比赛城市</text>
+          <text class="city-trigger-v">{{cityName || '全国 · 不限'}}</text>
+        </view>
+        <text class="city-trigger-caret"></text>
       </view>
-    </swiper-item>
-  </swiper>
-
-  <view class="list-head">
-    <view class="region-side">
-      <picker mode="region" level="city" bindchange="setRegion" value="{{region}}">
-        <view class="region-pick">{{regionText}}</view>
-      </picker>
-      <text wx:if="{{province}}" class="region-clear" bindtap="clearRegion">全部</text>
+      <view class="city-create" bindtap="goToCreate" hover-class="city-create--pressed">
+        <text class="city-create-plus">+</text>
+        <text class="city-create-t">发起</text>
+      </view>
     </view>
-    <text class="list-action" bindtap="goToCreate">创建</text>
   </view>
 
-  <view class="list-loading" wx:if="{{isLoading}}">
-    <view class="list-spinner"></view>
+  <view class="section">
+    <view class="section-head">
+      <view class="section-titles">
+        <text class="section-title">热门约球</text>
+        <text class="section-sub">{{cityName ? cityName + '附近比赛' : '全国可报名'}}</text>
+      </view>
+      <text class="section-count" wx:if="{{!isLoading}}">{{events.length}} 场</text>
+    </view>
+
+    <view class="list-loading" wx:if="{{isLoading}}">
+      <view class="list-spinner"></view>
+    </view>
+
+    <view class="event-list" wx:if="{{!isLoading}}">
+      <event-card wx:for="{{events}}" wx:key="_id" event="{{item}}" bind:select="goToEventDetail" />
+    </view>
+
+    <view class="empty" wx:if="{{!isLoading && events.length === 0}}">
+      <view class="empty-ring"></view>
+      <text class="empty-title">{{city ? '这个城市还没有比赛' : '还没有可报名的比赛'}}</text>
+      <text class="empty-sub">{{city ? '换个城市看看，或自己发起一场' : '先选城市，或直接发起'}}</text>
+      <view class="empty-actions">
+        <text class="empty-btn" bindtap="openCitySheet">选城市</text>
+        <text class="empty-btn empty-btn--primary" bindtap="goToCreate">发起比赛</text>
+      </view>
+    </view>
   </view>
-  <event-card wx:for="{{events}}" wx:key="_id" event="{{item}}" bind:select="goToEventDetail" />
-  <view class="empty-tip" wx:if="{{!isLoading && events.length === 0}}">{{province ? '这个城市还没有比赛' : '附近还没有比赛'}}</view>
+</view>
+
+<view class="sheet-mask {{showCitySheet ? 'sheet-mask--on' : ''}}" wx:if="{{showCitySheet}}" catchtouchmove="noop" bindtap="closeCitySheet"></view>
+<view class="sheet {{showCitySheet ? 'sheet--on' : ''}}" wx:if="{{showCitySheet}}" catchtouchmove="noop">
+  <view class="sheet-grab"></view>
+  <text class="sheet-title">选择城市</text>
+  <text class="sheet-caption">热门城市</text>
+  <view class="hot-grid">
+    <view
+      class="hot-item {{city === item.city ? 'hot-item--on' : ''}}"
+      wx:for="{{hotCities}}"
+      wx:key="city"
+      data-province="{{item.province}}"
+      data-city="{{item.city}}"
+      data-name="{{item.name}}"
+      bindtap="pickHotCity"
+    >{{item.name}}</view>
+  </view>
+  <view class="sheet-list">
+    <picker mode="region" level="city" value="{{region}}" bindchange="setRegionFromPicker">
+      <view class="sheet-row">
+        <text class="sheet-row-t">其他城市</text>
+        <text class="sheet-row-a">省 / 市</text>
+      </view>
+    </picker>
+    <view class="sheet-row" bindtap="pickNationwide">
+      <text class="sheet-row-t">全国</text>
+      <text class="sheet-row-a">不限城市</text>
+    </view>
+  </view>
+  <view class="sheet-cancel" bindtap="closeCitySheet">取消</view>
 </view>

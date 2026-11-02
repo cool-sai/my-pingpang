@@ -1,5 +1,7 @@
 {
-  "navigationBarTitleText": "球馆",
   "enablePullDownRefresh": true,
-  "usingComponents": {}
+  "usingComponents": {
+    "nav-bar": "/components/nav-bar/index"
+  },
+  "navigationStyle": "custom"
 }

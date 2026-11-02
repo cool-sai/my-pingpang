@@ -1,4 +1,11 @@
 <view class="container has-fab">
+  <nav-bar title="球馆" tone="light" overlay align="left" bind:layout="onNavLayout" />
+
+  <view class="club-hero" style="padding-top: {{navPad}}px;">
+    <text class="club-hero-title">附近球馆</text>
+    <text class="club-hero-sub">按热度或人数看看</text>
+  </view>
+
   <!-- 筛选 -->
   <view class="filter-tabs">
     <view class="tab {{sortBy === 'score' ? 'active' : ''}}" data-sort="score" bindtap="switchSort">热度</view>

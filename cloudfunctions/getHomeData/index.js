@@ -38,6 +38,7 @@ const main = async () => {
             .field({
             _id: true,
             name: true,
+            cover: true,
             startTime: true,
             status: true,
             location: true,

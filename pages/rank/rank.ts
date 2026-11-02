@@ -1,3 +1,4 @@
+import { getNavLayout } from '../../utils/nav'
 import { TabIndex } from '../../utils/tab'
 
 const rankApp = getApp<IAppOption>()
@@ -11,6 +12,7 @@ interface IRankingResult {
 
 Page({
   data: {
+    navPad: getNavLayout().navHeight,
     rankings: [] as Array<Record<string, any>>,
     isLoading: false,
     filter: 'all' as RankFilter,
@@ -21,6 +23,13 @@ Page({
   onLoad() {
     this.setData({ isLogin: rankApp.globalData.isLogin })
     void this.loadRankings()
+  },
+
+  onNavLayout(e: WechatMiniprogram.CustomEvent<{ navHeight?: number; titleBarHeight?: number }>) {
+    const navHeight = Number(e.detail.navHeight) || getNavLayout().navHeight
+    const titleBarHeight = Number(e.detail.titleBarHeight) || 44
+    // 标题行再加点底距，绿头更融入
+    this.setData({ navPad: navHeight - 4 })
   },
 
   onShow() {

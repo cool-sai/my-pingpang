@@ -1,10 +1,14 @@
 import { newsList } from '../../data/news'
+import { HOT_CITIES } from '../../data/hot-cities'
+import { getNavLayout } from '../../utils/nav'
 import { TabIndex } from '../../utils/tab'
+import { readEventPending, replaceEventInList } from '../../utils/event-list-sync'
 
 const indexApp = getApp<IAppOption>()
 const REGION_KEY = 'homeEventRegion'
 let promptedProfile = false
 let eventLoadSeq = 0
+let lastEventPatchAt = 0
 
 function readRegion() {
   const saved = wx.getStorageSync(REGION_KEY) || {}
@@ -15,7 +19,7 @@ function readRegion() {
     province,
     city,
     region,
-    regionText: province && city ? `${province} ${city}` : '全部城市'
+    regionText: province && city ? `${province} ${city}` : '选择城市'
   }
 }
 
@@ -27,16 +31,23 @@ function writeRegion(province: string, city: string, region: string[]) {
   wx.setStorageSync(REGION_KEY, { province, city, region })
 }
 
+function shortCityName(city: string) {
+  const raw = String(city || '')
+  return raw.replace(/(市|地区|自治州|盟)$/, '') || raw
+}
+
 function regionView(province: string, city: string, region: string[]) {
   return {
     province,
     city,
+    cityName: city ? shortCityName(city) : '',
     region: region.length ? region : province && city ? [province, city] : [],
-    regionText: province && city ? `${province} ${city}` : '全部城市'
+    regionText: province && city ? `${province} ${city}` : '选择城市'
   }
 }
 
 interface IEventCard {
+  cover?: string
   _id: string
   name: string
   startTime?: string
@@ -59,7 +70,14 @@ Page({
     region: [] as string[],
     province: '',
     city: '',
-    regionText: '全部城市'
+    cityName: '',
+    regionText: '选择城市',
+    hotCities: HOT_CITIES,
+    showCitySheet: false,
+    navHeight: getNavLayout().navHeight,
+    bannerHeight: Math.round(getNavLayout().navHeight + 268),
+    navScrolled: false,
+    heroIndex: 0
   },
 
   onLoad() {
@@ -75,10 +93,47 @@ Page({
     if (typeof this.getTabBar === 'function' && this.getTabBar()) {
       this.getTabBar().setData({ selected: TabIndex.Index })
     }
+    this.applyPendingEventPatch()
     const user = indexApp.globalData.userInfo
     if (!promptedProfile && indexApp.globalData.isLogin && user && !user.profileReady) {
       promptedProfile = true
       wx.navigateTo({ url: '/pages/user/profile?required=1' })
+    }
+  },
+
+  applyPendingEventPatch() {
+    void this.refreshPendingEventCard()
+  },
+
+  async refreshPendingEventCard() {
+    const pending = readEventPending()
+    if (!pending || pending.at === lastEventPatchAt) return
+    lastEventPatchAt = pending.at
+    if (pending.kind === 'remove') {
+      this.setData({
+        events: replaceEventInList(this.data.events, pending.id, null)
+      })
+      return
+    }
+    try {
+      const res = await indexApp.callFunction<Record<string, any>>({
+        name: 'getEvent',
+        data: { id: pending.id }
+      })
+      if (!res.result.success || !res.result.data) {
+        this.setData({
+          events: replaceEventInList(this.data.events, pending.id, null)
+        })
+        return
+      }
+      this.setData({
+        events: replaceEventInList(this.data.events, pending.id, res.result.data, {
+          province: this.data.province,
+          city: this.data.city
+        })
+      })
+    } catch (err) {
+      console.error('刷新比赛卡片失败', err)
     }
   },
 
@@ -128,7 +183,59 @@ Page({
     }
   },
 
-  setRegion(e: WechatMiniprogram.CustomEvent<{ value?: string[] }>) {
+  onNavLayout(e: WechatMiniprogram.CustomEvent<{ navHeight?: number }>) {
+    const navHeight = Number(e.detail.navHeight) || getNavLayout().navHeight
+    this.setData({
+      navHeight,
+      bannerHeight: Math.round(navHeight + 268)
+    })
+  },
+
+  onPageScroll(e: WechatMiniprogram.Page.IPageScrollOption) {
+    // 城市条叠在头图底部（margin-top -56rpx ≈ -28px），上滑到贴顶栏时交给左上角
+    const handoff = Math.max(
+      24,
+      this.data.bannerHeight - this.data.navHeight - 36
+    )
+    const scrolled = e.scrollTop > handoff
+    if (scrolled !== this.data.navScrolled) {
+      this.setData({ navScrolled: scrolled })
+    }
+  },
+
+  onHeroChange(e: WechatMiniprogram.CustomEvent<{ current?: number }>) {
+    this.setData({ heroIndex: Number(e.detail.current) || 0 })
+  },
+
+  openCitySheet() {
+    this.setData({ showCitySheet: true })
+  },
+
+  closeCitySheet() {
+    this.setData({ showCitySheet: false })
+  },
+
+  noop() {},
+
+  pickHotCity(e: WechatMiniprogram.BaseEvent) {
+    const province = String(e.currentTarget.dataset.province || '')
+    const city = String(e.currentTarget.dataset.city || '')
+    if (!province || !city) return
+    this.setData({ showCitySheet: false })
+    void this.saveRegion(province, city, [province, city], true)
+  },
+
+  setRegionFromPicker(e: WechatMiniprogram.CustomEvent<{ value?: string[] }>) {
+    this.setData({ showCitySheet: false })
+    this.setRegion(e)
+  },
+
+  pickNationwide() {
+    this.setData({ showCitySheet: false })
+    this.clearRegion()
+  },
+
+    setRegion(e: WechatMiniprogram.CustomEvent<{ value?: string[] }>) {
     const value = e.detail.value || []
     const province = String(value[0] || '')
     const city = String(value[1] || '')
