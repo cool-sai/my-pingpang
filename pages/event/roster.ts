@@ -73,19 +73,23 @@ Page({
       })
       const event = (res.result.data || []).find((item) => item._id === eventId) || null
       const rawSignups = Array.isArray(event && event.signups) ? event.signups : []
+      // 临时 https 大约 10 分钟过期。名单页只信本地缓存；没有就重拉，不用会过期的链撑着。
       const signups = rawSignups.map((item: ISignupRow) => {
         const openid = String(item.openid || '')
         const local = openid ? localAvatarPath(eventId, openid) : ''
+        const hasLocal = !!(local && hasLocalAvatar(local))
         return {
           openid,
           nickname: item.nickname || '球友',
-          avatar: local && hasLocalAvatar(local) ? local : String(item.avatar || '')
+          avatar: hasLocal ? local : ''
         }
       })
       if (!this.alive || seq !== this.loadSeq) return
       this.setData({ signups })
       signups.forEach((item) => {
-        if (item.openid && !item.avatar) this.queueAvatar(item.openid)
+        if (!item.openid) return
+        const local = localAvatarPath(eventId, item.openid)
+        if (!hasLocalAvatar(local)) this.queueAvatar(item.openid)
       })
     } catch (err) {
       console.error('加载参赛名单失败', err)
