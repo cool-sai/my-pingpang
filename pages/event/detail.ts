@@ -59,6 +59,15 @@ Page({
       }))
       const signupCount = Number(event && event.signupCount) || 0
       const maxPlayers = Number(event && event.maxPlayers) || 0
+      const prev = this.data.event
+      if (
+        event &&
+        prev &&
+        String(prev.cover || '') === String(event.cover || '') &&
+        prev.coverUrl
+      ) {
+        event.coverUrl = prev.coverUrl
+      }
       this.setData({
         event,
         signups,

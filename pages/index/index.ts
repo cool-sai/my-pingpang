@@ -127,8 +127,17 @@ Page({
         })
         return
       }
+      const fresh = res.result.data
+      const prev = this.data.events.find((item) => item && item._id === pending.id)
+      if (
+        prev &&
+        String(prev.cover || '') === String(fresh.cover || '') &&
+        prev.coverUrl
+      ) {
+        fresh.coverUrl = prev.coverUrl
+      }
       this.setData({
-        events: replaceEventInList(this.data.events, pending.id, res.result.data, {
+        events: replaceEventInList(this.data.events, pending.id, fresh, {
           province: this.data.province,
           city: this.data.city
         })
