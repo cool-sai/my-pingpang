@@ -13,6 +13,7 @@
     "pages/event/roster",
     "pages/event/edit",
     "pages/user/user",
+    "pages/user/events",
     "pages/user/profile"
   ],
   "window": {

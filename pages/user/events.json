@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "我的比赛",
+  "enablePullDownRefresh": true,
+  "usingComponents": {
+    "event-card": "/components/event-card/index"
+  }
+}

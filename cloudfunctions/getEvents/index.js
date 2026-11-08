@@ -116,12 +116,42 @@ async function readAvatarFiles(eventId, openids) {
     }
     return files;
 }
+async function loadEventsByIds(ids) {
+    const _ = db.command;
+    const found = [];
+    for (let i = 0; i < ids.length; i += 20) {
+        const chunk = ids.slice(i, i + 20);
+        const res = await db.collection('events').where({ _id: _.in(chunk) }).get();
+        found.push(...res.data);
+    }
+    return found;
+}
+async function loadMyEvents(scope) {
+    const openid = String(cloud.getWXContext().OPENID || '');
+    if (!openid)
+        return { success: false, error: '请先登录' };
+    let rows = [];
+    if (scope === 'created') {
+        const res = await db.collection('events').where({ creatorOpenid: openid }).limit(50).get();
+        rows = res.data;
+    }
+    else {
+        const signed = await db.collection('signups').where({ openid }).limit(50).get();
+        const ids = Array.from(new Set(signed.data.map((row) => String(row.eventId || '')).filter(Boolean)));
+        rows = await loadEventsByIds(ids);
+    }
+    rows.sort((a, b) => String(b.startTime || '').localeCompare(String(a.startTime || '')));
+    return { success: true, data: await withCoverUrls(rows.map(mapEvent)) };
+}
 const main = async (event) => {
     const { status = 'all', id = '' } = event;
     try {
         const avatarOpenids = Array.isArray(event.avatarOpenids) ? event.avatarOpenids : [];
         if (id && avatarOpenids.length > 0) {
             return { success: true, data: await readAvatarFiles(String(id), avatarOpenids) };
+        }
+        if (event.scope === 'created' || event.scope === 'signed') {
+            return await loadMyEvents(event.scope);
         }
         if (id) {
             const one = await db.collection('events').doc(String(id)).get();

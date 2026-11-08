@@ -16,7 +16,8 @@
     "showES6CompileOption": false,
     "checkInvalidKey": true,
     "ignoreDevUnusedFiles": true,
-    "bigPackageSizeSupport": false
+    "bigPackageSizeSupport": false,
+    "useGlassEaselForWxml": false
   },
   "libVersion": "3.17.3",
   "condition": {}

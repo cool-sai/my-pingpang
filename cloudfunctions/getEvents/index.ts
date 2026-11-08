@@ -12,6 +12,7 @@ interface GetEventsEvent {
   province?: string
   city?: string
   avatarOpenids?: string[]
+  scope?: 'created' | 'signed'
 }
 
 const statusMap: Record<EventStatus, { text: string; class: string }> = {
@@ -126,6 +127,33 @@ async function readAvatarFiles(eventId: string, openids: string[]) {
   return files
 }
 
+async function loadEventsByIds(ids: string[]) {
+  const _ = db.command
+  const found: Events[] = []
+  for (let i = 0; i < ids.length; i += 20) {
+    const chunk = ids.slice(i, i + 20)
+    const res = await db.collection('events').where({ _id: _.in(chunk) }).get()
+    found.push(...(res.data as Events[]))
+  }
+  return found
+}
+
+async function loadMyEvents(scope: 'created' | 'signed') {
+  const openid = String(cloud.getWXContext().OPENID || '')
+  if (!openid) return { success: false, error: '请先登录' }
+  let rows: Events[] = []
+  if (scope === 'created') {
+    const res = await db.collection('events').where({ creatorOpenid: openid }).limit(50).get()
+    rows = res.data as Events[]
+  } else {
+    const signed = await db.collection('signups').where({ openid }).limit(50).get()
+    const ids = Array.from(new Set((signed.data as Signups[]).map((row) => String(row.eventId || '')).filter(Boolean)))
+    rows = await loadEventsByIds(ids)
+  }
+  rows.sort((a, b) => String(b.startTime || '').localeCompare(String(a.startTime || '')))
+  return { success: true, data: await withCoverUrls(rows.map(mapEvent)) }
+}
+
 export const main = async (event: GetEventsEvent) => {
   const { status = 'all', id = '' } = event
 
@@ -133,6 +161,10 @@ export const main = async (event: GetEventsEvent) => {
     const avatarOpenids = Array.isArray(event.avatarOpenids) ? event.avatarOpenids : []
     if (id && avatarOpenids.length > 0) {
       return { success: true, data: await readAvatarFiles(String(id), avatarOpenids) }
+    }
+
+    if (event.scope === 'created' || event.scope === 'signed') {
+      return await loadMyEvents(event.scope)
     }
 
     if (id) {
