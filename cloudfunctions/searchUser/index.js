@@ -25,10 +25,9 @@ const main = async (event) => {
             score: true
         })
             .get();
-        return {
-            success: true,
-            data: res.data
-        };
+        const data = res.data
+            .filter((item) => String(item.openid || '').indexOf('virtual') !== 0);
+        return { success: true, data };
     }
     catch (err) {
         const error = err;

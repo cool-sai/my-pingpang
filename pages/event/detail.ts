@@ -20,6 +20,7 @@ Page({
     isOwner: false,
     deleting: false,
     signing: false,
+    scheduling: false,
     showManage: false
   },
 
@@ -88,8 +89,18 @@ Page({
     wx.navigateTo({ url: `/pages/event/roster?id=${this.data.eventId}` })
   },
 
+  goToScore() {
+    if (!this.data.eventId || !this.data.signed || !this.data.event || !this.data.event.started) return
+    wx.navigateTo({ url: `/pages/event/group?id=${this.data.eventId}` })
+  },
+
+  goToGroups() {
+    if (!this.data.eventId || !this.data.event || !this.data.event.started) return
+    wx.navigateTo({ url: `/pages/event/groups?id=${this.data.eventId}` })
+  },
+
   onSignupTap() {
-    if (!this.data.event || this.data.signing) return
+    if (!this.data.event || this.data.signing || this.data.event.started) return
     if (this.data.signed) {
       wx.showModal({
         title: '取消报名？',
@@ -107,7 +118,7 @@ Page({
   },
 
   onSignup() {
-    if (!this.data.event || this.data.signed || this.data.signing || this.data.full || this.data.event.status === 'finished') return
+    if (!this.data.event || this.data.signed || this.data.signing || this.data.full || this.data.event.started || this.data.event.status === 'finished') return
     detailApp.requireLogin('登录后才能报名', {
       success: () => {
         void this.submitSignup()
@@ -188,6 +199,64 @@ Page({
   },
 
   stopMove() {},
+
+  addVirtual() {
+    if (!this.data.isOwner || !this.data.event || this.data.event.started || this.data.scheduling) return
+    this.setData({ showManage: false })
+    wx.showModal({
+      title: '加虚拟球友',
+      editable: true,
+      placeholderText: '人数，最多 30',
+      success: (res) => {
+        if (!res.confirm) return
+        const count = Number.parseInt(String(res.content || '').trim(), 10)
+        if (!count || count < 1 || count > 30) {
+          wx.showToast({ title: '请输入 1 到 30', icon: 'none' })
+          return
+        }
+        void this.callSchedule('virtual', count)
+      }
+    })
+  },
+
+  startEvent() {
+    if (!this.data.isOwner || !this.data.event || this.data.event.started || this.data.scheduling) return
+    this.setData({ showManage: false })
+    wx.showModal({
+      title: '开启比赛？',
+      content: '按报名顺序分组，每组 10 人。开启后不能再报名。',
+      success: (res) => {
+        if (!res.confirm) return
+        void this.callSchedule('start')
+      }
+    })
+  },
+
+  async callSchedule(action: 'virtual' | 'start', count?: number) {
+    if (this.data.scheduling) return
+    this.setData({ scheduling: true })
+    wx.showLoading({ title: '处理中' })
+    try {
+      const res = await detailApp.callFunction<{ count?: number }>({
+        name: 'eventSchedule',
+        data: { id: this.data.eventId, action, count }
+      })
+      wx.hideLoading()
+      if (!res.result.success) {
+        wx.showToast({ title: res.result.error || '失败', icon: 'none' })
+        return
+      }
+      await this.loadEvent(this.data.eventId)
+      const added = res.result.data && res.result.data.count
+      wx.showToast({ title: action === 'virtual' ? `已加入${added || 0}人` : '已开启', icon: 'success' })
+    } catch (err) {
+      wx.hideLoading()
+      wx.showToast({ title: '失败', icon: 'none' })
+      console.error(err)
+    } finally {
+      this.setData({ scheduling: false })
+    }
+  },
 
   goToEdit() {
     if (!this.data.eventId) return

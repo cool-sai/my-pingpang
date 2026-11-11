@@ -34,10 +34,9 @@ export const main = async (event: SearchUserEvent) => {
       })
       .get()
 
-    return {
-      success: true,
-      data: res.data as Pick<Users, 'openid' | 'nickname' | 'avatar' | 'score'>[]
-    }
+    const data = (res.data as Pick<Users, 'openid' | 'nickname' | 'avatar' | 'score'>[])
+      .filter((item) => String(item.openid || '').indexOf('virtual') !== 0)
+    return { success: true, data }
   } catch (err) {
     const error = err as Error
     return { success: false, error: error.message }

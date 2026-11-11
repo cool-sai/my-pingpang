@@ -1,0 +1,28 @@
+<view wx:if="{{!isLoading}}">
+  <scroll-view class="tabs" scroll-x wx:if="{{tabs.length > 1}}">
+    <text
+      class="tab {{item.groupNo === groupNo ? 'tab--on' : ''}}"
+      wx:for="{{tabs}}"
+      wx:key="groupNo"
+      data-group-no="{{item.groupNo}}"
+      bindtap="onTab"
+    >{{item.title}}</text>
+  </scroll-view>
+  <view class="note" wx:if="{{note}}">{{note}}</view>
+  <view class="table" wx:if="{{rows.length}}">
+    <view class="table-row table-row--head">
+      <view class="cell cell--name"></view>
+      <view class="cell" wx:for="{{heads}}" wx:key="*this">{{item}}</view>
+    </view>
+    <view class="table-row" wx:for="{{rows}}" wx:key="no" wx:for-item="row">
+      <view class="cell cell--name">{{row.label}}</view>
+      <view
+        class="cell {{cell.mark === 'win' ? 'cell--win' : ''}} {{cell.mark === 'lose' ? 'cell--lose' : ''}}"
+        wx:for="{{row.cells}}"
+        wx:for-item="cell"
+        wx:key="key"
+      >{{cell.mark === 'win' ? '✓' : cell.mark === 'lose' ? '×' : ''}}</view>
+    </view>
+  </view>
+  <view class="empty-tip" wx:if="{{rows.length === 0}}">这一组没有人</view>
+</view>

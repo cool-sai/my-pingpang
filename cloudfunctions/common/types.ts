@@ -57,6 +57,12 @@ export interface Events {
   status: EventStatus
   maxPlayers: number
   signupCount: number
+  /** 开启后按报名顺序分组，并锁报名 */
+  started?: boolean
+  /** 组内胜负。a、b、winner 都是 openid */
+  results?: Array<{ a: string; b: string; winner: string }>
+  /** 分组备注。组名仍按组号显示为第一组、第二组 */
+  groupNotes?: Array<{ groupNo: number; note: string }>
   createTime: ServerDateValue
   updateTime: ServerDateValue
 }
@@ -81,6 +87,8 @@ export interface Matches {
   }
   winner: MatchWinner
   matchType: string
+  /** 这场约战里记下的胜负才有；友谊赛没有 */
+  eventId?: string
   location?: string
   status: string
   createTime: ServerDateValue
@@ -99,6 +107,10 @@ export interface Signups {
   avatarExpire?: number
   /** 旧字段：曾记录 maxAge，现不再写入/读取 */
   avatarMaxAge?: number
+  /** 开启比赛时写入，从 1 开始，每组 10 人 */
+  groupNo?: number
+  /** 组内序号，从 1 开始。开启时按报名顺序写入 */
+  groupSeq?: number
   createTime: ServerDateValue
 }
 

@@ -22,6 +22,11 @@
       <text class="line-v">{{(event.signupCount || 0) + '/' + (event.maxPlayers > 0 ? event.maxPlayers : '不限')}}</text>
       <text class="roster-link" bindtap="goToRoster">参赛名单</text>
     </view>
+    <view class="line" wx:if="{{event.started}}">
+      <text class="line-k">赛程</text>
+      <text wx:if="{{signed}}" class="roster-link" bindtap="goToScore">录入成绩</text>
+      <text class="roster-link" bindtap="goToGroups">查看分组</text>
+    </view>
   </view>
 
   <view class="block">
@@ -39,13 +44,15 @@
     class="submit-btn {{signed ? 'submit-btn--ghost' : ''}}"
     hover-class="none"
     loading="{{signing}}"
-    disabled="{{signing || (!signed && (event.status === 'finished' || full))}}"
+    disabled="{{signing || event.started || (!signed && (event.status === 'finished' || full))}}"
     bindtap="onSignupTap"
-  >{{signed ? '取消报名' : event.status === 'finished' ? '已结束' : full ? '已满' : '报名'}}</button>
+  >{{event.started ? (signed ? '已报名' : '已开始') : signed ? '取消报名' : event.status === 'finished' ? '已结束' : full ? '已满' : '报名'}}</button>
 </view>
 
 <view class="manage-mask {{showManage ? 'manage-mask--on' : ''}}" wx:if="{{isOwner}}" catchtouchmove="stopMove" bindtap="closeManage"></view>
 <view class="manage-sheet {{showManage ? 'manage-sheet--on' : ''}}" wx:if="{{isOwner}}" catchtouchmove="stopMove">
+  <view wx:if="{{event && !event.started}}" class="manage-action" bindtap="addVirtual">加虚拟球友</view>
+  <view wx:if="{{event && !event.started}}" class="manage-action" bindtap="startEvent">开启比赛</view>
   <view class="manage-action" bindtap="goToEdit">编辑</view>
   <view class="manage-action manage-action--danger" bindtap="onDelete">删除</view>
   <view class="manage-gap"></view>

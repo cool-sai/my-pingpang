@@ -14,7 +14,9 @@ const main = async (event) => {
             query = query.orderBy('score', 'desc');
         }
         const res = await query.limit(100).get();
-        const list = res.data.map((item, index) => ({
+        const list = res.data
+            .filter((item) => String(item.openid || '').indexOf('virtual') !== 0)
+            .map((item, index) => ({
             ...item,
             rank: index + 1
         }));

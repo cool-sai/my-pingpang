@@ -1,0 +1,15 @@
+<view class="container" wx:if="{{!isLoading}}">
+  <view class="head" wx:if="{{title}}">
+    <text class="head-title">{{title}}</text>
+    <text wx:if="{{note}}" class="head-note">{{note}}</text>
+  </view>
+  <view class="person" wx:for="{{opponents}}" wx:key="openid">
+    <text class="person-name">{{item.nickname}}</text>
+    <text wx:if="{{item.result}}" class="person-result {{item.result === '胜' ? 'person-result--win' : 'person-result--lose'}}">{{item.result}}</text>
+    <block wx:else>
+      <text class="person-btn" data-openid="{{item.openid}}" data-win="1" bindtap="onResult">胜</text>
+      <text class="person-btn person-btn--lose" data-openid="{{item.openid}}" data-win="0" bindtap="onResult">负</text>
+    </block>
+  </view>
+  <view class="empty-tip" wx:if="{{opponents.length === 0}}">{{emptyText}}</view>
+</view>

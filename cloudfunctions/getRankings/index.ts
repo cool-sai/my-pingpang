@@ -24,10 +24,12 @@ export const main = async (event: GetRankingsEvent) => {
 
     const res = await query.limit(100).get()
 
-    const list = (res.data as Users[]).map((item, index) => ({
-      ...item,
-      rank: index + 1
-    }))
+    const list = (res.data as Users[])
+      .filter((item) => String(item.openid || '').indexOf('virtual') !== 0)
+      .map((item, index) => ({
+        ...item,
+        rank: index + 1
+      }))
 
     const myRank = list.find((item) => item.openid === openid) || null
 

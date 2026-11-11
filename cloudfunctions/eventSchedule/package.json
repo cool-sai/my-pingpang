@@ -1,0 +1,9 @@
+{
+  "name": "eventSchedule",
+  "version": "1.0.0",
+  "description": "开启比赛、虚拟球友、组内胜负",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

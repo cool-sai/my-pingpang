@@ -76,7 +76,9 @@ async function loadSignups(eventId) {
             return {
                 openid: row.openid,
                 nickname: row.nickname || '球友',
-                avatar
+                avatar,
+                groupNo: Number(row.groupNo) || 0,
+                groupSeq: Number(row.groupSeq) || 0
             };
         });
     }
