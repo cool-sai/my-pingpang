@@ -120,6 +120,18 @@ export const schema: SchemaModel = {
         loseMatches: { type: 'number', note: '负' },
         province: { type: 'string', note: '首页筛选的省，可空', optional: true },
         city: { type: 'string', note: '首页筛选的市，可空', optional: true },
+        ownerOpenid: {
+          type: 'string',
+          note: '仅虚拟球友使用。创建人的 openid；旧数据可空，普通用户首次编辑或加入比赛时认领。超管编辑不改。',
+          optional: true,
+          port: true,
+          ref: 'users.openid',
+        },
+        cancelled: {
+          type: 'boolean',
+          note: '已注销。软删除标记；后边删除用户时写 true，不物理删文档。旧数据没有此字段视为未注销。',
+          optional: true,
+        },
         createTime: { type: 'serverDate', note: '服务器时间' },
         updateTime: { type: 'serverDate', note: '服务器时间' },
       },
@@ -218,16 +230,16 @@ export const schema: SchemaModel = {
       blurb: '记一场一对一比分',
       key: '_id',
       fields: {
-        _id: { type: 'string', note: '文档 id' },
+        _id: { type: 'string', note: '友谊赛由 add 自动生成；约战局为 eventId_openidA_openidB，两个 openid 按字典序排列' },
         player1Openid: {
           type: 'string',
-          note: '记录人',
+          note: '友谊赛是记录人；约战局是两个 openid 里字典序较小的那个',
           port: true,
           ref: 'users.openid',
         },
         player2Openid: {
           type: 'string',
-          note: '对手',
+          note: '友谊赛是对手；约战局是两个 openid 里字典序较大的那个',
           port: true,
           ref: 'users.openid',
         },
@@ -261,7 +273,7 @@ export const schema: SchemaModel = {
         },
         scoreChange: {
           type: 'object',
-          note: '积分增减',
+          note: '积分增减；约战局当前为 0，待结算后再入账（尚未做）',
           detail: 'player1、player2',
           fields: {
             player1: { type: 'number' },
@@ -317,7 +329,10 @@ export const schema: SchemaModel = {
     '报名在 <code class="text-stone-800">signups</code>。文档 id 是比赛 id 加 openid。<code class="text-stone-800">signupEvent</code> 写入时把 <code class="text-stone-800">events.signupCount</code> 加一。',
     '<code class="text-stone-800">users.score</code> 是积分。<code class="text-stone-800">matches.player1.score</code> 是本场比分。',
     '页面上的信用分 <code class="text-stone-800">creditScore</code> 不在 <code class="text-stone-800">users</code> 里，读不到时按 80 显示。',
-    'denorm 不回填：改昵称/头像后，旧的 <code class="text-stone-800">events.creatorName</code> 与 <code class="text-stone-800">matches.player*</code> 快照不会自动更新。',
+    'denorm 不回填：改昵称/头像后，旧的 <code class="text-stone-800">events.creatorName</code> 与 <code class="text-stone-800">matches.player*</code> 快照不会自动更新。<code class="text-stone-800">updateVirtualUser</code> 会同步该虚拟球友在 <code class="text-stone-800">signups</code> 里的昵称和头像，但仍不回填 matches。',
+    '虚拟球友的 <code class="text-stone-800">openid</code> 以 <code class="text-stone-800">virtual</code> 开头，按创建人 <code class="text-stone-800">ownerOpenid</code> 分开。排名和友谊赛把虚拟球友当成普通球友；管理页与归属仍在。新建虚拟球友初始积分与真人一样是 1000。',
+    '约战记胜负会 upsert <code class="text-stone-800">matches</code>，文档 id 为 <code class="text-stone-800">eventId</code> 加两个按字典序排列的 openid。友谊赛仍由 <code class="text-stone-800">add</code> 自动生成 id。',
+    '删除用户用软删除：给 <code class="text-stone-800">users.cancelled</code> 写 <code class="text-stone-800">true</code>，不物理删文档，避免名单和对阵里的 openid 悬空。主页对已注销或已经找不到的人显示「已注销」。',
   ],
 
   edges: [
@@ -347,6 +362,13 @@ export const schema: SchemaModel = {
       from: 'events.creatorOpenid',
       to: 'users.openid',
       label: 'creatorOpenid',
+      style: 'straight',
+    },
+    {
+      kind: 'ref',
+      from: 'users.ownerOpenid',
+      to: 'users.openid',
+      label: 'ownerOpenid',
       style: 'straight',
     },
     {

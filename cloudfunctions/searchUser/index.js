@@ -22,11 +22,13 @@ const main = async (event) => {
             openid: true,
             nickname: true,
             avatar: true,
-            score: true
+            score: true,
+            cancelled: true
         })
             .get();
         const data = res.data
-            .filter((item) => String(item.openid || '').indexOf('virtual') !== 0);
+            .filter((item) => item.cancelled !== true)
+            .map(({ cancelled, ...item }) => item);
         return { success: true, data };
     }
     catch (err) {

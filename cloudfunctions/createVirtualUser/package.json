@@ -1,0 +1,9 @@
+{
+  "name": "createVirtualUser",
+  "version": "1.0.0",
+  "description": "新建虚拟球友，只写入 users，不加入比赛",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

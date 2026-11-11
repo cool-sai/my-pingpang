@@ -58,9 +58,6 @@ export const main = async (event: CreateMatchEvent) => {
   if (openid === opponentOpenid) {
     return { success: false, error: '不能和自己比赛' }
   }
-  if (String(opponentOpenid).indexOf('virtual') === 0) {
-    return { success: false, error: '不能和虚拟球友记分' }
-  }
 
   try {
     const [player1Res, player2Res] = await Promise.all([

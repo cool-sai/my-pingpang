@@ -35,6 +35,7 @@ function portPoint(
 }
 
 function facing(positions: Record<string, Pos>, fromCard: string, toCard: string): ['left' | 'right', 'left' | 'right'] {
+  if (fromCard === toCard) return ['right', 'right']
   const a = positions[fromCard] || { x: 0, y: 0 }
   const b = positions[toCard] || { x: 0, y: 0 }
   const ax = a.x + CARD_W / 2
@@ -42,11 +43,17 @@ function facing(positions: Record<string, Pos>, fromCard: string, toCard: string
   return ax <= bx ? ['right', 'left'] : ['left', 'right']
 }
 
+function controlPull(a: Pt, b: Pt, fromSide: 'left' | 'right', toSide: 'left' | 'right') {
+  const sameSideLoop = fromSide === toSide && Math.abs(b.x - a.x) < 1
+  const dy = Math.abs(b.y - a.y)
+  if (sameSideLoop) return Math.max(36, Math.min(52, dy * 0.2 + 36))
+  const dx = Math.abs(b.x - a.x)
+  return Math.max(40, Math.min(180, dx * 0.45 + dy * 0.15))
+}
+
 /** Smooth cubic Bezier: horizontal leave/enter at ports (ERD-style). */
 function curve(a: Pt, b: Pt, fromSide: 'left' | 'right', toSide: 'left' | 'right') {
-  const dx = Math.abs(b.x - a.x)
-  const dy = Math.abs(b.y - a.y)
-  const pull = Math.max(40, Math.min(180, dx * 0.45 + dy * 0.15))
+  const pull = controlPull(a, b, fromSide, toSide)
   const c1x = a.x + (fromSide === 'right' ? pull : -pull)
   const c1y = a.y
   const c2x = b.x + (toSide === 'right' ? pull : -pull)
@@ -55,9 +62,7 @@ function curve(a: Pt, b: Pt, fromSide: 'left' | 'right', toSide: 'left' | 'right
 }
 
 function curveLabel(a: Pt, b: Pt, fromSide: 'left' | 'right', toSide: 'left' | 'right') {
-  const dx = Math.abs(b.x - a.x)
-  const dy = Math.abs(b.y - a.y)
-  const pull = Math.max(40, Math.min(180, dx * 0.45 + dy * 0.15))
+  const pull = controlPull(a, b, fromSide, toSide)
   const c1x = a.x + (fromSide === 'right' ? pull : -pull)
   const c1y = a.y
   const c2x = b.x + (toSide === 'right' ? pull : -pull)

@@ -251,6 +251,13 @@ button::after {
 .is-skeleton .rank-name,
 .is-skeleton .rank-detail,
 .is-skeleton .rank-score,
+.is-skeleton .profile-name,
+.is-skeleton .profile-score,
+.is-skeleton .chart-title,
+.is-skeleton .list-title,
+.is-skeleton .result-mark,
+.is-skeleton .score-line,
+.is-skeleton .match-event,
 .is-skeleton .rank-num,
 .is-skeleton .my-rank-num,
 .is-skeleton .field-label,
@@ -278,6 +285,10 @@ button::after {
 .is-skeleton .card-name,
 .is-skeleton .person-name,
 .is-skeleton .rank-name,
+.is-skeleton .profile-name,
+.is-skeleton .chart-title,
+.is-skeleton .list-title,
+.is-skeleton .match-event,
 .is-skeleton .line-v,
 .is-skeleton .block-v,
 .is-skeleton .tip,
@@ -304,6 +315,8 @@ button::after {
 .is-skeleton .my-rank-num,
 .is-skeleton .player-score,
 .is-skeleton .rank-score,
+.is-skeleton .profile-score,
+.is-skeleton .result-mark,
 .is-skeleton .stat-value {
   min-width: 96rpx;
   border-radius: 999rpx;
@@ -341,6 +354,7 @@ button::after {
 .is-skeleton .club-avatar,
 .is-skeleton .player-avatar,
 .is-skeleton .rank-avatar,
+.is-skeleton .profile-avatar,
 .is-skeleton .rank-num {
   background: rgba(22, 40, 30, 0.07) !important;
   background-image: none !important;
@@ -349,11 +363,12 @@ button::after {
 .is-skeleton .person-avatar,
 .is-skeleton .club-avatar,
 .is-skeleton .player-avatar,
-.is-skeleton .rank-avatar {
+.is-skeleton .rank-avatar,
+.is-skeleton .profile-avatar {
   border-radius: 50%;
 }
 
-.is-skeleton image:not(.person-avatar):not(.player-avatar):not(.rank-avatar) {
+.is-skeleton image:not(.person-avatar):not(.player-avatar):not(.rank-avatar):not(.profile-avatar) {
   opacity: 0;
 }
 
@@ -370,3 +385,7 @@ button::after {
   border-radius: 8rpx;
 }
 
+.is-skeleton .chart-box {
+  background: rgba(22, 40, 30, 0.07) !important;
+  border-radius: 12rpx;
+}

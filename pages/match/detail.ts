@@ -11,15 +11,21 @@ Page({
   },
 
   async loadMatch(matchId: string) {
+    const id = String(matchId || '').trim()
+    if (!id) {
+      this.setData({ match: null, isLoading: false })
+      return
+    }
     try {
       const res = await matchDetailApp.callFunction<Array<Record<string, any>>>({
         name: 'getMatches',
-        data: { status: 'all' }
+        data: { id }
       })
-      const match = (res.result.data || []).find((item) => item._id === matchId) || null
+      const match = (res.result && res.result.success ? (res.result.data || [])[0] : null) || null
       this.setData({ match })
     } catch (err) {
       console.error('加载对阵失败', err)
+      this.setData({ match: null })
     } finally {
       this.setData({ isLoading: false })
     }

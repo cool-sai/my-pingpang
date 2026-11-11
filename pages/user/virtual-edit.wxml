@@ -1,0 +1,21 @@
+<form bindsubmit="submit">
+  <view class="container has-submit {{isLoading ? 'is-skeleton' : ''}}">
+    <view class="avatar-block">
+      <view class="avatar-btn" bindtap="chooseAvatar">
+        <image class="avatar profile-avatar" mode="aspectFill" src="{{isLoading ? '' : (pickedAvatar || avatar || placeholder)}}" />
+      </view>
+      <text class="avatar-tip">{{isLoading ? '' : (pickedAvatar || avatar ? '点击头像可以更换' : '头像可以不填')}}</text>
+      <text class="avatar-clear" wx:if="{{!isLoading && (pickedAvatar || avatar)}}" bindtap="clearAvatar">去掉头像</text>
+    </view>
+
+    <view class="field">
+      <text class="field-label">昵称</text>
+      <input class="field-input" name="nickname" maxlength="20" placeholder="请填写昵称" placeholder-class="field-placeholder" value="{{nickname}}" disabled="{{isLoading || submitting}}" />
+    </view>
+  </view>
+
+  <view class="submit-bar">
+    <button class="submit-btn" hover-class="none" form-type="submit" loading="{{submitting}}" disabled="{{isLoading || submitting}}">保存</button>
+  </view>
+</form>
+<page-loading wx:if="{{isLoading}}" />

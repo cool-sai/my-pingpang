@@ -42,6 +42,7 @@ interface IBoardRow {
   no: number
   label: string
   mine: boolean
+  openid: string
   cells: IBoardCell[]
 }
 
@@ -64,6 +65,7 @@ function boardView(
       no,
       label: leftName,
       mine: myOpenid !== '' && openid === myOpenid,
+      openid,
       cells: people.map((other, colIndex) => {
         const otherId = String(other.openid || '')
         const otherNo = Number(other.groupSeq) || colIndex + 1
@@ -245,6 +247,13 @@ Page({
         void this.saveNote(groupNo, String(res.content || '').trim())
       }
     })
+  },
+
+
+  goToProfile(e: WechatMiniprogram.BaseEvent) {
+    const openid = String((e.currentTarget.dataset && e.currentTarget.dataset.openid) || '')
+    if (!openid || openid.indexOf('sk-') === 0) return
+    wx.navigateTo({ url: `/pages/user/detail?openid=${openid}` })
   },
 
   async saveNote(groupNo: number, note: string) {

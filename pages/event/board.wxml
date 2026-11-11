@@ -24,7 +24,7 @@
       <view class="cell {{item.mine ? 'cell--head-mine' : ''}}" wx:for="{{sk.heads(heads, isLoading, 4)}}" wx:key="no">{{item.no}}</view>
     </view>
     <view class="table-row {{row.mine ? 'table-row--mine' : ''}}" wx:for="{{sk.rows(rows, isLoading, 4)}}" wx:key="no" wx:for-item="row">
-      <view class="cell cell--name {{row.mine ? 'cell--mine' : ''}}">{{row.label}}</view>
+      <view class="cell cell--name {{row.mine ? 'cell--mine' : ''}}" data-openid="{{row.openid}}" bindtap="goToProfile">{{row.label}}</view>
       <view
         class="cell {{cell.self ? 'cell--self' : ''}} {{cell.colMine ? 'cell--col-mine' : ''}} {{cell.mark === 'win' ? 'cell--win' : ''}} {{cell.mark === 'lose' ? 'cell--lose' : ''}}"
         wx:for="{{row.cells}}"
@@ -46,7 +46,7 @@
       <text class="st-num">负</text>
     </view>
     <view class="standings-row {{item.mine ? 'standings-row--mine' : ''}}" wx:for="{{standings}}" wx:key="no">
-      <text class="st-name">{{item.label}}</text>
+      <text class="st-name" data-openid="{{item.openid}}" bindtap="goToProfile">{{item.label}}</text>
       <text class="st-num">{{item.win}}</text>
       <text class="st-num">{{item.lose}}</text>
     </view>

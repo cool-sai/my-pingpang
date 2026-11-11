@@ -32,7 +32,8 @@ Page({
       { id: 'created', icon: '📌', title: '我发起的', url: '/pages/user/events?scope=created' },
       { id: 'signed', icon: '📝', title: '我报名的', url: '/pages/user/events?scope=signed' },
       { id: 'record', icon: '🏓', title: '我的战绩', url: '/pages/match/match' },
-      { id: 'score', icon: '🏆', title: '我的积分', url: '/pages/rank/rank', tab: true },
+      { id: 'score', icon: '🏆', title: '积分', url: '/pages/user/detail' },
+      { id: 'virtuals', icon: '👥', title: '虚拟球友', url: '/pages/user/virtuals' },
       { id: 'credit', icon: '✅', title: '我的信用', url: '' }
     ] as IMenuItem[]
   },

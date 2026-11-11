@@ -76,7 +76,10 @@ Page({
   },
 
   onViewMyRank() {
-    if (this.data.isLogin) return
+    if (this.data.isLogin) {
+      wx.navigateTo({ url: '/pages/user/detail' })
+      return
+    }
     rankApp.requireLogin('登录后查看我的排名', {
       success: () => {
         void this.loadRankings()

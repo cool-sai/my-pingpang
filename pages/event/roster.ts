@@ -179,5 +179,11 @@ Page({
     } catch (err) {
       console.error('读取头像失败', err)
     }
+  },
+
+  goToProfile(e: WechatMiniprogram.BaseEvent) {
+    const openid = String((e.currentTarget.dataset && e.currentTarget.dataset.openid) || '')
+    if (!openid || openid.indexOf('sk-') === 0) return
+    wx.navigateTo({ url: `/pages/user/detail?openid=${openid}` })
   }
 })

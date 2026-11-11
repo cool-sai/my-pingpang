@@ -15,7 +15,7 @@ const main = async (event) => {
         }
         const res = await query.limit(100).get();
         const list = res.data
-            .filter((item) => String(item.openid || '').indexOf('virtual') !== 0)
+            .filter((item) => item.cancelled !== true)
             .map((item, index) => ({
             ...item,
             rank: index + 1

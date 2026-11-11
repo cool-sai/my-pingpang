@@ -72,20 +72,20 @@ async function withCoverUrl(item) {
 }
 async function loadSignups(eventId) {
     try {
-    const res = await db.collection('signups').where({ eventId }).limit(128).get();
-    const rows = res.data.slice().sort((a, b) => signupTime(a.createTime) - signupTime(b.createTime));
-    const urls = await signFileUrls(rows.map((row) => String(row.avatar || '')));
-    return rows.map((row) => {
-        const fileID = String(row.avatar || '');
-        const avatar = urls.get(fileID) || (fileID.indexOf('https://') === 0 ? fileID : (fileID.indexOf('cloud://') === 0 ? '' : fileID));
-        return {
-            openid: row.openid,
-            nickname: row.nickname || '球友',
-            avatar,
-            groupNo: Number(row.groupNo) || 0,
-            groupSeq: Number(row.groupSeq) || 0
-        };
-    });
+        const res = await db.collection('signups').where({ eventId }).limit(128).get();
+        const rows = res.data.slice().sort((a, b) => signupTime(a.createTime) - signupTime(b.createTime));
+        const urls = await signFileUrls(rows.map((row) => String(row.avatar || '')));
+        return rows.map((row) => {
+            const fileID = String(row.avatar || '');
+            const avatar = urls.get(fileID) || (fileID.indexOf('https://') === 0 ? fileID : (fileID.indexOf('cloud://') === 0 ? '' : fileID));
+            return {
+                openid: row.openid,
+                nickname: row.nickname || '球友',
+                avatar,
+                groupNo: Number(row.groupNo) || 0,
+                groupSeq: Number(row.groupSeq) || 0
+            };
+        });
     }
     catch (err) {
         console.error('读取报名名单失败', err);

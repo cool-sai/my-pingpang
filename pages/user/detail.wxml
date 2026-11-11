@@ -1,0 +1,68 @@
+<wxs src="../../utils/skeleton.wxs" module="sk" />
+<page-loading wx:if="{{isLoading}}" />
+<view class="container {{isLoading && !user ? 'is-skeleton' : ''}}" wx:if="{{isLoading || user}}">
+  <view class="profile-head">
+    <image class="profile-avatar" mode="aspectFill" src="{{isLoading && !user ? '' : (user.avatar || placeholder)}}" />
+    <view class="profile-meta">
+      <text class="profile-name">{{user.nickname}}</text>
+      <view class="profile-score-row">
+        <text class="profile-score">积分 {{isLoading && !user ? '' : (user.score || 0)}}</text>
+        <text class="profile-rank" wx:if="{{!isLoading && user.rank}}">第{{user.rank}}名</text>
+      </view>
+    </view>
+    <view class="profile-edit" wx:if="{{!isLoading && canEdit}}" bindtap="goToEdit">编辑资料</view>
+  </view>
+
+  <view class="stats-section">
+    <view class="stat-item">
+      <text class="stat-value">{{user.totalMatches || 0}}</text>
+      <text class="stat-label">场次</text>
+    </view>
+    <view class="stat-divider"></view>
+    <view class="stat-item">
+      <text class="stat-value">{{user.winMatches || 0}}</text>
+      <text class="stat-label">胜</text>
+    </view>
+    <view class="stat-divider"></view>
+    <view class="stat-item">
+      <text class="stat-value">{{user.loseMatches || 0}}</text>
+      <text class="stat-label">负</text>
+    </view>
+    <view class="stat-divider"></view>
+    <view class="stat-item">
+      <text class="stat-value">{{isLoading && !user ? '' : ((user.winRate || 0) + '%')}}</text>
+      <text class="stat-label">胜率</text>
+    </view>
+  </view>
+
+  <view class="chart-card">
+    <text class="chart-title">积分变化</text>
+    <view class="chart-box" wx:if="{{isLoading || chart.length}}">
+      <canvas type="2d" id="scoreChart" class="chart-canvas" wx:if="{{!isLoading && chart.length}}"></canvas>
+    </view>
+    <view class="empty-tip" wx:if="{{!isLoading && !chart.length}}">暂无积分变化</view>
+  </view>
+
+  <view class="match-list">
+    <view class="list-title">比赛记录</view>
+    <view class="match-item" wx:for="{{sk.pad(matches, isLoading, 3)}}" wx:key="key">
+      <text class="match-opponent" data-openid="{{item.right.openid}}" catchtap="goToOpponent">{{item.right.nickname}}</text>
+      <text class="result-mark {{item.winner === 'win' ? 'is-win' : item.winner === 'lose' ? 'is-lose' : ''}}">{{item._sk ? '' : (item.winner === 'win' ? '胜' : item.winner === 'lose' ? '负' : '平')}}</text>
+      <text
+        class="match-date {{item.eventId ? 'is-link' : ''}}"
+        data-event-id="{{item.eventId}}"
+        catchtap="goToEventBoard"
+      >{{item.date}}</text>
+    </view>
+    <view class="empty-tip" wx:if="{{!isLoading && matches.length === 0}}">暂无比赛记录</view>
+  </view>
+</view>
+<view class="container" wx:elif="{{needLogin}}">
+  <view class="empty-tip">
+    <text>登录后查看自己的主页</text>
+    <button class="login-btn" hover-class="none" bindtap="onLogin">去登录</button>
+  </view>
+</view>
+<view class="container" wx:else>
+  <view class="empty-tip" wx:if="{{!isLoading && cancelled}}">已注销</view>
+</view>

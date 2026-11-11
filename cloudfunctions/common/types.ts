@@ -26,6 +26,10 @@ export interface Users {
   province?: string
   /** 首页筛选的市，可空 */
   city?: string
+  /** 仅虚拟球友使用。创建人的 openid；旧数据可能没有，首次被普通用户编辑或加入比赛时认领。超级管理员编辑时不改此字段。 */
+  ownerOpenid?: string
+  /** 已注销。软删除标记，旧数据没有此字段视为未注销。 */
+  cancelled?: boolean
   createTime: ServerDateValue
   updateTime: ServerDateValue
 }
@@ -76,11 +80,15 @@ export interface MatchPlayerSnapshot {
 }
 
 export interface Matches {
+  /** 友谊赛由 add 自动生成；约战局为 `${eventId}_${a}_${b}`，a、b 是按字典序排列的两个 openid */
   _id: string
+  /** 友谊赛是记录人；约战局是两个 openid 里字典序较小的那个 */
   player1Openid: string
+  /** 友谊赛是对手；约战局是两个 openid 里字典序较大的那个 */
   player2Openid: string
   player1: MatchPlayerSnapshot
   player2: MatchPlayerSnapshot
+  /** 友谊赛立即改积分；约战局当前为 0，待整场结算后再入账（尚未做） */
   scoreChange: {
     player1: number
     player2: number

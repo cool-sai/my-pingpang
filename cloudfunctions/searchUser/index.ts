@@ -30,12 +30,14 @@ export const main = async (event: SearchUserEvent) => {
         openid: true,
         nickname: true,
         avatar: true,
-        score: true
+        score: true,
+        cancelled: true
       })
       .get()
 
-    const data = (res.data as Pick<Users, 'openid' | 'nickname' | 'avatar' | 'score'>[])
-      .filter((item) => String(item.openid || '').indexOf('virtual') !== 0)
+    const data = (res.data as Pick<Users, 'openid' | 'nickname' | 'avatar' | 'score' | 'cancelled'>[])
+      .filter((item) => item.cancelled !== true)
+      .map(({ cancelled, ...item }) => item)
     return { success: true, data }
   } catch (err) {
     const error = err as Error

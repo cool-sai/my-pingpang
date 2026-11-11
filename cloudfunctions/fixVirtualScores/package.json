@@ -1,0 +1,9 @@
+{
+  "name": "fixVirtualScores",
+  "version": "1.0.0",
+  "description": "一次性：把未上场且积分为 0 的旧虚拟球友积分补成 1000",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

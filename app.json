@@ -16,7 +16,10 @@
     "pages/event/edit",
     "pages/user/user",
     "pages/user/events",
-    "pages/user/profile"
+    "pages/user/profile",
+    "pages/user/detail",
+    "pages/user/virtuals",
+    "pages/user/virtual-edit"
   ],
   "window": {
     "navigationBarTextStyle": "black",

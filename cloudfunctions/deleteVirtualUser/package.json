@@ -1,0 +1,9 @@
+{
+  "name": "deleteVirtualUser",
+  "version": "1.0.0",
+  "description": "超级管理员删除未报名的虚拟球友",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

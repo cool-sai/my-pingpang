@@ -33,8 +33,11 @@ function pad(list, loading, count) {
       player2: { nickname: ' ', avatar: PIXEL, score: '' },
       player1Score: '',
       player2Score: '',
-      left: { openid: 'l' + i, label: ' ', win: false },
-      right: { openid: 'r' + i, label: ' ', win: false },
+      key: 'sk-' + i,
+      left: { openid: 'l' + i, label: ' ', nickname: ' ', avatar: PIXEL, score: '', win: false },
+      right: { openid: 'r' + i, label: ' ', nickname: ' ', avatar: PIXEL, score: '', win: false },
+      winner: '',
+      eventName: '',
       done: false,
       mine: false
     })

@@ -8,6 +8,17 @@ function virtualNo(nickname) {
     const matched = /^球友(\d+)$/.exec(String(nickname || ''));
     return matched ? Number(matched[1]) : 0;
 }
+function virtualOpenidNo(openid) {
+    const matched = /^virtual(\d+)$/.exec(String(openid || ''));
+    return matched ? Number(matched[1]) : 0;
+}
+function isUnowned(user) {
+    return !String(user.ownerOpenid || '').trim();
+}
+function inMyVirtualPool(user, ownerOpenid) {
+    const owner = String(user.ownerOpenid || '').trim();
+    return !owner || owner === ownerOpenid;
+}
 function signupTime(value) {
     if (value instanceof Date)
         return value.getTime();
@@ -22,33 +33,107 @@ function signupTime(value) {
 function pairKey(left, right) {
     return left < right ? { a: left, b: right } : { a: right, b: left };
 }
+function matchIdFor(eventId, pair) {
+    return `${eventId}_${pair.a}_${pair.b}`;
+}
+function playerSnap(openid, people) {
+    const found = people.find((item) => item.openid === openid);
+    return {
+        openid,
+        nickname: (found && found.nickname) || '球友',
+        avatar: (found && found.avatar) || '',
+        score: 0
+    };
+}
+// 约战记胜负同时 upsert matches，scoreChange 先写 0，不改 users 积分
+async function upsertEventMatch(transaction, eventId, pair, winner, people) {
+    const id = matchIdFor(eventId, pair);
+    const side = winner === pair.a ? 'player1' : 'player2';
+    const doc = {
+        player1Openid: pair.a,
+        player2Openid: pair.b,
+        player1: playerSnap(pair.a, people),
+        player2: playerSnap(pair.b, people),
+        scoreChange: { player1: 0, player2: 0 },
+        winner: side,
+        matchType: 'event',
+        eventId,
+        status: 'completed'
+    };
+    let existing = null;
+    try {
+        const snap = await transaction.collection('matches').doc(id).get();
+        existing = snap && snap.data;
+    }
+    catch (err) {
+        existing = null;
+    }
+    if (existing) {
+        await transaction.collection('matches').doc(id).update({
+            data: {
+                winner: side,
+                player1: doc.player1,
+                player2: doc.player2,
+                player1Openid: pair.a,
+                player2Openid: pair.b,
+                scoreChange: { player1: 0, player2: 0 },
+                matchType: 'event',
+                eventId,
+                status: 'completed'
+            }
+        });
+        return;
+    }
+    await transaction.collection('matches').doc(id).set({
+        data: { ...doc, createTime: db.serverDate() }
+    });
+}
+function signupSnap(row) {
+    return {
+        openid: row.openid,
+        nickname: row.nickname || '球友',
+        avatar: row.avatar || ''
+    };
+}
 async function loadSignups(eventId) {
     const res = await db.collection('signups').where({ eventId }).limit(128).get();
     return res.data.slice().sort((a, b) => signupTime(a.createTime) - signupTime(b.createTime));
 }
 async function loadVirtualUsers() {
-    const res = await db.collection('users').where({
-        openid: db.RegExp({ regexp: '^virtual', options: '' })
-    }).limit(100).get();
-    return res.data.slice().sort((a, b) => {
+    const all = [];
+    const query = { openid: db.RegExp({ regexp: '^virtual', options: '' }) };
+    for (let skip = 0; skip < 1000; skip += 100) {
+        const res = await db.collection('users').where(query).skip(skip).limit(100).get();
+        const rows = (res.data || []);
+        all.push(...rows);
+        if (rows.length < 100)
+            break;
+    }
+    return all.slice().sort((a, b) => {
         const diff = virtualNo(a.nickname) - virtualNo(b.nickname);
         return diff || String(a.openid).localeCompare(String(b.openid));
     });
 }
-async function addVirtual(eventId, event, count) {
+async function addVirtual(eventId, event, count, ownerOpenid) {
     const rows = await loadSignups(eventId);
     const room = event.maxPlayers > 0 ? event.maxPlayers - rows.length : count;
     const n = Math.min(count, room);
     if (n < 1)
         return { success: false, error: '人数已满' };
     const taken = new Set(rows.map((row) => row.openid));
-    const pool = await loadVirtualUsers();
+    const allVirtual = await loadVirtualUsers();
+    const pool = allVirtual.filter((user) => inMyVirtualPool(user, ownerOpenid) && !taken.has(user.openid));
     const chosen = pool
-        .filter((user) => !taken.has(user.openid))
         .slice(0, n)
-        .map((user) => ({ openid: user.openid, nickname: user.nickname || '球友' }));
-    const openids = new Set(pool.map((user) => user.openid));
-    let nextNo = pool.reduce((max, user) => Math.max(max, virtualNo(user.nickname)), 0);
+        .map((user) => ({
+        openid: user.openid,
+        nickname: user.nickname || '球友',
+        avatar: user.avatar || '',
+        claim: isUnowned(user),
+        docId: user._id
+    }));
+    const openids = new Set(allVirtual.map((user) => user.openid));
+    let nextNo = allVirtual.reduce((max, user) => Math.max(max, virtualNo(user.nickname), virtualOpenidNo(user.openid)), 0);
     while (chosen.length < n) {
         nextNo += 1;
         const openid = `virtual${nextNo}`;
@@ -61,24 +146,30 @@ async function addVirtual(eventId, event, count) {
             avatar: '',
             userNo: 0,
             profileReady: true,
-            score: 0,
+            score: 1000,
             totalMatches: 0,
             winMatches: 0,
             loseMatches: 0,
+            ownerOpenid,
             createTime: db.serverDate(),
             updateTime: db.serverDate()
         };
         await db.collection('users').add({ data: user });
         openids.add(openid);
-        chosen.push({ openid, nickname });
+        chosen.push({ openid, nickname, avatar: '', claim: false, docId: '' });
     }
     for (let i = 0; i < chosen.length; i += 1) {
         const person = chosen[i];
+        if (person.claim && person.docId) {
+            await db.collection('users').doc(person.docId).update({
+                data: { ownerOpenid, updateTime: db.serverDate() }
+            });
+        }
         const signup = {
             eventId,
             openid: person.openid,
             nickname: person.nickname,
-            avatar: '',
+            avatar: person.avatar || '',
             createTime: db.serverDate()
         };
         await db.collection('signups').doc(`${eventId}_${person.openid}`).set({ data: signup });
@@ -151,6 +242,7 @@ async function reportResult(eventId, openid, opponent, win) {
                 throw new Error('已经记过');
             results.push({ a: pair.a, b: pair.b, winner });
             await transaction.collection('events').doc(eventId).update({ data: { results } });
+            await upsertEventMatch(transaction, eventId, pair, winner, [signupSnap(myRow), signupSnap(otherRow)]);
         });
     }
     catch (err) {
@@ -161,7 +253,7 @@ async function reportResult(eventId, openid, opponent, win) {
     }
     return { success: true, data: { winner } };
 }
-async function saveWinner(eventId, pair, winner, once) {
+async function saveWinner(eventId, pair, winner, once, people) {
     await db.runTransaction(async (transaction) => {
         const snap = await transaction.collection('events').doc(eventId).get();
         const current = snap.data;
@@ -177,6 +269,7 @@ async function saveWinner(eventId, pair, winner, once) {
         else
             results.push({ a: pair.a, b: pair.b, winner });
         await transaction.collection('events').doc(eventId).update({ data: { results } });
+        await upsertEventMatch(transaction, eventId, pair, winner, people);
     });
 }
 async function setResult(eventId, left, right, winner, openid, owner) {
@@ -199,7 +292,7 @@ async function setResult(eventId, left, right, winner, openid, owner) {
         }
     }
     try {
-        await saveWinner(eventId, pairKey(left, right), winner, !owner);
+        await saveWinner(eventId, pairKey(left, right), winner, !owner, [signupSnap(leftSignup), signupSnap(rightSignup)]);
     }
     catch (err) {
         const message = err.message || '记录失败';
@@ -246,7 +339,7 @@ const main = async (event) => {
             const count = Number.parseInt(String(event.count ?? ''), 10);
             if (!count || count < 1 || count > 30)
                 return { success: false, error: '一次最多加 30 人' };
-            return addVirtual(id, current, count);
+            return addVirtual(id, current, count, openid);
         }
         return startEvent(id);
     }

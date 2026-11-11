@@ -1,0 +1,21 @@
+<wxs src="../../utils/skeleton.wxs" module="sk" />
+<page-loading wx:if="{{isLoading && !users.length}}" />
+<view class="container has-submit">
+  <view class="virtual-list {{isLoading && !users.length ? 'is-skeleton' : ''}}" wx:if="{{isLoading || users.length}}">
+    <view class="virtual-item" wx:for="{{sk.pad(users, isLoading, 5)}}" wx:key="openid" data-openid="{{item.openid}}" bindtap="goToEdit">
+      <image class="player-avatar" mode="aspectFill" src="{{item._sk ? '' : (item.avatar || placeholder)}}" />
+      <text class="person-name">{{item.nickname}}</text>
+      <view class="delete-btn" wx:if="{{isAdmin && !item._sk}}" catchtap="onDelete" data-openid="{{item.openid}}" data-nickname="{{item.nickname}}">删除</view>
+      <view class="menu-arrow" wx:elif="{{!item._sk}}"></view>
+    </view>
+  </view>
+
+  <view class="empty-tip" wx:if="{{!isLoading && !users.length}}">
+    <text>还没有虚拟球友</text>
+    <text class="empty-subtip">可以先新建，再加进比赛</text>
+  </view>
+
+  <view class="submit-bar">
+    <button class="submit-btn" hover-class="none" bindtap="goToCreate">新建虚拟球友</button>
+  </view>
+</view>
