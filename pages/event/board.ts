@@ -20,10 +20,16 @@ interface IBoardNote {
   note?: string
 }
 
+interface IBoardHead {
+  no: number
+  mine: boolean
+}
+
 interface IBoardCell {
   key: string
   mark: string
   self: boolean
+  colMine: boolean
   left: string
   right: string
   leftName: string
@@ -71,6 +77,7 @@ function boardView(
           key: `${rowIndex}-${colIndex}`,
           mark,
           self: rowIndex === colIndex,
+          colMine: myOpenid !== '' && otherId === myOpenid,
           left: openid,
           right: otherId,
           leftName,
@@ -83,7 +90,7 @@ function boardView(
   return {
     groupNo,
     note: noteRow && noteRow.note ? String(noteRow.note) : '',
-    heads: rows.map((row) => row.no),
+    heads: rows.map((row) => ({ no: row.no, mine: row.mine })),
     rows
   }
 }
@@ -94,7 +101,8 @@ Page({
     groupNo: 0,
     note: '',
     tabs: [] as Array<{ groupNo: number; title: string; mine: boolean }>,
-    heads: [] as number[],
+    tabIntoView: '',
+    heads: [] as IBoardHead[],
     rows: [] as IBoardRow[],
     signups: [] as IBoardPerson[],
     results: [] as IBoardResult[],
@@ -142,11 +150,14 @@ Page({
         results,
         notes,
         tabs,
+        tabIntoView: '',
         signed: myGroupNo > 0,
         myGroupNo,
         isOwner: !!(event && openid && event.creatorOpenid === openid),
         ...boardView(signups, results, notes, groupNo, openid),
         isLoading: false
+      }, () => {
+        if (groupNo) this.setData({ tabIntoView: `tab-${groupNo}` })
       })
       if (groupNo) wx.setNavigationBarTitle({ title: groupTitle(groupNo) })
     } catch (err) {

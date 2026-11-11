@@ -1,6 +1,7 @@
 <view class="{{signed ? 'has-score' : ''}}" wx:if="{{!isLoading}}">
-  <scroll-view class="tabs" scroll-x wx:if="{{tabs.length > 1 || signed}}">
+  <scroll-view class="tabs" scroll-x enhanced show-scrollbar="{{false}}" scroll-into-view="{{tabIntoView}}" wx:if="{{tabs.length > 1 || signed}}">
     <view
+      id="tab-{{item.groupNo}}"
       class="tab {{item.groupNo === groupNo ? 'tab--on' : ''}}"
       wx:for="{{tabs}}"
       wx:key="groupNo"
@@ -8,7 +9,7 @@
       bindtap="onTab"
     >
       <text>{{item.title}}</text>
-      <view wx:if="{{item.mine}}" class="tab-dot"></view>
+      <text wx:if="{{item.mine}}" class="tab-me">我</text>
     </view>
   </scroll-view>
   <view class="note-row" wx:if="{{note || isOwner}}">
@@ -18,12 +19,12 @@
   <view class="table" wx:if="{{rows.length}}">
     <view class="table-row table-row--head">
       <view class="cell cell--name"></view>
-      <view class="cell" wx:for="{{heads}}" wx:key="*this">{{item}}</view>
+      <view class="cell {{item.mine ? 'cell--head-mine' : ''}}" wx:for="{{heads}}" wx:key="no">{{item.no}}</view>
     </view>
-    <view class="table-row" wx:for="{{rows}}" wx:key="no" wx:for-item="row">
+    <view class="table-row {{row.mine ? 'table-row--mine' : ''}}" wx:for="{{rows}}" wx:key="no" wx:for-item="row">
       <view class="cell cell--name {{row.mine ? 'cell--mine' : ''}}">{{row.label}}</view>
       <view
-        class="cell {{cell.self ? 'cell--self' : ''}} {{cell.mark === 'win' ? 'cell--win' : ''}} {{cell.mark === 'lose' ? 'cell--lose' : ''}}"
+        class="cell {{cell.self ? 'cell--self' : ''}} {{cell.colMine ? 'cell--col-mine' : ''}} {{cell.mark === 'win' ? 'cell--win' : ''}} {{cell.mark === 'lose' ? 'cell--lose' : ''}}"
         wx:for="{{row.cells}}"
         wx:for-item="cell"
         wx:key="key"
