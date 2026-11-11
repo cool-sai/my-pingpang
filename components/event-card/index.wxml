@@ -1,22 +1,22 @@
-<view class="card" hover-class="card--pressed" bindtap="onTap">
+<view class="card {{skeleton ? 'is-skeleton' : ''}}" hover-class="{{skeleton ? '' : 'card--pressed'}}" bindtap="onTap">
   <view class="card-cover-wrap">
-    <image wx:if="{{event.coverUrl || event.cover}}" class="card-cover" src="{{event.coverUrl || event.cover}}" mode="aspectFill" />
+    <image wx:if="{{!skeleton && (event.coverUrl || event.cover)}}" class="card-cover" src="{{event.coverUrl || event.cover}}" mode="aspectFill" />
     <view wx:else class="card-cover card-cover--empty"></view>
   </view>
   <view class="card-body">
     <view class="card-head">
       <text class="card-name">{{event.name}}</text>
-      <text class="card-tag">{{event.signupCount || 0}}人报名</text>
+      <text class="card-tag">{{skeleton ? '' : ((event.signupCount || 0) + '人报名')}}</text>
     </view>
     <view class="card-row">
       <text class="card-k">时间</text>
-      <text class="card-v">{{event.startTime || '待定'}}</text>
+      <text class="card-v">{{skeleton ? '' : (event.startTime || '待定')}}</text>
     </view>
     <view class="card-row">
       <text class="card-k">地点</text>
-      <text class="card-v">{{event.location || '待定'}}</text>
+      <text class="card-v">{{skeleton ? '' : (event.location || '待定')}}</text>
     </view>
-    <view class="card-foot" wx:if="{{event.format || event.maxPlayers > 0}}">
+    <view class="card-foot" wx:if="{{!skeleton && (event.format || event.maxPlayers > 0)}}">
       <text class="card-chip" wx:if="{{event.format}}">{{event.format}}</text>
       <text class="card-chip card-chip--muted" wx:if="{{event.maxPlayers > 0}}">限{{event.maxPlayers}}人</text>
     </view>

@@ -1,0 +1,33 @@
+.page-loading {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16rpx;
+  background: rgba(242, 245, 243, 0.55);
+}
+
+.page-spinner {
+  width: 40rpx;
+  height: 40rpx;
+  border: 4rpx solid rgba(20, 143, 76, 0.16);
+  border-top-color: #148f4c;
+  border-radius: 50%;
+  animation: page-spin 0.75s linear infinite;
+}
+
+.page-loading-text {
+  color: #8b97a3;
+  font-size: 24rpx;
+}
+
+@keyframes page-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

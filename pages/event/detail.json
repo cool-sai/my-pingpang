@@ -1,4 +1,5 @@
 {
   "navigationBarTitleText": "比赛详情",
-  "usingComponents": {}
+  "usingComponents": {},
+  "enableShareAppMessage": true
 }

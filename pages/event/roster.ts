@@ -1,9 +1,12 @@
 const rosterApp = getApp<IAppOption>()
+import { fetchEvent } from '../../utils/load-event'
 
 interface ISignupRow {
   openid: string
   nickname: string
   avatar: string
+  groupNo?: number
+  groupSeq?: number
 }
 
 interface IAvatarFile {
@@ -36,7 +39,8 @@ Page({
   data: {
     eventId: '',
     signups: [] as ISignupRow[],
-    isLoading: true
+    isLoading: true,
+    missing: false
   },
 
   onLoad(query: Record<string, string | undefined>) {
@@ -51,7 +55,7 @@ Page({
 
   onShow() {
     if (!this.data.eventId) {
-      this.setData({ isLoading: false, signups: [] })
+      this.setData({ isLoading: false, signups: [], missing: true })
       return
     }
     void this.loadSignups(this.data.eventId)
@@ -67,12 +71,12 @@ Page({
       this.timer = 0
     }
     try {
-      const res = await rosterApp.callFunction<Array<Record<string, any>>>({
-        name: 'getEvents',
-        data: { id: eventId, status: 'all' }
-      })
-      const event = (res.result.data || []).find((item) => item._id === eventId) || null
-      const rawSignups = Array.isArray(event && event.signups) ? event.signups : []
+      const { event, missing } = await fetchEvent(rosterApp, eventId, true)
+      if (missing || !event) {
+        if (this.alive && seq === this.loadSeq) this.setData({ signups: [], missing: true })
+        return
+      }
+      const rawSignups = Array.isArray(event.signups) ? event.signups : []
       // 临时 https 大约 10 分钟过期。名单页只信本地缓存；没有就重拉，不用会过期的链撑着。
       const signups = rawSignups.map((item: ISignupRow) => {
         const openid = String(item.openid || '')
@@ -81,11 +85,13 @@ Page({
         return {
           openid,
           nickname: item.nickname || '球友',
-          avatar: hasLocal ? local : ''
+          avatar: hasLocal ? local : '',
+          groupNo: Number(item.groupNo) || 0,
+          groupSeq: Number(item.groupSeq) || 0
         }
       })
       if (!this.alive || seq !== this.loadSeq) return
-      this.setData({ signups })
+      this.setData({ signups, missing: false })
       signups.forEach((item) => {
         if (!item.openid) return
         const local = localAvatarPath(eventId, item.openid)

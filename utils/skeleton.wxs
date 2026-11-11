@@ -1,0 +1,85 @@
+var PIXEL = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
+
+function pad(list, loading, count) {
+  if (list && list.length) return list
+  if (!loading) return []
+  var n = count || 3
+  var out = []
+  var i
+  for (i = 0; i < n; i++) {
+    out.push({
+      _id: 'sk-' + i,
+      _sk: true,
+      openid: 'sk-' + i,
+      name: ' ',
+      nickname: ' ',
+      title: ' ',
+      label: ' ',
+      no: i + 1,
+      groupNo: i + 1,
+      date: ' ',
+      statusText: ' ',
+      location: ' ',
+      score: ' ',
+      status: '',
+      avatar: PIXEL,
+      rank: 99,
+      winMatches: '',
+      loseMatches: '',
+      memberCount: '',
+      totalScore: '',
+      matchCount: '',
+      player1: { nickname: ' ', avatar: PIXEL, score: '' },
+      player2: { nickname: ' ', avatar: PIXEL, score: '' },
+      player1Score: '',
+      player2Score: '',
+      left: { openid: 'l' + i, label: ' ', win: false },
+      right: { openid: 'r' + i, label: ' ', win: false },
+      done: false,
+      mine: false
+    })
+  }
+  return out
+}
+
+function heads(list, loading, count) {
+  if (list && list.length) return list
+  if (!loading) return []
+  var n = count || 4
+  var out = []
+  var i
+  for (i = 0; i < n; i++) {
+    out.push({ no: i + 1, mine: false })
+  }
+  return out
+}
+
+function rows(list, loading, count) {
+  if (list && list.length) return list
+  if (!loading) return []
+  var n = count || 4
+  var out = []
+  var r
+  var c
+  for (r = 0; r < n; r++) {
+    var cells = []
+    for (c = 0; c < n; c++) {
+      cells.push({
+        key: 'sk-' + r + '-' + c,
+        self: r === c,
+        colMine: false,
+        mark: '',
+        left: '',
+        right: '',
+        leftName: '',
+        rightName: ''
+      })
+    }
+    out.push({ no: r + 1, label: ' ', mine: false, cells: cells })
+  }
+  return out
+}
+
+module.exports.pad = pad
+module.exports.heads = heads
+module.exports.rows = rows

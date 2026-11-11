@@ -1,4 +1,6 @@
 import { groupTitle } from '../../utils/group-title'
+import { fetchEvent } from '../../utils/load-event'
+import { groupStandings, IGroupStanding } from '../../utils/group-standings'
 
 const boardApp = getApp<IAppOption>()
 
@@ -87,11 +89,13 @@ function boardView(
     }
   })
   const noteRow = notes.find((row) => Number(row.groupNo) === groupNo)
+  const standings = groupStandings(rows)
   return {
     groupNo,
     note: noteRow && noteRow.note ? String(noteRow.note) : '',
     heads: rows.map((row) => ({ no: row.no, mine: row.mine })),
-    rows
+    rows,
+    standings
   }
 }
 
@@ -104,6 +108,7 @@ Page({
     tabIntoView: '',
     heads: [] as IBoardHead[],
     rows: [] as IBoardRow[],
+    standings: [] as IGroupStanding[],
     signups: [] as IBoardPerson[],
     results: [] as IBoardResult[],
     notes: [] as IBoardNote[],
@@ -111,7 +116,8 @@ Page({
     signed: false,
     myGroupNo: 0,
     saving: false,
-    isLoading: true
+    isLoading: true,
+    missing: false
   },
 
   onLoad(query: Record<string, string | undefined>) {
@@ -129,12 +135,12 @@ Page({
       return
     }
     try {
-      const res = await boardApp.callFunction<Array<Record<string, any>>>({
-        name: 'getEvents',
-        data: { id: eventId, status: 'all' }
-      })
-      const event = (res.result.data || []).find((item) => item._id === eventId)
-      const signups = (Array.isArray(event && event.signups) ? event.signups : []) as IBoardPerson[]
+      const { event, missing } = await fetchEvent(boardApp, eventId, true)
+      if (missing || !event) {
+        this.setData({ isLoading: false, rows: [], standings: [], tabs: [], missing: true })
+        return
+      }
+      const signups = (Array.isArray(event.signups) ? event.signups : []) as IBoardPerson[]
       const results = (Array.isArray(event && event.results) ? event.results : []) as IBoardResult[]
       const notes = (Array.isArray(event && event.groupNotes) ? event.groupNotes : []) as IBoardNote[]
       const groupNos = Array.from(new Set(signups.map((item) => Number(item.groupNo) || 0).filter((groupNo) => groupNo > 0)))

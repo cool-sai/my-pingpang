@@ -71,7 +71,8 @@ async function withCoverUrl(item) {
     return { ...item, coverUrl };
 }
 async function loadSignups(eventId) {
-    const res = await db.collection('signups').where({ eventId }).limit(200).get();
+    try {
+    const res = await db.collection('signups').where({ eventId }).limit(128).get();
     const rows = res.data.slice().sort((a, b) => signupTime(a.createTime) - signupTime(b.createTime));
     const urls = await signFileUrls(rows.map((row) => String(row.avatar || '')));
     return rows.map((row) => {
@@ -80,9 +81,16 @@ async function loadSignups(eventId) {
         return {
             openid: row.openid,
             nickname: row.nickname || '球友',
-            avatar
+            avatar,
+            groupNo: Number(row.groupNo) || 0,
+            groupSeq: Number(row.groupSeq) || 0
         };
     });
+    }
+    catch (err) {
+        console.error('读取报名名单失败', err);
+        return [];
+    }
 }
 const main = async (event) => {
     const id = String(event.id || '').trim();

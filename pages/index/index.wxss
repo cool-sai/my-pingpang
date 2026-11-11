@@ -370,27 +370,6 @@
   border-radius: 999rpx;
 }
 
-.list-loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 56rpx 32rpx 24rpx;
-}
-
-.list-spinner {
-  width: 40rpx;
-  height: 40rpx;
-  border: 4rpx solid rgba(20, 143, 76, 0.16);
-  border-top-color: #148f4c;
-  border-radius: 50%;
-  animation: list-spin 0.75s linear infinite;
-}
-
-@keyframes list-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
 .event-list {
   padding-top: 12rpx;
 }

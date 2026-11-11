@@ -1,21 +1,17 @@
+<wxs src="../../utils/skeleton.wxs" module="sk" />
 <view class="container has-tab">
   <nav-bar title="排名" tone="light" overlay align="left" bind:layout="onNavLayout" />
 
   <!-- 我的排名 -->
-  <view class="my-rank" style="padding-top: {{navPad}}px;" wx:if="{{myRank}}">
+  <view class="my-rank {{isLoading && !myRank ? 'is-skeleton' : ''}}" style="padding-top: {{navPad}}px;" bindtap="onViewMyRank">
     <text class="my-rank-label">我的排名</text>
-    <view class="my-rank-info">
+    <view class="my-rank-info" wx:if="{{myRank}}">
       <text class="my-rank-num">第{{myRank.rank}}名</text>
       <text class="my-rank-score">{{myRank.score}}分</text>
     </view>
-  </view>
-  <view class="my-rank" style="padding-top: {{navPad}}px;" wx:elif="{{!isLogin}}" bindtap="onViewMyRank">
-    <text class="my-rank-label">我的排名</text>
-    <text class="my-rank-num">登录查看</text>
-  </view>
-  <view class="my-rank" style="padding-top: {{navPad}}px;" wx:else>
-    <text class="my-rank-label">我的排名</text>
-    <text class="my-rank-num">暂无成绩</text>
+    <text class="my-rank-num" wx:elif="{{isLoading}}"></text>
+    <text class="my-rank-num" wx:elif="{{!isLogin}}">登录查看</text>
+    <text class="my-rank-num" wx:else>暂无成绩</text>
   </view>
 
   <!-- 筛选 -->
@@ -25,18 +21,18 @@
   </view>
 
   <!-- 排名列表 -->
-  <view class="rank-list">
-    <view class="rank-item {{item.rank <= 3 ? 'top' : ''}}" wx:for="{{rankings}}" wx:key="_id" data-openid="{{item.openid}}" bindtap="goToUserDetail">
+  <view class="rank-list {{isLoading && rankings.length === 0 ? 'is-skeleton' : ''}}">
+    <view class="rank-item {{item.rank <= 3 ? 'top' : ''}}" wx:for="{{sk.pad(rankings, isLoading, 5)}}" wx:key="_id" data-openid="{{item.openid}}" bindtap="goToUserDetail">
       <view class="rank-num {{item.rank <= 3 ? 'medal' : ''}}">
-        <text wx:if="{{item.rank > 3}}">{{item.rank}}</text>
+        <text wx:if="{{item.rank > 3}}">{{item._sk ? '' : item.rank}}</text>
         <text wx:if="{{item.rank === 1}}">🥇</text>
         <text wx:if="{{item.rank === 2}}">🥈</text>
         <text wx:if="{{item.rank === 3}}">🥉</text>
       </view>
-      <image class="rank-avatar" src="{{item.avatar || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCI+PGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iNTAiIGZpbGw9IiNlMGUwZTAiLz48Y2lyY2xlIGN4PSI1MCIgY3k9IjM4IiByPSIxOCIgZmlsbD0iI2JkYmRiZCIvPjxlbGxpcHNlIGN4PSI1MCIgY3k9Ijg1IiByeD0iMjgiIHJ5PSIyMiIgZmlsbD0iI2JkYmRiZCIvPjwvc3ZnPg=='}}" />
+      <image class="rank-avatar" src="{{item._sk ? '' : (item.avatar || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCI+PGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iNTAiIGZpbGw9IiNlMGUwZTAiLz48Y2lyY2xlIGN4PSI1MCIgY3k9IjM4IiByPSIxOCIgZmlsbD0iI2JkYmRiZCIvPjxlbGxpcHNlIGN4PSI1MCIgY3k9Ijg1IiByeD0iMjgiIHJ5PSIyMiIgZmlsbD0iI2JkYmRiZCIvPjwvc3ZnPg==')}}" />
       <view class="rank-info">
         <text class="rank-name">{{item.nickname}}</text>
-        <text class="rank-detail">胜{{item.winMatches}} 负{{item.loseMatches}}</text>
+        <text class="rank-detail">{{item._sk ? '' : ('胜' + item.winMatches + ' 负' + item.loseMatches)}}</text>
       </view>
       <view class="rank-score-section">
         <text class="rank-score">{{item.score}}</text>
@@ -49,3 +45,5 @@
     </view>
   </view>
 </view>
+
+<page-loading wx:if="{{isLoading && rankings.length === 0}}" />

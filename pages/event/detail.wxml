@@ -1,25 +1,38 @@
-<view class="container has-submit" wx:if="{{event}}">
+<view class="container has-submit {{isLoading && !event ? 'is-skeleton' : ''}}" wx:if="{{event || isLoading}}">
   <image wx:if="{{event.coverUrl || event.cover}}" class="cover" src="{{event.coverUrl || event.cover}}" mode="aspectFill" />
+  <view wx:elif="{{isLoading}}" class="cover"></view>
   <view class="hero">
-    <text class="hero-title">{{event.name}}</text>
+    <view class="hero-top">
+      <text class="hero-title">{{event.name}}</text>
+      <button class="share-btn-title" hover-class="share-btn-title--hover" open-type="share">
+        <view class="share-icon">
+          <view class="share-dot share-dot--c"></view>
+          <view class="share-dot share-dot--t"></view>
+          <view class="share-dot share-dot--b"></view>
+          <view class="share-line share-line--t"></view>
+          <view class="share-line share-line--b"></view>
+        </view>
+        <text class="share-btn-text">分享</text>
+      </button>
+    </view>
     <view class="tags">
       <text class="tag tag--{{event.status}}">{{event.statusText}}</text>
-      <text class="tag tag--format" wx:if="{{event.format}}">{{event.format}}</text>
+      <text class="tag tag--format" wx:if="{{event.format || isLoading}}">{{event.format}}</text>
     </view>
   </view>
 
   <view class="sheet">
     <view class="line">
       <text class="line-k">时间</text>
-      <text class="line-v">{{event.startTime || '待定'}}</text>
+      <text class="line-v">{{event.startTime || (isLoading ? '' : '待定')}}</text>
     </view>
     <view class="line" bindtap="openLocation">
       <text class="line-k">地点</text>
-      <text class="line-v {{event.hasMap ? 'line-v--link' : ''}}">{{event.location || '待定'}}</text>
+      <text class="line-v {{event.hasMap ? 'line-v--link' : ''}}">{{event.location || (isLoading ? '' : '待定')}}</text>
     </view>
     <view class="line">
       <text class="line-k">人数</text>
-      <text class="line-v">{{(event.signupCount || 0) + '/' + (event.maxPlayers > 0 ? event.maxPlayers : '不限')}}</text>
+      <text class="line-v">{{isLoading && !event ? '' : ((event.signupCount || 0) + '/' + (event.maxPlayers > 0 ? event.maxPlayers : '不限'))}}</text>
       <text class="roster-link" bindtap="goToRoster">参赛名单</text>
     </view>
     <view class="line" wx:if="{{event.started}}">
@@ -31,14 +44,15 @@
 
   <view class="block">
     <text class="block-k">说明</text>
-    <text class="block-v">{{event.description || '暂无说明'}}</text>
+    <text class="block-v">{{event.description || (isLoading ? '' : '暂无说明')}}</text>
   </view>
 </view>
 <view class="container" wx:elif="{{!isLoading}}">
   <view class="empty-tip">没有找到这场比赛</view>
 </view>
+<page-loading wx:if="{{isLoading}}" />
 
-<view class="submit-bar detail-bar" wx:if="{{event}}">
+<view class="submit-bar detail-bar {{isLoading && !event ? 'is-skeleton' : ''}}" wx:if="{{event || isLoading}}">
   <text wx:if="{{isOwner}}" class="manage-text" bindtap="openManage">管理</text>
   <button
     class="submit-btn {{signed ? 'submit-btn--ghost' : ''}}"
@@ -58,4 +72,3 @@
   <view class="manage-gap"></view>
   <view class="manage-action" bindtap="closeManage">取消</view>
 </view>
-

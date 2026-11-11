@@ -1,0 +1,4 @@
+<view class="page-loading" catchtouchmove="preventMove">
+  <view class="page-spinner"></view>
+  <text wx:if="{{text}}" class="page-loading-text">{{text}}</text>
+</view>

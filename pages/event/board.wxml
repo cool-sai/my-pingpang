@@ -1,9 +1,11 @@
-<view class="{{signed ? 'has-score' : ''}}" wx:if="{{!isLoading}}">
-  <scroll-view class="tabs" scroll-x enhanced show-scrollbar="{{false}}" scroll-into-view="{{tabIntoView}}" wx:if="{{tabs.length > 1 || signed}}">
+<wxs src="../../utils/skeleton.wxs" module="sk" />
+<page-loading wx:if="{{isLoading}}" />
+<view class="{{signed ? 'has-score' : ''}} {{isLoading && !rows.length ? 'is-skeleton' : ''}}">
+  <scroll-view class="tabs" scroll-x enhanced show-scrollbar="{{false}}" scroll-into-view="{{tabIntoView}}" wx:if="{{isLoading || tabs.length > 1 || signed}}">
     <view
       id="tab-{{item.groupNo}}"
       class="tab {{item.groupNo === groupNo ? 'tab--on' : ''}}"
-      wx:for="{{tabs}}"
+      wx:for="{{sk.pad(tabs, isLoading, 3)}}"
       wx:key="groupNo"
       data-group-no="{{item.groupNo}}"
       bindtap="onTab"
@@ -12,16 +14,16 @@
       <text wx:if="{{item.mine}}" class="tab-me">我</text>
     </view>
   </scroll-view>
-  <view class="note-row" wx:if="{{note || isOwner}}">
+  <view class="note-row" wx:if="{{!isLoading && (note || isOwner)}}">
     <text class="note">{{note || '暂无备注'}}</text>
     <text wx:if="{{isOwner}}" class="note-edit" bindtap="editNote">备注</text>
   </view>
-  <view class="table" wx:if="{{rows.length}}">
+  <view class="table" wx:if="{{isLoading || rows.length}}">
     <view class="table-row table-row--head">
       <view class="cell cell--name"></view>
-      <view class="cell {{item.mine ? 'cell--head-mine' : ''}}" wx:for="{{heads}}" wx:key="no">{{item.no}}</view>
+      <view class="cell {{item.mine ? 'cell--head-mine' : ''}}" wx:for="{{sk.heads(heads, isLoading, 4)}}" wx:key="no">{{item.no}}</view>
     </view>
-    <view class="table-row {{row.mine ? 'table-row--mine' : ''}}" wx:for="{{rows}}" wx:key="no" wx:for-item="row">
+    <view class="table-row {{row.mine ? 'table-row--mine' : ''}}" wx:for="{{sk.rows(rows, isLoading, 4)}}" wx:key="no" wx:for-item="row">
       <view class="cell cell--name {{row.mine ? 'cell--mine' : ''}}">{{row.label}}</view>
       <view
         class="cell {{cell.self ? 'cell--self' : ''}} {{cell.colMine ? 'cell--col-mine' : ''}} {{cell.mark === 'win' ? 'cell--win' : ''}} {{cell.mark === 'lose' ? 'cell--lose' : ''}}"
@@ -37,7 +39,20 @@
       >{{cell.mark === 'win' ? '✓' : cell.mark === 'lose' ? '×' : ''}}</view>
     </view>
   </view>
-  <view class="empty-tip" wx:if="{{rows.length === 0}}">这一组没有人</view>
+  <view class="standings" wx:if="{{!isLoading && standings.length}}">
+    <view class="standings-row standings-row--head">
+      <text class="st-name">小组战绩</text>
+      <text class="st-num">胜</text>
+      <text class="st-num">负</text>
+    </view>
+    <view class="standings-row {{item.mine ? 'standings-row--mine' : ''}}" wx:for="{{standings}}" wx:key="no">
+      <text class="st-name">{{item.label}}</text>
+      <text class="st-num">{{item.win}}</text>
+      <text class="st-num">{{item.lose}}</text>
+    </view>
+  </view>
+  <view class="empty-tip" wx:if="{{!isLoading && missing}}">没有找到这场比赛</view>
+  <view class="empty-tip" wx:elif="{{!isLoading && rows.length === 0}}">这一组没有人</view>
 </view>
 <view class="submit-bar" wx:if="{{!isLoading && signed}}">
   <button class="submit-btn" hover-class="none" bindtap="goToScore">录入成绩</button>

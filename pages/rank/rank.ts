@@ -14,7 +14,7 @@ Page({
   data: {
     navPad: getNavLayout().navHeight,
     rankings: [] as Array<Record<string, any>>,
-    isLoading: false,
+    isLoading: true,
     filter: 'all' as RankFilter,
     myRank: null as Record<string, any> | null,
     isLogin: false
@@ -76,6 +76,7 @@ Page({
   },
 
   onViewMyRank() {
+    if (this.data.isLogin) return
     rankApp.requireLogin('登录后查看我的排名', {
       success: () => {
         void this.loadRankings()

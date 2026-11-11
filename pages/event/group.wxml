@@ -1,10 +1,12 @@
-<view class="container" wx:if="{{!isLoading}}">
-  <view class="tip" wx:if="{{opponents.length}}">点获胜的人</view>
-  <view class="head" wx:if="{{title}}">
+<wxs src="../../utils/skeleton.wxs" module="sk" />
+<page-loading wx:if="{{isLoading}}" />
+<view class="container {{isLoading && !opponents.length ? 'is-skeleton' : ''}}">
+  <view class="tip" wx:if="{{isLoading || opponents.length}}">点获胜的人</view>
+  <view class="head" wx:if="{{isLoading || title}}">
     <text class="head-title">{{title}}</text>
     <text wx:if="{{note}}" class="head-note">{{note}}</text>
   </view>
-  <view class="match" wx:for="{{opponents}}" wx:key="openid">
+  <view class="match" wx:for="{{sk.pad(opponents, isLoading, 3)}}" wx:key="openid">
     <text
       class="pick {{item.left.win ? 'pick--win' : ''}}"
       data-openid="{{item.openid}}"
@@ -23,5 +25,5 @@
       bindtap="onPick"
     >{{item.right.label}}</text>
   </view>
-  <view class="empty-tip" wx:if="{{opponents.length === 0}}">{{emptyText}}</view>
+  <view class="empty-tip" wx:if="{{!isLoading && opponents.length === 0}}">{{emptyText}}</view>
 </view>

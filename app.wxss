@@ -223,3 +223,150 @@ button::after {
   padding: 16rpx 28rpx calc(16rpx + env(safe-area-inset-bottom));
   background: rgba(242, 245, 243, 0.96);
 }
+
+/* 骨架态：同一套页面结构，加载时把内容画成灰条 */
+.is-skeleton .hero-title,
+.is-skeleton .line-v,
+.is-skeleton .block-v,
+.is-skeleton .tag,
+.is-skeleton .head-title,
+.is-skeleton .head-note,
+.is-skeleton .tip,
+.is-skeleton .pick,
+.is-skeleton .person-name,
+.is-skeleton .cell--name,
+.is-skeleton .table-row--head .cell,
+.is-skeleton .club-name,
+.is-skeleton .club-desc,
+.is-skeleton .club-avatar,
+.is-skeleton .stat-value,
+.is-skeleton .detail-title,
+.is-skeleton .detail-line,
+.is-skeleton .detail-desc,
+.is-skeleton .status-pill,
+.is-skeleton .match-date,
+.is-skeleton .match-location,
+.is-skeleton .player-name,
+.is-skeleton .player-score,
+.is-skeleton .rank-name,
+.is-skeleton .rank-detail,
+.is-skeleton .rank-score,
+.is-skeleton .rank-num,
+.is-skeleton .my-rank-num,
+.is-skeleton .field-label,
+.is-skeleton .field-input,
+.is-skeleton .field-value,
+.is-skeleton .field-place-name,
+.is-skeleton .field-place-addr,
+.is-skeleton .field-area,
+.is-skeleton .count-step,
+.is-skeleton .cover-box,
+.is-skeleton .cover-empty-title,
+.is-skeleton .cover-empty-sub,
+.is-skeleton .submit-btn {
+  color: transparent !important;
+  background-color: rgba(22, 40, 30, 0.07) !important;
+  background-image: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.is-skeleton .hero-title,
+.is-skeleton .head-title,
+.is-skeleton .detail-title,
+.is-skeleton .club-name,
+.is-skeleton .card-name,
+.is-skeleton .person-name,
+.is-skeleton .rank-name,
+.is-skeleton .line-v,
+.is-skeleton .block-v,
+.is-skeleton .tip,
+.is-skeleton .field-label,
+.is-skeleton .field-value,
+.is-skeleton .field-place-name,
+.is-skeleton .match-date,
+.is-skeleton .match-location {
+  display: inline-block;
+  min-width: 46%;
+  min-height: 1em;
+  border-radius: 8rpx;
+}
+
+.is-skeleton .hero-title,
+.is-skeleton .detail-title,
+.is-skeleton .head-title {
+  width: 62%;
+  min-height: 44rpx;
+}
+
+.is-skeleton .tag,
+.is-skeleton .status-pill,
+.is-skeleton .my-rank-num,
+.is-skeleton .player-score,
+.is-skeleton .rank-score,
+.is-skeleton .stat-value {
+  min-width: 96rpx;
+  border-radius: 999rpx;
+}
+
+.is-skeleton .pick,
+.is-skeleton .submit-btn,
+.is-skeleton .cover-box,
+.is-skeleton .field-input,
+.is-skeleton .field-area,
+.is-skeleton .count-step {
+  border-radius: 12rpx;
+}
+
+.is-skeleton .share-btn-title,
+.is-skeleton .roster-link,
+.is-skeleton .manage-text,
+.is-skeleton .stat-label,
+.is-skeleton .rank-score-label,
+.is-skeleton .card-k,
+.is-skeleton .vs,
+.is-skeleton .vs-wrap,
+.is-skeleton .line-k,
+.is-skeleton .block-k,
+.is-skeleton .hero-cta,
+.is-skeleton .share-icon,
+.is-skeleton .share-btn-text,
+.is-skeleton .cover-empty,
+.is-skeleton .count-step-btn {
+  visibility: hidden;
+}
+
+.is-skeleton .cover,
+.is-skeleton .person-avatar,
+.is-skeleton .club-avatar,
+.is-skeleton .player-avatar,
+.is-skeleton .rank-avatar,
+.is-skeleton .rank-num {
+  background: rgba(22, 40, 30, 0.07) !important;
+  background-image: none !important;
+}
+
+.is-skeleton .person-avatar,
+.is-skeleton .club-avatar,
+.is-skeleton .player-avatar,
+.is-skeleton .rank-avatar {
+  border-radius: 50%;
+}
+
+.is-skeleton image:not(.person-avatar):not(.player-avatar):not(.rank-avatar) {
+  opacity: 0;
+}
+
+.is-skeleton .tab {
+  min-width: 128rpx;
+}
+
+.is-skeleton .tab text {
+  display: inline-block;
+  min-width: 80rpx;
+  min-height: 28rpx;
+  color: transparent !important;
+  background: rgba(22, 40, 30, 0.07) !important;
+  border-radius: 8rpx;
+}
+

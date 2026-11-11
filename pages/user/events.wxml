@@ -1,13 +1,12 @@
+<wxs src="../../utils/skeleton.wxs" module="sk" />
 <view class="container">
-  <view class="event-list" wx:if="{{!isLoading || events.length > 0}}">
-    <event-card wx:for="{{events}}" wx:key="_id" event="{{item}}" bind:select="goToEventDetail" />
-  </view>
-
-  <view class="empty-tip" wx:if="{{isLoading && events.length === 0}}">
-    <text>加载中</text>
+  <view class="event-list" wx:if="{{isLoading || events.length > 0}}">
+    <event-card wx:for="{{sk.pad(events, isLoading, 3)}}" wx:key="_id" event="{{item}}" skeleton="{{item._sk}}" bind:select="goToEventDetail" />
   </view>
 
   <view class="empty-tip" wx:if="{{!isLoading && events.length === 0}}">
     <text>{{emptyText}}</text>
   </view>
 </view>
+
+<page-loading wx:if="{{isLoading && events.length === 0}}" />

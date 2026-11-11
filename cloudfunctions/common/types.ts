@@ -162,6 +162,7 @@ export interface UserSeq {
 export interface Collections {
   users: Users
   events: Events
+  signups: Signups
   matches: Matches
   clubs: Clubs
 }

@@ -16,6 +16,13 @@
   padding: 32rpx;
 }
 
+.hero-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20rpx;
+}
+
 .tags {
   display: flex;
   align-items: center;
@@ -50,11 +57,92 @@
 }
 
 .hero-title {
-  display: block;
+  flex: 1;
+  min-width: 0;
   color: #17211b;
   font-size: 40rpx;
   font-weight: 700;
   line-height: 1.35;
+}
+
+/* 标题行右侧「分享」小胶囊按钮 */
+.share-btn-title {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  width: auto;
+  height: 52rpx;
+  padding: 0 20rpx;
+  margin: 4rpx 0 0;
+  color: #148f4c;
+  font-size: 24rpx;
+  font-weight: 600;
+  background: rgba(20, 143, 76, 0.08);
+  border-radius: 26rpx;
+}
+
+.share-btn-title::after {
+  border: none;
+}
+
+.share-btn-title--hover {
+  background: rgba(20, 143, 76, 0.18);
+}
+
+.share-btn-text {
+  line-height: 1;
+}
+
+/* 纯 CSS 分享小图标：三圆点 + 连线 */
+.share-icon {
+  position: relative;
+  width: 22rpx;
+  height: 22rpx;
+  flex-shrink: 0;
+}
+
+.share-dot {
+  position: absolute;
+  width: 7rpx;
+  height: 7rpx;
+  background: #148f4c;
+  border-radius: 50%;
+}
+
+.share-dot--c {
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.share-dot--t {
+  right: 0;
+  top: 0;
+}
+
+.share-dot--b {
+  right: 0;
+  bottom: 0;
+}
+
+.share-line {
+  position: absolute;
+  left: 7rpx;
+  width: 15rpx;
+  height: 2rpx;
+  background: #148f4c;
+  transform-origin: left center;
+}
+
+.share-line--t {
+  top: 4rpx;
+  transform: rotate(-28deg);
+}
+
+.share-line--b {
+  bottom: 4rpx;
+  transform: rotate(28deg);
 }
 
 .line {

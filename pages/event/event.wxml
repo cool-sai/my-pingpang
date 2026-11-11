@@ -1,3 +1,4 @@
+<wxs src="../../utils/skeleton.wxs" module="sk" />
 <view class="container has-fab">
   <view class="filter-tabs">
     <view class="tab {{status === 'all' ? 'active' : ''}}" data-status="all" bindtap="switchStatus">全部</view>
@@ -7,7 +8,7 @@
   </view>
 
   <view class="event-list">
-    <event-card wx:for="{{events}}" wx:key="_id" event="{{item}}" bind:select="goToEventDetail" />
+    <event-card wx:for="{{sk.pad(events, isLoading, 3)}}" wx:key="_id" event="{{item}}" skeleton="{{item._sk}}" bind:select="goToEventDetail" />
   </view>
 
   <view class="empty-tip" wx:if="{{events.length === 0 && !isLoading}}">
@@ -17,3 +18,5 @@
 
   <view class="fab" bindtap="goToCreate"></view>
 </view>
+
+<page-loading wx:if="{{isLoading && events.length === 0}}" />

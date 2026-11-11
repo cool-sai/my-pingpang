@@ -5,7 +5,7 @@ type MatchStatus = 'all' | 'pending' | 'completed'
 Page({
   data: {
     matches: [] as Array<Record<string, any>>,
-    isLoading: false,
+    isLoading: true,
     status: 'all' as MatchStatus
   },
 

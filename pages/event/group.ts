@@ -1,4 +1,5 @@
 import { groupTitle } from '../../utils/group-title'
+import { fetchEvent } from '../../utils/load-event'
 
 const groupApp = getApp<IAppOption>()
 
@@ -55,12 +56,12 @@ Page({
       return
     }
     try {
-      const res = await groupApp.callFunction<Array<Record<string, any>>>({
-        name: 'getEvents',
-        data: { id: eventId, status: 'all' }
-      })
-      const event = (res.result.data || []).find((item) => item._id === eventId)
-      const signups = (Array.isArray(event && event.signups) ? event.signups : []) as IGroupPerson[]
+      const { event, missing } = await fetchEvent(groupApp, eventId, true)
+      if (missing || !event) {
+        this.setData({ isLoading: false, opponents: [], emptyText: '没有找到这场比赛' })
+        return
+      }
+      const signups = (Array.isArray(event.signups) ? event.signups : []) as IGroupPerson[]
       const me = signups.find((item) => item.openid === openid)
       const groupNo = me ? Number(me.groupNo) || 0 : 0
       const people = signups

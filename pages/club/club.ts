@@ -9,7 +9,7 @@ Page({
   data: {
     navPad: getNavLayout().navHeight,
     clubs: [] as Array<Record<string, any>>,
-    isLoading: false,
+    isLoading: true,
     sortBy: 'score' as ClubSort
   },
 

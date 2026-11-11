@@ -63,6 +63,59 @@
   font-size: 26rpx;
 }
 
+
+.standings {
+  margin-top: 16rpx;
+  background: #ffffff;
+}
+
+.standings-row {
+  display: flex;
+  align-items: center;
+  min-height: 64rpx;
+  padding: 0 24rpx;
+  border-bottom: 1rpx solid rgba(22, 40, 30, 0.08);
+}
+
+.standings-row--head {
+  min-height: 56rpx;
+  color: #6d7b8a;
+  font-size: 24rpx;
+}
+
+.standings-row--mine {
+  background-color: rgba(20, 143, 76, 0.06);
+}
+
+.standings-row--mine .st-name {
+  color: #148f4c;
+  font-weight: 700;
+}
+
+.st-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: #17211b;
+  font-size: 26rpx;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.st-num {
+  width: 72rpx;
+  flex-shrink: 0;
+  color: #17211b;
+  font-size: 26rpx;
+  text-align: center;
+}
+
+.standings-row--head .st-name,
+.standings-row--head .st-num {
+  color: #6d7b8a;
+  font-weight: 400;
+}
+
 .table {
   margin-top: 16rpx;
   background: #ffffff;

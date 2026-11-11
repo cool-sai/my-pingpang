@@ -1,66 +1,65 @@
-<block wx:if="{{ready}}">
-  <view class="container has-submit">
-    <view class="field field--cover">
-      <text class="field-label">封面</text>
-      <view class="cover-box" bindtap="pickCover">
-        <image wx:if="{{coverPreview}}" class="cover-preview" src="{{coverPreview}}" mode="aspectFill" />
-        <view wx:else class="cover-empty">
-          <text class="cover-empty-title">添加封面图</text>
-          <text class="cover-empty-sub">列表和详情页顶部会显示</text>
-        </view>
-        <view wx:if="{{coverPreview}}" class="cover-clear" catchtap="clearCover">清除</view>
+<page-loading wx:if="{{eventId && !ready}}" />
+<view class="container has-submit {{eventId && !ready ? 'is-skeleton' : ''}}" wx:if="{{ready || eventId}}">
+  <view class="field field--cover">
+    <text class="field-label">封面</text>
+    <view class="cover-box" bindtap="pickCover">
+      <image wx:if="{{coverPreview}}" class="cover-preview" src="{{coverPreview}}" mode="aspectFill" />
+      <view wx:else class="cover-empty">
+        <text class="cover-empty-title">添加封面图</text>
+        <text class="cover-empty-sub">列表和详情页顶部会显示</text>
       </view>
-    </view>
-    <view class="field">
-      <text class="field-label">名称</text>
-      <input class="field-input" maxlength="30" placeholder="例如周末分段赛" placeholder-class="field-placeholder" value="{{name}}" data-field="name" bindinput="setField" />
-    </view>
-    <view class="field">
-      <text class="field-label">日期</text>
-      <picker class="field-picker" mode="date" value="{{date}}" start="2024-01-01" end="2035-12-31" bindchange="setDate">
-        <view class="field-value field-value--pick {{date ? '' : 'is-placeholder'}}">{{date || '选择日期'}}</view>
-      </picker>
-    </view>
-    <view class="field">
-      <text class="field-label">时间</text>
-      <picker class="field-picker" mode="time" value="{{time}}" bindchange="setTime">
-        <view class="field-value field-value--pick {{time ? '' : 'is-placeholder'}}">{{time || '选择时间'}}</view>
-      </picker>
-    </view>
-    <view class="field field--place" bindtap="pickLocation">
-      <text class="field-label">地点</text>
-      <view class="field-place {{location ? '' : 'is-placeholder'}}">
-        <text class="field-place-name">{{location || '在地图上选择'}}</text>
-        <text class="field-place-addr" wx:if="{{locationAddress}}">{{locationAddress}}</text>
-      </view>
-    </view>
-    <view class="field">
-      <text class="field-label">赛制</text>
-      <picker class="field-picker" mode="selector" range="{{formats}}" value="{{formatIndex}}" bindchange="setFormat">
-        <view class="field-value field-value--pick">{{formats[formatIndex]}}</view>
-      </picker>
-    </view>
-    <view class="field">
-      <text class="field-label">状态</text>
-      <picker class="field-picker" mode="selector" range="{{statusLabels}}" value="{{statusIndex}}" bindchange="setStatus">
-        <view class="field-value field-value--pick">{{statusLabels[statusIndex]}}</view>
-      </picker>
-    </view>
-    <view class="field">
-      <text class="field-label">人数</text>
-      <view class="count-step">
-        <view class="count-step-btn" data-delta="-1" bindtap="stepPlayers">－</view>
-        <input class="count-step-input" type="number" maxlength="3" value="{{maxPlayers}}" bindinput="setPlayers" bindblur="blurPlayers" />
-        <view class="count-step-btn" data-delta="1" bindtap="stepPlayers">＋</view>
-      </view>
-    </view>
-    <view class="field field--block">
-      <text class="field-label">说明</text>
-      <textarea class="field-area" maxlength="300" placeholder="费用、水平要求、到场说明" placeholder-class="field-placeholder" value="{{description}}" data-field="description" bindinput="setField" />
+      <view wx:if="{{coverPreview}}" class="cover-clear" catchtap="clearCover">清除</view>
     </view>
   </view>
+  <view class="field">
+    <text class="field-label">名称</text>
+    <input class="field-input" maxlength="30" placeholder="{{eventId && !ready ? '' : '例如周末分段赛'}}" placeholder-class="field-placeholder" value="{{name}}" data-field="name" bindinput="setField" />
+  </view>
+  <view class="field">
+    <text class="field-label">日期</text>
+    <picker class="field-picker" mode="date" value="{{date}}" start="2024-01-01" end="2035-12-31" bindchange="setDate">
+      <view class="field-value field-value--pick {{date ? '' : 'is-placeholder'}}">{{eventId && !ready ? '' : (date || '选择日期')}}</view>
+    </picker>
+  </view>
+  <view class="field">
+    <text class="field-label">时间</text>
+    <picker class="field-picker" mode="time" value="{{time}}" bindchange="setTime">
+      <view class="field-value field-value--pick {{time ? '' : 'is-placeholder'}}">{{eventId && !ready ? '' : (time || '选择时间')}}</view>
+    </picker>
+  </view>
+  <view class="field field--place" bindtap="pickLocation">
+    <text class="field-label">地点</text>
+    <view class="field-place {{location ? '' : 'is-placeholder'}}">
+      <text class="field-place-name">{{eventId && !ready ? '' : (location || '在地图上选择')}}</text>
+      <text class="field-place-addr" wx:if="{{locationAddress}}">{{locationAddress}}</text>
+    </view>
+  </view>
+  <view class="field">
+    <text class="field-label">赛制</text>
+    <picker class="field-picker" mode="selector" range="{{formats}}" value="{{formatIndex}}" bindchange="setFormat">
+      <view class="field-value field-value--pick">{{eventId && !ready ? '' : formats[formatIndex]}}</view>
+    </picker>
+  </view>
+  <view class="field">
+    <text class="field-label">状态</text>
+    <picker class="field-picker" mode="selector" range="{{statusLabels}}" value="{{statusIndex}}" bindchange="setStatus">
+      <view class="field-value field-value--pick">{{eventId && !ready ? '' : statusLabels[statusIndex]}}</view>
+    </picker>
+  </view>
+  <view class="field">
+    <text class="field-label">人数</text>
+    <view class="count-step">
+      <view class="count-step-btn" data-delta="-1" bindtap="stepPlayers">－</view>
+      <input class="count-step-input" type="number" maxlength="3" value="{{eventId && !ready ? '' : maxPlayers}}" bindinput="setPlayers" bindblur="blurPlayers" />
+      <view class="count-step-btn" data-delta="1" bindtap="stepPlayers">＋</view>
+    </view>
+  </view>
+  <view class="field field--block">
+    <text class="field-label">说明</text>
+    <textarea class="field-area" maxlength="300" placeholder="{{eventId && !ready ? '' : '费用、水平要求、到场说明'}}" placeholder-class="field-placeholder" value="{{description}}" data-field="description" bindinput="setField" />
+  </view>
+</view>
 
-  <view class="submit-bar">
-    <button class="submit-btn" hover-class="none" loading="{{submitting}}" disabled="{{submitting}}" bindtap="submit">{{eventId ? '保存' : '发布比赛'}}</button>
-  </view>
-</block>
+<view class="submit-bar {{eventId && !ready ? 'is-skeleton' : ''}}" wx:if="{{ready || eventId}}">
+  <button class="submit-btn" hover-class="none" loading="{{submitting}}" disabled="{{submitting || (eventId && !ready)}}" bindtap="submit">{{eventId ? '保存' : '发布比赛'}}</button>
+</view>

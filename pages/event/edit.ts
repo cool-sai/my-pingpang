@@ -1,4 +1,5 @@
 import { markEventNeedRefresh } from '../../utils/event-list-sync'
+import { fetchEvent } from '../../utils/load-event'
 
 const editApp = getApp<IAppOption>()
 
@@ -71,13 +72,9 @@ Page({
 
   async loadEvent(eventId: string) {
     try {
-      const res = await editApp.callFunction<Array<Record<string, any>>>({
-        name: 'getEvents',
-        data: { id: eventId, status: 'all' }
-      })
-      const event = (res.result.data || []).find((item) => item._id === eventId) || null
-      if (!res.result.success || !event) {
-        wx.showToast({ title: res.result.error || '没有找到这场比赛', icon: 'none' })
+      const { event, error } = await fetchEvent(editApp, eventId, false)
+      if (!event) {
+        wx.showToast({ title: error || '没有找到这场比赛', icon: 'none' })
         wx.navigateBack()
         return
       }

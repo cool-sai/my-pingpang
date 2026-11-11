@@ -1,3 +1,4 @@
+<wxs src="../../utils/skeleton.wxs" module="sk" />
 <view class="container has-fab">
   <nav-bar title="球馆" tone="light" overlay align="left" bind:layout="onNavLayout" />
 
@@ -13,8 +14,8 @@
   </view>
 
   <!-- 俱乐部列表 -->
-  <view class="club-list">
-    <view class="club-item" wx:for="{{clubs}}" wx:key="_id" data-id="{{item._id}}" bindtap="goToClubDetail">
+  <view class="club-list {{isLoading && clubs.length === 0 ? 'is-skeleton' : ''}}">
+    <view class="club-item" wx:for="{{sk.pad(clubs, isLoading, 3)}}" wx:key="_id" data-id="{{item._id}}" bindtap="goToClubDetail">
       <view class="club-header">
         <view class="club-avatar">{{item.name.charAt(0)}}</view>
         <view class="club-info">
@@ -47,3 +48,5 @@
   <!-- 创建俱乐部按钮 -->
   <view class="fab" bindtap="goToCreateClub"></view>
 </view>
+
+<page-loading wx:if="{{isLoading && clubs.length === 0}}" />

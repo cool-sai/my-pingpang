@@ -30,9 +30,13 @@
       "desc": "用于在地图上选择比赛地点，方便球友导航"
     }
   },
-  "requiredPrivateInfos": ["chooseLocation"],
+  "requiredPrivateInfos": [
+    "chooseLocation"
+  ],
   "sitemapLocation": "sitemap.json",
-  "usingComponents": {},
+  "usingComponents": {
+    "page-loading": "/components/page-loading/index"
+  },
   "lazyCodeLoading": "requiredComponents",
   "tabBar": {
     "custom": true,

@@ -1,3 +1,4 @@
+<wxs src="../../utils/skeleton.wxs" module="sk" />
 <view class="home">
   <nav-bar
     title="约球"
@@ -74,12 +75,8 @@
       <text class="section-count" wx:if="{{!isLoading}}">{{events.length}} 场</text>
     </view>
 
-    <view class="list-loading" wx:if="{{isLoading}}">
-      <view class="list-spinner"></view>
-    </view>
-
-    <view class="event-list" wx:if="{{!isLoading}}">
-      <event-card wx:for="{{events}}" wx:key="_id" event="{{item}}" bind:select="goToEventDetail" />
+    <view class="event-list" wx:if="{{isLoading || events.length > 0}}">
+      <event-card wx:for="{{sk.pad(events, isLoading, 3)}}" wx:key="_id" event="{{item}}" skeleton="{{item._sk}}" bind:select="goToEventDetail" />
     </view>
 
     <view class="empty" wx:if="{{!isLoading && events.length === 0}}">
@@ -93,6 +90,8 @@
     </view>
   </view>
 </view>
+
+<page-loading wx:if="{{isLoading && events.length === 0}}" />
 
 <view class="sheet-mask {{showCitySheet ? 'sheet-mask--on' : ''}}" wx:if="{{showCitySheet}}" catchtouchmove="noop" bindtap="closeCitySheet"></view>
 <view class="sheet {{showCitySheet ? 'sheet--on' : ''}}" wx:if="{{showCitySheet}}" catchtouchmove="noop">

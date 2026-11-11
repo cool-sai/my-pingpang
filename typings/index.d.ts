@@ -23,6 +23,7 @@ interface ICloudResponse<T> {
   success: boolean
   data: T
   error?: string
+  missing?: boolean
 }
 
 interface ICloudCallResult<T> extends WechatMiniprogram.CallFunctionResult {
