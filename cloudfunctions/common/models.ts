@@ -207,7 +207,7 @@ export const schema: SchemaModel = {
         avatarUrl: { type: 'string', note: '旧字段：曾缓存临时 https，现读名单时现签，不再写入', optional: true },
         avatarExpire: { type: 'number', note: '旧字段：临时链到期毫秒，现不再写入/读取', optional: true },
         avatarMaxAge: { type: 'number', note: '旧字段：曾存 maxAge，现不再写入/读取', optional: true },
-        groupNo: { type: 'number', note: '开启时分组，每组 10 人', optional: true },
+        groupNo: { type: 'number', note: '开启时分组，每组 8 到 12 人', optional: true },
         groupSeq: { type: 'number', note: '组内序号，从 1 开始', optional: true },
         createTime: { type: 'serverDate', note: '服务器时间' },
       },

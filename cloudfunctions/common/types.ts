@@ -107,7 +107,7 @@ export interface Signups {
   avatarExpire?: number
   /** 旧字段：曾记录 maxAge，现不再写入/读取 */
   avatarMaxAge?: number
-  /** 开启比赛时写入，从 1 开始，每组 10 人 */
+  /** 开启比赛时写入，从 1 开始。每组 8 到 12 人 */
   groupNo?: number
   /** 组内序号，从 1 开始。开启时按报名顺序写入 */
   groupSeq?: number

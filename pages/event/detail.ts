@@ -1,6 +1,8 @@
 import { avatarSrc } from '../../utils/avatar'
 import { markEventNeedRefresh, markEventRemoved } from '../../utils/event-list-sync'
 
+import { groupSizes, groupStartError } from '../../utils/group-sizes'
+
 const detailApp = getApp<IAppOption>()
 
 interface ISignupRow {
@@ -96,7 +98,7 @@ Page({
 
   goToGroups() {
     if (!this.data.eventId || !this.data.event || !this.data.event.started) return
-    wx.navigateTo({ url: `/pages/event/groups?id=${this.data.eventId}` })
+    wx.navigateTo({ url: `/pages/event/board?id=${this.data.eventId}` })
   },
 
   onSignupTap() {
@@ -222,9 +224,15 @@ Page({
   startEvent() {
     if (!this.data.isOwner || !this.data.event || this.data.event.started || this.data.scheduling) return
     this.setData({ showManage: false })
+    const count = this.data.signups.length
+    const sizes = groupSizes(count)
+    if (!sizes) {
+      wx.showToast({ title: groupStartError(count), icon: 'none' })
+      return
+    }
     wx.showModal({
       title: '开启比赛？',
-      content: '按报名顺序分组，每组 10 人。开启后不能再报名。',
+      content: `分成 ${sizes.length} 组：${sizes.join('、')}。开启后不能再报名。`,
       success: (res) => {
         if (!res.confirm) return
         void this.callSchedule('start')

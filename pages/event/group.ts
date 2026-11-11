@@ -2,10 +2,24 @@ import { groupTitle } from '../../utils/group-title'
 
 const groupApp = getApp<IAppOption>()
 
+interface IGroupSide {
+  openid: string
+  label: string
+  win: boolean
+}
+
 interface IGroupOpponent {
   openid: string
-  nickname: string
-  result: string
+  done: boolean
+  left: IGroupSide
+  right: IGroupSide
+}
+
+interface IGroupPerson {
+  openid?: string
+  nickname?: string
+  groupNo?: number
+  groupSeq?: number
 }
 
 interface IGroupResult {
@@ -46,24 +60,38 @@ Page({
         data: { id: eventId, status: 'all' }
       })
       const event = (res.result.data || []).find((item) => item._id === eventId)
-      const signups = Array.isArray(event && event.signups) ? event.signups : []
-      const me = signups.find((item: { openid?: string }) => item.openid === openid)
+      const signups = (Array.isArray(event && event.signups) ? event.signups : []) as IGroupPerson[]
+      const me = signups.find((item) => item.openid === openid)
       const groupNo = me ? Number(me.groupNo) || 0 : 0
+      const people = signups
+        .filter((item) => groupNo && Number(item.groupNo) === groupNo)
+        .slice()
+        .sort((a, b) => (Number(a.groupSeq) || 0) - (Number(b.groupSeq) || 0))
+      const meIndex = people.findIndex((item) => item.openid === openid)
       const results = Array.isArray(event && event.results) ? event.results as IGroupResult[] : []
       const notes = Array.isArray(event && event.groupNotes) ? event.groupNotes : []
       const noteRow = notes.find((row: { groupNo?: number }) => Number(row.groupNo) === groupNo)
-      const opponents = signups
-        .filter((item: { openid?: string; groupNo?: number }) => groupNo && Number(item.groupNo) === groupNo && item.openid !== openid)
-        .map((item: { openid?: string; nickname?: string }) => {
+      const seat = (person: IGroupPerson, index: number) => `${Number(person.groupSeq) || index + 1} ${person.nickname || '球友'}`
+      const myNo = me ? Number(me.groupSeq) || meIndex + 1 : 0
+      const opponents = people
+        .map((item, index) => ({ item, index }))
+        .filter(({ index }) => index !== meIndex)
+        .map(({ item, index }) => {
           const other = String(item.openid || '')
           const row = results.find((result) => (
             (result.a === openid && result.b === other) ||
             (result.a === other && result.b === openid)
           ))
+          const winner = row && row.winner ? String(row.winner) : ''
+          const mineSide = { openid, label: me ? seat(me, meIndex) : '', win: winner === openid }
+          const otherSide = { openid: other, label: seat(item, index), win: winner === other }
+          const otherNo = Number(item.groupSeq) || index + 1
+          const left = myNo <= otherNo ? mineSide : otherSide
           return {
             openid: other,
-            nickname: item.nickname || '球友',
-            result: !row ? '' : row.winner === openid ? '胜' : '负'
+            done: winner !== '',
+            left,
+            right: left === mineSide ? otherSide : mineSide
           }
         })
       this.setData({
@@ -79,21 +107,50 @@ Page({
     }
   },
 
-  async onResult(e: WechatMiniprogram.BaseEvent) {
+  onPick(e: WechatMiniprogram.BaseEvent) {
+    const done = e.currentTarget.dataset.done
+    if (done === true || done === 'true') {
+      wx.showToast({ title: '不能再点', icon: 'none' })
+      return
+    }
     const opponentOpenid = String(e.currentTarget.dataset.openid || '')
-    const win = String(e.currentTarget.dataset.win || '') === '1'
-    if (!opponentOpenid || this.data.reporting) return
+    const winner = String(e.currentTarget.dataset.winner || '')
+    const name = String(e.currentTarget.dataset.name || '球友')
+    if (!opponentOpenid || !winner || this.data.reporting) return
+    const win = winner === groupApp.globalData.openid
     this.setData({ reporting: opponentOpenid })
+    wx.showModal({
+      title: '确认获胜者',
+      content: `${name}获胜`,
+      confirmText: '确认',
+      success: (res) => {
+        if (!res.confirm) {
+          this.setData({ reporting: '' })
+          return
+        }
+        void this.saveResult(opponentOpenid, win)
+      },
+      fail: () => {
+        this.setData({ reporting: '' })
+      }
+    })
+  },
+
+  async saveResult(opponentOpenid: string, win: boolean) {
+    wx.showLoading({ title: '保存中' })
     try {
       const res = await groupApp.callFunction({
         name: 'eventSchedule',
         data: { id: this.data.eventId, action: 'report', opponentOpenid, win }
       })
+      wx.hideLoading()
       if (!res.result.success) {
         wx.showToast({ title: res.result.error || '失败', icon: 'none' })
+        return
       }
       await this.loadGroup()
     } catch (err) {
+      wx.hideLoading()
       wx.showToast({ title: '失败', icon: 'none' })
       console.error(err)
     } finally {

@@ -1,4 +1,4 @@
-import type { Events, MatchesInsert, Signups, Users, UsersInsert } from '../common/types'
+import type { Events, Signups, Users, UsersInsert } from '../common/types'
 
 const cloud = require('wx-server-sdk')
 
@@ -14,10 +14,9 @@ interface ScheduleEvent {
   count?: number
   groupNo?: number
   note?: string
-}
-
-function isVirtual(openid: string) {
-  return openid.indexOf('virtual') === 0
+  left?: string
+  right?: string
+  winner?: string
 }
 
 function virtualNo(nickname: string) {
@@ -38,12 +37,6 @@ function signupTime(value: unknown) {
 
 function pairKey(left: string, right: string) {
   return left < right ? { a: left, b: right } : { a: right, b: left }
-}
-
-function nextScore(mine: number, other: number, actual: number) {
-  const expected = 1 / (1 + Math.pow(10, (other - mine) / 400))
-  const k = mine < 1500 ? 32 : 16
-  return Math.round(mine + k * (actual - expected))
 }
 
 async function loadSignups(eventId: string) {
@@ -113,21 +106,45 @@ async function addVirtual(eventId: string, event: Events, count: number) {
   return { success: true, data: { count: n } }
 }
 
+function groupSizes(count: number) {
+  if (count < 8) return null
+  const groups = Math.ceil(count / 12)
+  if (groups > Math.floor(count / 8)) return null
+  const base = Math.floor(count / groups)
+  const extra = count % groups
+  const sizes: number[] = []
+  for (let i = 0; i < groups; i += 1) sizes.push(i < extra ? base + 1 : base)
+  return sizes
+}
+
+function groupStartError(count: number) {
+  const need = count < 8 ? 8 - count : 16 - count
+  if (need > 0) return `再加 ${need} 人才能开启`
+  return '这人数分不开'
+}
+
 async function startEvent(eventId: string) {
   const rows = await loadSignups(eventId)
-  if (rows.length < 2) return { success: false, error: '至少两个人报名' }
-  for (let i = 0; i < rows.length; i += 1) {
-    await db.collection('signups').doc(`${eventId}_${rows[i].openid}`).update({
-      data: { groupNo: Math.floor(i / 10) + 1, groupSeq: (i % 10) + 1 }
-    })
+  const sizes = groupSizes(rows.length)
+  if (!sizes) return { success: false, error: groupStartError(rows.length) }
+  let index = 0
+  for (let groupNo = 1; groupNo <= sizes.length; groupNo += 1) {
+    const size = sizes[groupNo - 1]
+    for (let groupSeq = 1; groupSeq <= size; groupSeq += 1) {
+      const row = rows[index]
+      index += 1
+      await db.collection('signups').doc(`${eventId}_${row.openid}`).update({
+        data: { groupNo, groupSeq }
+      })
+    }
   }
   await db.collection('events').doc(eventId).update({
     data: { started: true, status: 'ongoing', updateTime: db.serverDate() }
   })
-  return { success: true, data: { groups: Math.ceil(rows.length / 10) } }
+  return { success: true, data: { groups: sizes.length } }
 }
 
-async function reportResult(eventId: string, event: Events, openid: string, opponent: string, win: boolean) {
+async function reportResult(eventId: string, openid: string, opponent: string, win: boolean) {
   if (opponent === openid) return { success: false, error: '不能和自己比赛' }
   const mine = await db.collection('signups').doc(`${eventId}_${openid}`).get()
   const other = await db.collection('signups').doc(`${eventId}_${opponent}`).get()
@@ -154,58 +171,47 @@ async function reportResult(eventId: string, event: Events, openid: string, oppo
     if (/已经记过|比赛还没开始/.test(message)) return { success: false, error: message }
     return { success: false, error: '记录失败' }
   }
-  if (isVirtual(openid) || isVirtual(opponent)) return { success: true, data: { winner } }
+  return { success: true, data: { winner } }
+}
 
-  const [player1Res, player2Res] = await Promise.all([
-    db.collection('users').where({ openid }).limit(1).get(),
-    db.collection('users').where({ openid: opponent }).limit(1).get()
-  ])
-  const player1 = player1Res.data[0] as Users | undefined
-  const player2 = player2Res.data[0] as Users | undefined
-  if (!player1 || !player2) return { success: false, error: '胜负已记下，积分更新失败' }
+async function saveWinner(eventId: string, pair: { a: string; b: string }, winner: string, once: boolean) {
+  await db.runTransaction(async (transaction) => {
+    const snap = await transaction.collection('events').doc(eventId).get()
+    const current = snap.data as Events | undefined
+    if (!current || !current.started) throw new Error('比赛还没开始')
+    const results = Array.isArray(current.results) ? current.results.slice() : []
+    const index = results.findIndex((row) => row.a === pair.a && row.b === pair.b)
+    if (index >= 0) {
+      if (once) throw new Error('已经记过')
+      results[index] = { a: pair.a, b: pair.b, winner }
+    } else results.push({ a: pair.a, b: pair.b, winner })
+    await transaction.collection('events').doc(eventId).update({ data: { results } })
+  })
+}
 
-  const p1Wins = winner === openid
-  const p1Next = nextScore(player1.score, player2.score, p1Wins ? 1 : 0)
-  const p2Next = nextScore(player2.score, player1.score, p1Wins ? 0 : 1)
-  const match: MatchesInsert = {
-    eventId,
-    player1Openid: openid,
-    player2Openid: opponent,
-    player1: { openid, nickname: player1.nickname, avatar: player1.avatar, score: p1Wins ? 1 : 0 },
-    player2: { openid: opponent, nickname: player2.nickname, avatar: player2.avatar, score: p1Wins ? 0 : 1 },
-    scoreChange: { player1: p1Next - player1.score, player2: p2Next - player2.score },
-    winner: p1Wins ? 'player1' : 'player2',
-    matchType: 'event',
-    location: event.location || '',
-    status: 'completed',
-    createTime: db.serverDate()
+async function setResult(eventId: string, left: string, right: string, winner: string, openid: string, owner: boolean) {
+  if (left === right) return { success: false, error: '不能和自己比赛' }
+  if (winner !== left && winner !== right) return { success: false, error: '请选择胜负' }
+  const leftRow = await db.collection('signups').doc(`${eventId}_${left}`).get()
+  const rightRow = await db.collection('signups').doc(`${eventId}_${right}`).get()
+  const leftSignup = leftRow && leftRow.data as Signups | undefined
+  const rightSignup = rightRow && rightRow.data as Signups | undefined
+  if (!leftSignup || !rightSignup || !leftSignup.groupNo || leftSignup.groupNo !== rightSignup.groupNo) {
+    return { success: false, error: '不在同一组' }
   }
-  const p1Data: Record<string, unknown> = {
-    score: p1Next,
-    totalMatches: db.command.inc(1),
-    updateTime: db.serverDate()
-  }
-  const p2Data: Record<string, unknown> = {
-    score: p2Next,
-    totalMatches: db.command.inc(1),
-    updateTime: db.serverDate()
-  }
-  if (p1Wins) {
-    p1Data.winMatches = db.command.inc(1)
-    p2Data.loseMatches = db.command.inc(1)
-  } else {
-    p1Data.loseMatches = db.command.inc(1)
-    p2Data.winMatches = db.command.inc(1)
+  if (!owner) {
+    const mine = await db.collection('signups').doc(`${eventId}_${openid}`).get()
+    const myRow = mine && mine.data as Signups | undefined
+    if (!myRow || !myRow.groupNo || myRow.groupNo !== leftSignup.groupNo) {
+      return { success: false, error: '不在同一组' }
+    }
   }
   try {
-    await db.collection('matches').add({ data: match })
-    await Promise.all([
-      db.collection('users').where({ openid }).update({ data: p1Data }),
-      db.collection('users').where({ openid: opponent }).update({ data: p2Data })
-    ])
+    await saveWinner(eventId, pairKey(left, right), winner, !owner)
   } catch (err) {
-    console.error('更新积分失败', err)
-    return { success: false, error: '胜负已记下，积分更新失败' }
+    const message = (err as Error).message || '记录失败'
+    if (/已经记过|比赛还没开始/.test(message)) return { success: false, error: message }
+    return { success: false, error: '记录失败' }
   }
   return { success: true, data: { winner } }
 }
@@ -253,7 +259,16 @@ export const main = async (event: ScheduleEvent) => {
     const opponent = String(event.opponentOpenid || '').trim()
     if (!opponent) return { success: false, error: '没有这个对手' }
     if (event.win !== true && event.win !== false) return { success: false, error: '请选择胜负' }
-    return reportResult(id, current, openid, opponent, event.win)
+    return reportResult(id, openid, opponent, event.win)
+  }
+
+  if (event.action === 'set') {
+    if (!current.started) return { success: false, error: '比赛还没开始' }
+    const left = String(event.left || '').trim()
+    const right = String(event.right || '').trim()
+    const winner = String(event.winner || '').trim()
+    if (!left || !right) return { success: false, error: '没有这个对手' }
+    return setResult(id, left, right, winner, openid, current.creatorOpenid === openid)
   }
 
   if (event.action === 'note') {

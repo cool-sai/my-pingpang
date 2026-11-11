@@ -1,5 +1,5 @@
 .tabs {
-  height: 88rpx;
+  height: 96rpx;
   white-space: nowrap;
   padding: 20rpx 24rpx 0;
   background: #ffffff;
@@ -7,13 +7,24 @@
 }
 
 .tab {
+  position: relative;
   display: inline-block;
-  margin-right: 16rpx;
-  padding: 8rpx 20rpx;
+  margin-right: 20rpx;
+  padding: 12rpx 36rpx 12rpx 20rpx;
   color: #6d7b8a;
   font-size: 26rpx;
   background: #f2f5f3;
   border-radius: 999rpx;
+}
+
+.tab-dot {
+  position: absolute;
+  top: 8rpx;
+  right: 10rpx;
+  width: 20rpx;
+  height: 20rpx;
+  background: #d14343;
+  border-radius: 50%;
 }
 
 .tab--on {
@@ -22,11 +33,25 @@
   background: rgba(20, 143, 76, 0.12);
 }
 
-.note {
+.note-row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
   padding: 16rpx 32rpx 0;
+  background: #ffffff;
+}
+
+.note {
+  flex: 1;
+  min-width: 0;
   color: #6d7b8a;
   font-size: 26rpx;
-  background: #ffffff;
+}
+
+.note-edit {
+  flex-shrink: 0;
+  color: #148f4c;
+  font-size: 26rpx;
 }
 
 .table {
@@ -60,6 +85,31 @@
   text-align: left;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+.cell--mine {
+  color: #148f4c;
+  font-weight: 700;
+  background: rgba(20, 143, 76, 0.12);
+}
+
+.cell--self {
+  background-image: linear-gradient(to bottom left, transparent 49%, #b7c1ca 49%, #b7c1ca 51%, transparent 51%);
+}
+
+.has-score {
+  padding-bottom: calc(120rpx + env(safe-area-inset-bottom));
+}
+
+.submit-btn {
+  height: 88rpx;
+  margin: 0;
+  color: #ffffff;
+  font-size: 32rpx;
+  font-weight: 700;
+  line-height: 88rpx;
+  background: #148f4c;
+  border-radius: 12rpx;
 }
 
 .cell--win {
