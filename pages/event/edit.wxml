@@ -17,13 +17,13 @@
   </view>
   <view class="field">
     <text class="field-label">日期</text>
-    <picker class="field-picker" mode="date" value="{{date}}" start="2024-01-01" end="2035-12-31" bindchange="setDate">
+    <picker class="field-picker" mode="date" disabled="{{statusLocked}}" value="{{date}}" start="2024-01-01" end="2035-12-31" bindchange="setDate">
       <view class="field-value field-value--pick {{date ? '' : 'is-placeholder'}}">{{eventId && !ready ? '' : (date || '选择日期')}}</view>
     </picker>
   </view>
   <view class="field">
     <text class="field-label">时间</text>
-    <picker class="field-picker" mode="time" value="{{time}}" bindchange="setTime">
+    <picker class="field-picker" mode="time" disabled="{{statusLocked}}" value="{{time}}" bindchange="setTime">
       <view class="field-value field-value--pick {{time ? '' : 'is-placeholder'}}">{{eventId && !ready ? '' : (time || '选择时间')}}</view>
     </picker>
   </view>
@@ -42,7 +42,7 @@
   </view>
   <view class="field">
     <text class="field-label">状态</text>
-    <picker class="field-picker" mode="selector" range="{{statusLabels}}" value="{{statusIndex}}" bindchange="setStatus">
+    <picker class="field-picker" mode="selector" disabled="{{statusLocked}}" range="{{statusLabels}}" value="{{statusIndex}}" bindchange="setStatus">
       <view class="field-value field-value--pick">{{eventId && !ready ? '' : statusLabels[statusIndex]}}</view>
     </picker>
   </view>

@@ -30,6 +30,14 @@ function signupTime(value) {
     const parsed = Date.parse(String(value || ''));
     return Number.isNaN(parsed) ? 0 : parsed;
 }
+// 比赛时间按东八区解析，云函数运行在 UTC
+function startMillis(startTime) {
+    const matched = /^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2})$/.exec(String(startTime || ''));
+    if (!matched)
+        return 0;
+    const ms = Date.parse(`${matched[1]}T${matched[2]}:00+08:00`);
+    return Number.isNaN(ms) ? 0 : ms;
+}
 function pairKey(left, right) {
     return left < right ? { a: left, b: right } : { a: right, b: left };
 }
@@ -46,7 +54,8 @@ function playerSnap(openid, people) {
     };
 }
 // 约战记胜负同时 upsert matches，scoreChange 先写 0，不改 users 积分
-async function upsertEventMatch(transaction, eventId, pair, winner, people) {
+async function upsertEventMatch(transaction, eventId, pair, winner, people, startTime) {
+    const matchTime = startMillis(startTime);
     const id = matchIdFor(eventId, pair);
     const side = winner === pair.a ? 'player1' : 'player2';
     const doc = {
@@ -58,7 +67,9 @@ async function upsertEventMatch(transaction, eventId, pair, winner, people) {
         winner: side,
         matchType: 'event',
         eventId,
-        status: 'completed'
+        status: 'completed',
+        settled: false,
+        matchTime
     };
     let existing = null;
     try {
@@ -79,7 +90,9 @@ async function upsertEventMatch(transaction, eventId, pair, winner, people) {
                 scoreChange: { player1: 0, player2: 0 },
                 matchType: 'event',
                 eventId,
-                status: 'completed'
+                status: 'completed',
+                settled: false,
+                matchTime
             }
         });
         return;
@@ -237,17 +250,21 @@ async function reportResult(eventId, openid, opponent, win) {
             const current = snap.data;
             if (!current || !current.started)
                 throw new Error('比赛还没开始');
+            if (current.deleting)
+                throw new Error('比赛正在删除');
+            if (current.status === 'finished' || current.settled)
+                throw new Error('比赛已结束');
             const results = Array.isArray(current.results) ? current.results.slice() : [];
             if (results.some((row) => row.a === pair.a && row.b === pair.b))
                 throw new Error('已经记过');
             results.push({ a: pair.a, b: pair.b, winner });
             await transaction.collection('events').doc(eventId).update({ data: { results } });
-            await upsertEventMatch(transaction, eventId, pair, winner, [signupSnap(myRow), signupSnap(otherRow)]);
+            await upsertEventMatch(transaction, eventId, pair, winner, [signupSnap(myRow), signupSnap(otherRow)], current.startTime);
         });
     }
     catch (err) {
         const message = err.message || '记录失败';
-        if (/已经记过|比赛还没开始/.test(message))
+        if (/已经记过|比赛还没开始|比赛已结束|比赛正在删除/.test(message))
             return { success: false, error: message };
         return { success: false, error: '记录失败' };
     }
@@ -259,6 +276,10 @@ async function saveWinner(eventId, pair, winner, once, people) {
         const current = snap.data;
         if (!current || !current.started)
             throw new Error('比赛还没开始');
+        if (current.deleting)
+            throw new Error('比赛正在删除');
+        if (current.status === 'finished' || current.settled)
+            throw new Error('比赛已结束');
         const results = Array.isArray(current.results) ? current.results.slice() : [];
         const index = results.findIndex((row) => row.a === pair.a && row.b === pair.b);
         if (index >= 0) {
@@ -269,7 +290,7 @@ async function saveWinner(eventId, pair, winner, once, people) {
         else
             results.push({ a: pair.a, b: pair.b, winner });
         await transaction.collection('events').doc(eventId).update({ data: { results } });
-        await upsertEventMatch(transaction, eventId, pair, winner, people);
+        await upsertEventMatch(transaction, eventId, pair, winner, people, current.startTime);
     });
 }
 async function setResult(eventId, left, right, winner, openid, owner) {
@@ -296,7 +317,7 @@ async function setResult(eventId, left, right, winner, openid, owner) {
     }
     catch (err) {
         const message = err.message || '记录失败';
-        if (/已经记过|比赛还没开始/.test(message))
+        if (/已经记过|比赛还没开始|比赛已结束|比赛正在删除/.test(message))
             return { success: false, error: message };
         return { success: false, error: '记录失败' };
     }
@@ -330,6 +351,8 @@ const main = async (event) => {
     const current = snap.data;
     if (!current)
         return { success: false, error: '没有找到这场比赛' };
+    if (current.deleting)
+        return { success: false, error: '比赛正在删除' };
     if (event.action === 'virtual' || event.action === 'start') {
         if (current.creatorOpenid !== openid)
             return { success: false, error: '只有发起人可以操作' };

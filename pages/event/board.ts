@@ -115,6 +115,7 @@ Page({
     results: [] as IBoardResult[],
     notes: [] as IBoardNote[],
     isOwner: false,
+    closed: false,
     signed: false,
     myGroupNo: 0,
     saving: false,
@@ -162,6 +163,7 @@ Page({
         signed: myGroupNo > 0,
         myGroupNo,
         isOwner: !!(event && openid && event.creatorOpenid === openid),
+        closed: event.status === 'finished' || !!event.settled,
         ...boardView(signups, results, notes, groupNo, openid),
         isLoading: false
       }, () => {
@@ -182,6 +184,10 @@ Page({
   },
 
   onCell(e: WechatMiniprogram.BaseEvent) {
+    if (this.data.closed) {
+      wx.showToast({ title: '比赛已结束，不能再记分', icon: 'none' })
+      return
+    }
     const mineHere = this.data.myGroupNo > 0 && this.data.groupNo === this.data.myGroupNo
     if (this.data.saving || (!this.data.isOwner && !mineHere)) return
     const left = String(e.currentTarget.dataset.left || '')

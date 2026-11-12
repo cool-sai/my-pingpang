@@ -21,6 +21,7 @@
     "node_modules",
     "miniprogram_npm",
     "cloudfunctions",
+    "scripts",
     "schema"
   ]
 }

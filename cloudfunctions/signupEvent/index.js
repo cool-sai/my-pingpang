@@ -21,6 +21,8 @@ async function cancelSignup(id, openid) {
             const current = eventSnap.data;
             if (!current)
                 throw new Error('没有找到这场比赛');
+            if (current.deleting)
+                throw new Error('比赛正在删除');
             if (current.started)
                 throw new Error('比赛已开始');
             const signupSnap = await transaction.collection('signups').doc(signupId).get();
@@ -38,7 +40,7 @@ async function cancelSignup(id, openid) {
     catch (err) {
         const error = err;
         const message = error.message || '取消失败';
-        if (/没有找到这场比赛|比赛已开始/.test(message)) {
+        if (/没有找到这场比赛|比赛已开始|比赛正在删除/.test(message)) {
             return { success: false, error: message };
         }
         return { success: false, error: '取消失败' };
@@ -83,6 +85,8 @@ const main = async (event) => {
             const current = eventSnap.data;
             if (!current)
                 throw new Error('没有找到这场比赛');
+            if (current.deleting)
+                throw new Error('比赛正在删除');
             if (current.started)
                 throw new Error('比赛已开始');
             if (current.status === 'finished')
@@ -107,7 +111,7 @@ const main = async (event) => {
     catch (err) {
         const error = err;
         const message = error.message || '报名失败';
-        if (/人数已满|报名已结束|没有找到这场比赛|比赛已开始/.test(message)) {
+        if (/人数已满|报名已结束|没有找到这场比赛|比赛已开始|比赛正在删除/.test(message)) {
             return { success: false, error: message };
         }
         if (/collection not exist|集合不存在|DATABASE_COLLECTION_NOT_EXIST/i.test(message)) {

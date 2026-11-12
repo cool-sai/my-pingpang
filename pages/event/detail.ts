@@ -286,6 +286,59 @@ Page({
     }
   },
 
+  finishEvent() {
+    const event = this.data.event
+    if (!this.data.isOwner || !event || !event.started || event.status === 'finished' || event.settled || this.data.scheduling) return
+    this.setData({ showManage: false })
+    wx.showModal({
+      title: '结束比赛？',
+      content: '结束后将结算全员积分，未记录的对局不计分，且结束后不可再记分或改判，确认结束吗？',
+      confirmText: '结束',
+      confirmColor: '#d14343',
+      success: (res) => {
+        if (!res.confirm) return
+        void this.submitFinish()
+      }
+    })
+  },
+
+  async submitFinish() {
+    if (this.data.scheduling) return
+    this.setData({ scheduling: true })
+    wx.showLoading({ title: '结束中' })
+    try {
+      const res = await detailApp.callFunction<{ archived?: boolean; queued?: boolean }>({
+        name: 'finishEvent',
+        data: { id: this.data.eventId }
+      })
+      wx.hideLoading()
+      if (!res.result.success) {
+        await this.loadEvent(this.data.eventId)
+        const locked = !!(this.data.event && this.data.event.status === 'finished')
+        wx.showToast({
+          title: locked ? '比赛已结束，积分结算中' : (res.result.error || '结束失败'),
+          icon: 'none'
+        })
+        return
+      }
+      await this.loadEvent(this.data.eventId)
+      const data = res.result.data || {}
+      const title = data.queued ? '已结束，积分结算中' : data.archived ? '已归档，不改积分' : '已结束并结算'
+      wx.showToast({ title, icon: 'success' })
+    } catch (err) {
+      wx.hideLoading()
+      console.error(err)
+      await this.loadEvent(this.data.eventId)
+      const locked = !!(this.data.event && this.data.event.status === 'finished')
+      wx.showToast({
+        title: locked ? '比赛已结束，积分结算处理中' : '结束失败',
+        icon: 'none'
+      })
+    } finally {
+      this.setData({ scheduling: false })
+    }
+  },
+
   goToEdit() {
     if (!this.data.eventId) return
     this.setData({ showManage: false })
@@ -293,7 +346,7 @@ Page({
   },
 
   onDelete() {
-    if (this.data.deleting || !this.data.event) return
+    if (this.data.deleting || !this.data.event || this.data.event.status === 'finished' || this.data.event.settled) return
     this.setData({ showManage: false })
     const name = this.data.event.name || '这场比赛'
     wx.showModal({

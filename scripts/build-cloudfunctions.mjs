@@ -13,17 +13,21 @@ for (const entry of entries) {
   if (!entry.isDirectory()) continue
 
   const functionName = entry.name
-  const builtIndexPath = path.join(distRoot, functionName, 'index.js')
+  const builtDir = path.join(distRoot, functionName)
   const targetDir = path.join(functionsRoot, functionName)
-  const targetIndexPath = path.join(targetDir, 'index.js')
 
+  // 只拷有 index.js 的函数目录；同目录下的其它 .js（如 rating.js）一并带上，云函数运行时要 require
   try {
-    const fileStat = await stat(builtIndexPath)
+    const fileStat = await stat(path.join(builtDir, 'index.js'))
     if (!fileStat.isFile()) continue
   } catch {
     continue
   }
 
   await mkdir(targetDir, { recursive: true })
-  await copyFile(builtIndexPath, targetIndexPath)
+  const files = await readdir(builtDir, { withFileTypes: true })
+  for (const file of files) {
+    if (!file.isFile() || !file.name.endsWith('.js')) continue
+    await copyFile(path.join(builtDir, file.name), path.join(targetDir, file.name))
+  }
 }

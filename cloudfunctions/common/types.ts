@@ -63,8 +63,17 @@ export interface Events {
   signupCount: number
   /** 开启后按报名顺序分组，并锁报名 */
   started?: boolean
+  /** 删除已在事务中确认，阻止结束、记分及编辑；清理失败时保留，供再次删除继续清理 */
+  deleting?: boolean
   /** 组内胜负。a、b、winner 都是 openid */
   results?: Array<{ a: string; b: string; winner: string }>
+  /** 已结算积分。结束比赛后置 true；status 为 finished 但未结算时由全局管理员在结算管理页处理 */
+  settled?: boolean
+  settledAt?: ServerDateValue
+  /** 结束比赛的时间（锁定记分的时刻） */
+  finishedAt?: ServerDateValue
+  /** 开赛超过 14 天才结束：只归档战绩，不改积分 */
+  archived?: boolean
   /** 分组备注。组名仍按组号显示为第一组、第二组 */
   groupNotes?: Array<{ groupNo: number; note: string }>
   createTime: ServerDateValue
@@ -88,11 +97,21 @@ export interface Matches {
   player2Openid: string
   player1: MatchPlayerSnapshot
   player2: MatchPlayerSnapshot
-  /** 友谊赛立即改积分；约战局当前为 0，待整场结算后再入账（尚未做） */
+  /** 约战局进行中为 0，结束比赛后按涟漪积分法写入。旧的单局记录可能已有增减 */
   scoreChange: {
     player1: number
     player2: number
   }
+  /** 比赛实际发生时间（events.startTime 的东八区毫秒），个人主页与结算排序用；旧记录没有 */
+  matchTime?: number
+  /** 约战结算时落盘：双方进入本场时的积分（涟漪重算的天然检查点） */
+  preScore?: { player1: number; player2: number }
+  /** 约战结算时落盘：双方进入本场前累计已结算局数（判定是否新手定级期） */
+  preMatches?: { player1: number; player2: number }
+  /** 是否已结算积分 */
+  settled?: boolean
+  /** 超期归档：不改积分 */
+  archived?: boolean
   winner: MatchWinner
   matchType: string
   /** 这场约战里记下的胜负才有；友谊赛没有 */

@@ -37,6 +37,7 @@ Page({
     note: '',
     emptyText: '你不在这组',
     isLoading: true,
+    closed: false,
     reporting: ''
   },
 
@@ -100,6 +101,7 @@ Page({
         title: groupNo ? groupTitle(groupNo) : '',
         note: noteRow && noteRow.note ? String(noteRow.note) : '',
         emptyText: groupNo ? '这一组没有对手' : '你不在这组',
+        closed: event.status === 'finished' || !!event.settled,
         isLoading: false
       })
     } catch (err) {
@@ -109,6 +111,10 @@ Page({
   },
 
   onPick(e: WechatMiniprogram.BaseEvent) {
+    if (this.data.closed) {
+      wx.showToast({ title: '比赛已结束，不能再记分', icon: 'none' })
+      return
+    }
     const done = e.currentTarget.dataset.done
     if (done === true || done === 'true') {
       wx.showToast({ title: '不能再点', icon: 'none' })

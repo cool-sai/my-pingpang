@@ -5,6 +5,8 @@
     "typecheck": "tsc --noEmit",
     "typecheck:cloudfunctions": "tsc -p tsconfig.cloudfunctions.json --noEmit",
     "build:cloudfunctions": "tsc -p tsconfig.cloudfunctions.json && node scripts/build-cloudfunctions.mjs",
+    "test:rating": "tsx scripts/test-rating.ts",
+    "test:event-lifecycle": "node scripts/test-event-lifecycle.cjs",
     "typecheck:schema": "tsc -p schema --noEmit",
     "schema:dev": "node schema/serve.mjs"
   },

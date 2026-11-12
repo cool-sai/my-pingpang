@@ -4,8 +4,11 @@ import { fetchEvent } from '../../utils/load-event'
 const editApp = getApp<IAppOption>()
 
 const FORMATS = ['分段赛', '淘汰赛']
-const STATUS_LABELS = ['报名中', '进行中', '已结束']
-const STATUS_VALUES = ['upcoming', 'ongoing', 'finished']
+const STATUS_LABELS = ['报名中', '进行中']
+const STATUS_VALUES = ['upcoming', 'ongoing']
+// 已结束的比赛只能由详情页「结束比赛」产生，编辑页里状态和开赛时间只读
+const FINISHED_LABELS = ['已结束']
+const FINISHED_VALUES = ['finished']
 
 function readPlayers(value: unknown) {
   const parsed = Number(value)
@@ -42,6 +45,8 @@ Page({
     maxPlayers: 0,
     formats: FORMATS,
     statusLabels: STATUS_LABELS,
+    statusValues: STATUS_VALUES,
+    statusLocked: false,
     formatIndex: 0,
     statusIndex: 0
   },
@@ -89,7 +94,8 @@ Page({
       const savedFormat = String(event.format || '')
       const formats = !savedFormat || FORMATS.indexOf(savedFormat) >= 0 ? FORMATS : [savedFormat, ...FORMATS]
       const formatIndex = Math.max(0, formats.indexOf(savedFormat))
-      const statusIndex = Math.max(0, STATUS_VALUES.indexOf(event.status))
+      const statusLocked = event.status === 'finished' || !!event.settled
+      const statusIndex = statusLocked ? 0 : Math.max(0, STATUS_VALUES.indexOf(event.status))
       const cover = String(event.cover || '')
       this.setData({
         ready: true,
@@ -107,7 +113,10 @@ Page({
         description: event.description || '',
         maxPlayers: readPlayers(event.maxPlayers),
         formatIndex,
-        statusIndex
+        statusIndex,
+        statusLocked,
+        statusLabels: statusLocked ? FINISHED_LABELS : STATUS_LABELS,
+        statusValues: statusLocked ? FINISHED_VALUES : STATUS_VALUES
       })
     } catch (err) {
       console.error('加载比赛失败', err)
@@ -149,6 +158,7 @@ Page({
   },
 
   setStatus(e: WechatMiniprogram.CustomEvent<{ value?: string }>) {
+    if (this.data.statusLocked) return
     this.setData({ statusIndex: Number(e.detail.value) || 0 })
   },
 
@@ -271,7 +281,7 @@ Page({
         longitude,
         description,
         format: this.data.formats[this.data.formatIndex] || FORMATS[0],
-        status: STATUS_VALUES[this.data.statusIndex] || STATUS_VALUES[0],
+        status: this.data.statusValues[this.data.statusIndex] || STATUS_VALUES[0],
         maxPlayers
       }
 

@@ -4,6 +4,8 @@ import { TabIndex } from '../../utils/tab'
 
 const userApp = getApp<IAppOption>()
 
+const SUPER_ADMIN_OPENID = 'oNw7Y5E0Wkbx_ZqHgLNOAntmTp3g'
+
 interface IUserStats {
   totalMatches: number
   winRate: number
@@ -18,6 +20,22 @@ interface IMenuItem {
   tab?: boolean
 }
 
+const BASE_MENU_ITEMS: IMenuItem[] = [
+  { id: 'created', icon: '📌', title: '我发起的', url: '/pages/user/events?scope=created' },
+  { id: 'signed', icon: '📝', title: '我报名的', url: '/pages/user/events?scope=signed' },
+  { id: 'score', icon: '🏆', title: '积分', url: '/pages/user/detail' },
+  { id: 'virtuals', icon: '👥', title: '虚拟球友', url: '/pages/user/virtuals' },
+  { id: 'credit', icon: '✅', title: '我的信用', url: '' }
+]
+
+function buildMenu(userInfo: IUserInfo | null): IMenuItem[] {
+  const openid = String((userInfo && userInfo.openid) || userApp.globalData.openid || '')
+  if (openid === SUPER_ADMIN_OPENID) {
+    return [...BASE_MENU_ITEMS, { id: 'settlement', icon: '⚙️', title: '结算管理', url: '/pages/user/settlement' }]
+  }
+  return BASE_MENU_ITEMS
+}
+
 Page({
   data: {
     navPad: getNavLayout().navHeight,
@@ -28,19 +46,13 @@ Page({
       winRate: 0,
       score: 0
     } as IUserStats,
-    menuItems: [
-      { id: 'created', icon: '📌', title: '我发起的', url: '/pages/user/events?scope=created' },
-      { id: 'signed', icon: '📝', title: '我报名的', url: '/pages/user/events?scope=signed' },
-      { id: 'record', icon: '🏓', title: '我的战绩', url: '/pages/match/match' },
-      { id: 'score', icon: '🏆', title: '积分', url: '/pages/user/detail' },
-      { id: 'virtuals', icon: '👥', title: '虚拟球友', url: '/pages/user/virtuals' },
-      { id: 'credit', icon: '✅', title: '我的信用', url: '' }
-    ] as IMenuItem[]
+    menuItems: BASE_MENU_ITEMS
   },
 
   onLoad() {
     if (userApp.globalData.isLogin) {
-      this.setData({ userInfo: userApp.globalData.userInfo })
+      const userInfo = userApp.globalData.userInfo
+      this.setData({ userInfo, menuItems: buildMenu(userInfo) })
       this.loadUserStats()
     }
   },
@@ -55,13 +67,16 @@ Page({
       this.getTabBar().setData({ selected: TabIndex.User })
     }
     if (userApp.globalData.isLogin) {
+      const userInfo = userApp.globalData.userInfo
       this.setData({
-        userInfo: userApp.globalData.userInfo
+        userInfo,
+        menuItems: buildMenu(userInfo)
       })
       this.loadUserStats()
     } else {
       this.setData({
         userInfo: null,
+        menuItems: BASE_MENU_ITEMS,
         stats: { totalMatches: 0, winRate: 0, score: 0 }
       })
     }
@@ -97,6 +112,7 @@ Page({
           userApp.logout()
           this.setData({
             userInfo: null,
+            menuItems: BASE_MENU_ITEMS,
             stats: { totalMatches: 0, winRate: 0, score: 0 }
           })
           wx.showToast({ title: '已退出登录', icon: 'none' })
@@ -109,7 +125,8 @@ Page({
     userApp.login({
       success: (userInfo) => {
         this.setData({
-          userInfo
+          userInfo,
+          menuItems: buildMenu(userInfo)
         })
         this.loadUserStats()
         if (!userInfo.profileReady) {

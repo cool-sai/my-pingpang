@@ -58,6 +58,7 @@ function readEventFields(input) {
         return { error: '请选择赛制' };
     if (statuses.indexOf(status) < 0)
         return { error: '请选择状态' };
+    // finished 是否合法由 main 按库里现状判断：已结束的比赛状态保持不变，其它比赛不能绕过结算改成已结束
     if (!Number.isInteger(maxPlayers) || maxPlayers < 0 || maxPlayers > 128 || (maxPlayers !== 0 && maxPlayers < 2)) {
         return { error: '人数上限填 2 到 128，不限制就留空' };
     }
@@ -102,14 +103,35 @@ const main = async (event) => {
         if (currentEvent.creatorOpenid !== openid) {
             return { success: false, error: '只能修改自己发起的比赛' };
         }
+        if (currentEvent.deleting)
+            return { success: false, error: '比赛正在删除，不能编辑' };
         const region = await reverseGeocode(parsed.value.latitude, parsed.value.longitude);
-        const data = {
-            ...parsed.value,
-            province: region.province,
-            city: region.city,
-            updateTime: db.serverDate(),
-        };
-        await db.collection('events').doc(id).update({ data });
+        // 地址解析期间比赛可能已经结束或进入删除，必须在最终写入的事务里重新判断。
+        await db.runTransaction(async (transaction) => {
+            const snap = await transaction.collection('events').doc(id).get();
+            const latest = snap.data;
+            if (!latest)
+                throw new Error('没有找到这场比赛');
+            if (latest.creatorOpenid !== openid)
+                throw new Error('只能修改自己发起的比赛');
+            if (latest.deleting)
+                throw new Error('比赛正在删除，不能编辑');
+            const finished = latest.status === 'finished' || !!latest.settled;
+            if (!finished && parsed.value.status === 'finished') {
+                throw new Error('比赛结束请在详情页点「结束比赛」');
+            }
+            const data = {
+                ...parsed.value,
+                province: region.province,
+                city: region.city,
+                updateTime: db.serverDate(),
+            };
+            if (finished) {
+                data.status = latest.status;
+                data.startTime = latest.startTime;
+            }
+            await transaction.collection('events').doc(id).update({ data });
+        });
         return { success: true, data: { _id: id } };
     }
     catch (err) {

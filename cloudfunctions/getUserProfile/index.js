@@ -8,6 +8,7 @@ const _ = db.command;
 const TEMP_BATCH = 50;
 const MATCH_PAGE = 100;
 const MATCH_MAX = 500;
+const SIGNUP_MAX = 2000;
 const IN_LIMIT = 10;
 const CHART_LIMIT = 40;
 function isVirtual(openid) {
@@ -33,7 +34,14 @@ function toTime(value) {
                 return parsed;
         }
     }
-    const parsed = Date.parse(String(value || ''));
+    const rawStr = String(value || '').trim();
+    const local = /^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2})$/.exec(rawStr);
+    if (local) {
+        const ms = Date.parse(`${local[1]}T${local[2]}:00+08:00`);
+        if (!Number.isNaN(ms))
+            return ms;
+    }
+    const parsed = Date.parse(rawStr);
     return Number.isNaN(parsed) ? 0 : parsed;
 }
 function formatDate(value) {
@@ -101,20 +109,30 @@ async function loadMatches(openid) {
         all.push(...rows);
         if (rows.length < MATCH_PAGE)
             break;
-        const changed = all.filter((item) => {
-            const change = item.player1Openid === openid
-                ? Number(item.scoreChange && item.scoreChange.player1) || 0
-                : Number(item.scoreChange && item.scoreChange.player2) || 0;
-            return change !== 0;
-        }).length;
-        if (changed >= CHART_LIMIT && all.length >= MATCH_PAGE)
-            break;
+    }
+    return all;
+}
+async function loadMatchesForEvents(openid, eventIds) {
+    const all = [];
+    const unique = Array.from(new Set(eventIds.filter(Boolean)));
+    for (let i = 0; i < unique.length; i += IN_LIMIT) {
+        const chunk = unique.slice(i, i + IN_LIMIT);
+        for (let skip = 0; skip < 2000; skip += MATCH_PAGE) {
+            const res = await db.collection('matches').where(_.or([
+                { eventId: _.in(chunk), player1Openid: openid },
+                { eventId: _.in(chunk), player2Openid: openid }
+            ])).orderBy('_id', 'asc').skip(skip).limit(MATCH_PAGE).get();
+            const rows = (res.data || []);
+            all.push(...rows);
+            if (rows.length < MATCH_PAGE)
+                break;
+        }
     }
     return all;
 }
 async function loadSignups(openid) {
     const all = [];
-    for (let skip = 0; skip < MATCH_MAX; skip += 100) {
+    for (let skip = 0; skip < SIGNUP_MAX; skip += 100) {
         const res = await db.collection('signups').where({ openid }).skip(skip).limit(100).get();
         const rows = (res.data || []);
         all.push(...rows);
@@ -187,9 +205,11 @@ function viewFromMatch(item, openid, eventName) {
         winner,
         scoreChange: change,
         showScore: !isEvent,
-        showChange: !isEvent,
-        date: formatDate(item.createTime),
-        createTime: toTime(item.createTime),
+        // 约战局结算后才显示加减分；超期归档的不显示
+        showChange: !isEvent || (item.settled === true && !item.archived),
+        // 约战局按比赛实际发生时间，不按记分或结算时间
+        date: formatDate(item.matchTime || item.createTime),
+        createTime: toTime(item.matchTime || item.createTime),
         matchType: isEvent ? 'event' : (item.matchType || 'friendly'),
         eventId,
         eventName
@@ -284,16 +304,53 @@ const main = async (event) => {
             });
         });
         matches.sort((a, b) => b.createTime - a.createTime || a.key.localeCompare(b.key));
-        const changed = matches
-            .filter((item) => Number(item.scoreChange) !== 0)
-            .slice()
-            .sort((a, b) => a.createTime - b.createTime || a.key.localeCompare(b.key));
-        const recent = changed.slice(-CHART_LIMIT);
-        let cursor = Number(user.score) || 0;
-        cursor -= recent.reduce((sum, item) => sum + (Number(item.scoreChange) || 0), 0);
-        const chart = recent.map((item) => {
-            cursor += Number(item.scoreChange) || 0;
-            return { score: cursor, change: Number(item.scoreChange) || 0, date: item.date };
+        // 折线图：先确定最近 40 场已结算且未归档的比赛，触及 500 条上限时按场补齐完整对阵，避免截断半场
+        const chartEvents = events
+            .filter((ev) => {
+            const row = ev;
+            return row.settled === true && !row.archived;
+        })
+            .map((ev) => ({
+            eventId: String(ev._id),
+            time: toTime(ev.startTime) || toTime(ev.updateTime) || toTime(ev.createTime)
+        }))
+            .sort((a, b) => a.time - b.time || a.eventId.localeCompare(b.eventId))
+            .slice(-CHART_LIMIT);
+        const chartEventIds = chartEvents.map((item) => item.eventId);
+        const chartEventSet = new Set(chartEventIds);
+        const chartRows = matchRows.length >= MATCH_MAX && chartEventIds.length
+            ? await loadMatchesForEvents(openid, chartEventIds)
+            : matchRows;
+        const eventPoints = new Map();
+        chartRows.forEach((item) => {
+            const key = String(item.eventId || '');
+            if (!key || item.settled !== true || item.archived || !item.preScore)
+                return;
+            if (chartEventSet.size > 0 && !chartEventSet.has(key))
+                return;
+            const isLeft = item.player1Openid === openid;
+            const pre = Number(isLeft ? item.preScore.player1 : item.preScore.player2);
+            const change = Number(item.scoreChange && (isLeft ? item.scoreChange.player1 : item.scoreChange.player2)) || 0;
+            if (!Number.isFinite(pre))
+                return;
+            const point = eventPoints.get(key);
+            if (point)
+                point.net += change;
+            else
+                eventPoints.set(key, { time: toTime(item.matchTime || item.createTime), eventId: key, pre, net: change });
+        });
+        const chart = Array.from(eventPoints.values())
+            .sort((a, b) => a.time - b.time || a.eventId.localeCompare(b.eventId))
+            .slice(-CHART_LIMIT)
+            .map((point) => {
+            const ev = eventMap.get(point.eventId);
+            return {
+                eventId: point.eventId,
+                eventName: (ev && ev.name) || '约战',
+                score: point.pre + point.net,
+                change: point.net,
+                date: formatDate(point.time)
+            };
         });
         const fileIDs = [
             user.avatar,

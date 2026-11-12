@@ -1,0 +1,13 @@
+{
+  "timeout": 60,
+  "permissions": {
+    "openapi": []
+  },
+  "triggers": [
+    {
+      "name": "drainQueue",
+      "type": "timer",
+      "config": "0 */1 * * * * *"
+    }
+  ]
+}

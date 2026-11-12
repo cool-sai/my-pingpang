@@ -179,7 +179,12 @@ export const schema: SchemaModel = {
         maxPlayers: { type: 'number', note: '0 为不限' },
         signupCount: { type: 'number', note: '报名时加一' },
         started: { type: 'boolean', note: '开启后分组，不能再报名', optional: true },
+        deleting: { type: 'boolean', note: '事务中标记删除中，阻止结束、记分和编辑；清理失败可重试删除', optional: true },
         results: { type: 'object', note: '组内胜负，每项 a、b、winner 都是 openid', optional: true },
+        settled: { type: 'boolean', note: '积分已结算。结束比赛（finishEvent）后为 true', optional: true },
+        settledAt: { type: 'serverDate', note: '结算时间', optional: true },
+        finishedAt: { type: 'serverDate', note: '点结束比赛、锁定记分的时间', optional: true },
+        archived: { type: 'boolean', note: '开赛超过 14 天才结束：只归档战绩，不改积分', optional: true },
         groupNotes: { type: 'object', note: '分组备注，每项 groupNo、note', optional: true },
         createTime: { type: 'serverDate', note: '服务器时间' },
         updateTime: { type: 'serverDate', note: '服务器时间' },
@@ -273,19 +278,24 @@ export const schema: SchemaModel = {
         },
         scoreChange: {
           type: 'object',
-          note: '积分增减；约战局当前为 0，待结算后再入账（尚未做）',
+          note: '积分增减；约战局进行中为 0，结束比赛后按涟漪积分法写入。旧单局记录可能已有增减',
           detail: 'player1、player2',
           fields: {
             player1: { type: 'number' },
             player2: { type: 'number' },
           },
         },
+        matchTime: { type: 'number', note: '比赛实际发生时间（events.startTime 东八区毫秒）；旧记录没有', optional: true },
+        preScore: { type: 'object', note: '结算时落盘：双方进入本场时的积分（涟漪重算检查点），字段 player1、player2', optional: true },
+        preMatches: { type: 'object', note: '结算时落盘：双方进入本场前累计已结算局数，字段 player1、player2', optional: true },
+        settled: { type: 'boolean', note: '是否已结算积分', optional: true },
+        archived: { type: 'boolean', note: '超期归档，不改积分', optional: true },
         winner: {
           type: 'enum',
           values: ['player1', 'player2', 'draw'],
           note: 'player1 / player2 / draw',
         },
-        matchType: { type: 'string', note: 'friendly 或 event' },
+        matchType: { type: 'string', note: 'event；旧的单局记录可能是 friendly' },
         eventId: { type: 'string', note: '约战里的胜负才有', optional: true, ref: 'events._id' },
         location: { type: 'string', note: '可空', optional: true },
         status: { type: 'string', note: '写入为 completed' },
@@ -313,11 +323,26 @@ export const schema: SchemaModel = {
 
   auxiliaries: {
     counters: {
-      blurb: '注册序号来源',
+      blurb: '注册序号、全局结算锁和结算日志',
       docs: {
         userSeq: {
           fields: {
             n: { type: 'number', note: '事务里加一' },
+          },
+        },
+        settlement_lock: {
+          fields: {
+            locked: { type: 'boolean', note: '全局结算锁' },
+            lockedAt: { type: 'number', note: '加锁毫秒时间，超过 90 秒视为过期' },
+            token: { type: 'string', note: '持有者令牌，释放时校验' },
+            eventId: { type: 'string', note: '正在结算的比赛' },
+          },
+        },
+        settlement_journal: {
+          fields: {
+            eventId: { type: 'string', note: '正在写入的结算；写完即删，残留说明上次中断，下次抢到锁先补完' },
+            matches: { type: 'object', note: '待写的 matches 补丁' },
+            users: { type: 'object', note: '待写的 users 绝对值' },
           },
         },
       },
@@ -330,8 +355,8 @@ export const schema: SchemaModel = {
     '<code class="text-stone-800">users.score</code> 是积分。<code class="text-stone-800">matches.player1.score</code> 是本场比分。',
     '页面上的信用分 <code class="text-stone-800">creditScore</code> 不在 <code class="text-stone-800">users</code> 里，读不到时按 80 显示。',
     'denorm 不回填：改昵称/头像后，旧的 <code class="text-stone-800">events.creatorName</code> 与 <code class="text-stone-800">matches.player*</code> 快照不会自动更新。<code class="text-stone-800">updateVirtualUser</code> 会同步该虚拟球友在 <code class="text-stone-800">signups</code> 里的昵称和头像，但仍不回填 matches。',
-    '虚拟球友的 <code class="text-stone-800">openid</code> 以 <code class="text-stone-800">virtual</code> 开头，按创建人 <code class="text-stone-800">ownerOpenid</code> 分开。排名和友谊赛把虚拟球友当成普通球友；管理页与归属仍在。新建虚拟球友初始积分与真人一样是 1000。',
-    '约战记胜负会 upsert <code class="text-stone-800">matches</code>，文档 id 为 <code class="text-stone-800">eventId</code> 加两个按字典序排列的 openid。友谊赛仍由 <code class="text-stone-800">add</code> 自动生成 id。',
+    '虚拟球友的 <code class="text-stone-800">openid</code> 以 <code class="text-stone-800">virtual</code> 开头，按创建人 <code class="text-stone-800">ownerOpenid</code> 分开。排名把虚拟球友当成普通球友；管理页与归属仍在。新建虚拟球友初始积分与真人一样是 1000。',
+    '约战记胜负会 upsert <code class="text-stone-800">matches</code>，文档 id 为 <code class="text-stone-800">eventId</code> 加两个按字典序排列的 openid，进行中 <code class="text-stone-800">scoreChange</code> 为 0，不改 <code class="text-stone-800">users.score</code>。发起人点「结束比赛」后由 <code class="text-stone-800">finishEvent</code> 按涟漪积分法（见 docs）结算：写入每局 <code class="text-stone-800">scoreChange</code>、<code class="text-stone-800">preScore</code>、<code class="text-stone-800">preMatches</code>，并改 <code class="text-stone-800">users</code>。',
     '删除用户用软删除：给 <code class="text-stone-800">users.cancelled</code> 写 <code class="text-stone-800">true</code>，不物理删文档，避免名单和对阵里的 openid 悬空。主页对已注销或已经找不到的人显示「已注销」。',
   ],
 

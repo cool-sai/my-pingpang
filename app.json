@@ -2,9 +2,6 @@
   "pages": [
     "pages/index/index",
     "pages/news/detail",
-    "pages/match/match",
-    "pages/match/create",
-    "pages/match/detail",
     "pages/rank/rank",
     "pages/club/club",
     "pages/club/detail",
@@ -19,7 +16,8 @@
     "pages/user/profile",
     "pages/user/detail",
     "pages/user/virtuals",
-    "pages/user/virtual-edit"
+    "pages/user/virtual-edit",
+    "pages/user/settlement"
   ],
   "window": {
     "navigationBarTextStyle": "black",

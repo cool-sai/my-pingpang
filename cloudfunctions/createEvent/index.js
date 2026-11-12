@@ -58,6 +58,8 @@ function readEventFields(input) {
         return { error: '请选择赛制' };
     if (statuses.indexOf(status) < 0)
         return { error: '请选择状态' };
+    if (status === 'finished')
+        return { error: '比赛结束请在详情页点「结束比赛」' };
     if (!Number.isInteger(maxPlayers) || maxPlayers < 0 || maxPlayers > 128 || (maxPlayers !== 0 && maxPlayers < 2)) {
         return { error: '人数上限填 2 到 128，不限制就留空' };
     }

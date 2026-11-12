@@ -36,9 +36,35 @@
   </view>
 
   <view class="chart-card">
-    <text class="chart-title">积分变化</text>
-    <view class="chart-box" wx:if="{{isLoading || chart.length}}">
-      <canvas type="2d" id="scoreChart" class="chart-canvas" wx:if="{{!isLoading && chart.length}}"></canvas>
+    <view class="chart-head">
+      <text class="chart-title">积分变化</text>
+      <text class="chart-hint" wx:if="{{!isLoading && chart.length && !activePoint}}">点击或滑动节点查看详情</text>
+    </view>
+    <view class="chart-focus" wx:if="{{!isLoading && activePoint}}" data-event-id="{{activePoint.eventId}}" bindtap="goToEventBoard">
+      <view class="chart-focus-main">
+        <text class="chart-focus-date">{{activePoint.date}}</text>
+        <text class="chart-focus-name">{{activePoint.eventName || '约战'}}</text>
+      </view>
+      <view class="chart-focus-score">
+        <text class="chart-focus-val">{{activePoint.score}}</text>
+        <text class="chart-focus-delta {{activePoint.change > 0 ? 'is-up' : activePoint.change < 0 ? 'is-down' : ''}}">{{activePoint.change > 0 ? '+' : ''}}{{activePoint.change}}</text>
+      </view>
+    </view>
+    <view
+      class="chart-box"
+      wx:if="{{isLoading || chart.length}}"
+      bindtouchstart="onChartTouchStart"
+      bindtouchmove="onChartTouchMove"
+    >
+      <image
+        wx:if="{{!isLoading && chartSvg}}"
+        class="chart-canvas"
+        src="{{chartSvg}}"
+      />
+      <block wx:if="{{!isLoading && activeCursor}}">
+        <view class="chart-cursor-line" style="left: {{activeCursor.xPct}}%;"></view>
+        <view class="chart-cursor-dot" style="left: {{activeCursor.xPct}}%; top: {{activeCursor.yPct}}%;"></view>
+      </block>
     </view>
     <view class="empty-tip" wx:if="{{!isLoading && !chart.length}}">暂无积分变化</view>
   </view>
@@ -48,6 +74,7 @@
     <view class="match-item" wx:for="{{sk.pad(matches, isLoading, 3)}}" wx:key="key">
       <text class="match-opponent" data-openid="{{item.right.openid}}" catchtap="goToOpponent">{{item.right.nickname}}</text>
       <text class="result-mark {{item.winner === 'win' ? 'is-win' : item.winner === 'lose' ? 'is-lose' : ''}}">{{item._sk ? '' : (item.winner === 'win' ? '胜' : item.winner === 'lose' ? '负' : '平')}}</text>
+      <text wx:if="{{item.showChange && !item._sk}}" class="match-change {{item.scoreChange > 0 ? 'is-up' : item.scoreChange < 0 ? 'is-down' : ''}}">{{item.scoreChange > 0 ? '+' : ''}}{{item.scoreChange}}</text>
       <text
         class="match-date {{item.eventId ? 'is-link' : ''}}"
         data-event-id="{{item.eventId}}"
